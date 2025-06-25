@@ -26,7 +26,6 @@
 (defstruct (resource-database (:copier nil) (:predicate nil)
 			      (:print-function print-resource-database)
 			      (:constructor make-resource-database-internal)
-			      #+explorer (:callable-constructors nil)
 			      )
   (name nil :type stringable :read-only t)
   (value nil)
@@ -108,7 +107,7 @@
 	  (kintern (symbol-name (the symbol stringable)))))
     (string
       (if *uppercase-resource-symbols*
-	  (setq stringable (#-allegro string-upcase #+allegro correct-case
+	  (setq stringable (string-upcase
 			    (the string stringable))))
       (kintern (the string stringable)))))
 

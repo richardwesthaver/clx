@@ -1,3 +1,4 @@
+- NOTE: This is a downstream fork of sharplispers/clx which depends on the cc/core project.
 # CLX
 
 CLX is an X11 client library for Common Lisp. The code was originally

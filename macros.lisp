@@ -228,8 +228,7 @@
 
 (defun generate-member-lookup (thing keywords mismatch-error-p)
   (let ((lookup `(position ,thing
-                           #+lispm ',keywords ;; Lispm's prefer lists
-                           #-lispm (the simple-vector ',(apply #'vector keywords))
+                           (the simple-vector ',(apply #'vector keywords))
                            :test #'eq)))
     (if mismatch-error-p
         `(or ,lookup

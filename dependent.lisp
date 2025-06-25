@@ -22,21 +22,12 @@
 
 (proclaim '(declaration array-register))
 
-#+cmu
-(setf (getf ext:*herald-items* :xlib)
-      `("    CLX X Library " ,*version*))
-
-
 ;;; The size of the output buffer.  Must be a multiple of 4.
 (defparameter *output-buffer-size* #x10000)
-
-#+explorer
-(zwei:define-indentation event-case (1 1))
 
 ;;; Number of seconds to wait for a reply to a server request
 (defparameter *reply-timeout* nil)
 
-#-(or clx-overlapping-arrays (not clx-little-endian))
 (progn
   (defconstant +word-0+ 0)
   (defconstant +word-1+ 1)
@@ -45,16 +36,6 @@
   (defconstant +long-1+ 1)
   (defconstant +long-2+ 2)
   (defconstant +long-3+ 3))
-
-#-(or clx-overlapping-arrays clx-little-endian)
-(progn
-  (defconstant +word-0+ 1)
-  (defconstant +word-1+ 0)
-
-  (defconstant +long-0+ 3)
-  (defconstant +long-1+ 2)
-  (defconstant +long-2+ 1)
-  (defconstant +long-3+ 0))
 
 ;;; Set some compiler-options for often used code
 
@@ -158,48 +139,7 @@
   #.(declare-buffun)
   (setf (aref a i) (int8->card8 v)))
 
-#+clx-overlapping-arrays
-(declaim (inline aref-card16 aref-int16 aref-card32 aref-int32 aref-card29
-                 aset-card16 aset-int16 aset-card32 aset-int32 aset-card29))
-
-#+clx-overlapping-arrays
 (progn
-
-  (defun aref-card16 (a i)
-    (aref a i))
-
-  (defun aset-card16 (v a i)
-    (setf (aref a i) v))
-
-  (defun aref-int16 (a i)
-    (card16->int16 (aref a i)))
-
-  (defun aset-int16 (v a i)
-    (setf (aref a i) (int16->card16 v))
-    v)
-
-  (defun aref-card32 (a i)
-    (aref a i))
-
-  (defun aset-card32 (v a i)
-    (setf (aref a i) v))
-
-  (defun aref-int32 (a i)
-    (card32->int32 (aref a i)))
-
-  (defun aset-int32 (v a i)
-    (setf (aref a i) (int32->card32 v))
-    v)
-
-  (defun aref-card29 (a i)
-    (aref a i))
-
-  (defun aset-card29 (v a i)
-    (setf (aref a i) v)))
-
-#-clx-overlapping-arrays
-(progn
-
   (defun aref-card16 (a i)
     (declare (type buffer-bytes a)
              (type array-index i))
@@ -340,7 +280,6 @@
   `(aset-card29 ,v ,a ,i))
 
 ;;; Other random conversions
-
 (defun rgb-val->card16 (value)
   ;; Short floats are good enough
   (declare (type rgb-val value))
@@ -372,9 +311,7 @@
   (the short-float (* (the int16 value) #.(coerce (/ pi 180.0 64.0) 'short-float))))
 
 
-#+(or cmu sbcl clisp ecl clasp)
 (progn
-
 ;;; This overrides the (probably incorrect) definition in clx.lisp.  Since PI
 ;;; is irrational, there can't be a precise rational representation.  In
 ;;; particular, the different float approximations will always be /=.  This
@@ -391,7 +328,6 @@
              (the int16 (round x #.(float (/ pi 180.0s0 64.0s0) 0.0s0)))
              (* 360 64)))))
 
-
 ;;-----------------------------------------------------------------------------
 ;; Character transformation
 ;;-----------------------------------------------------------------------------
@@ -414,21 +350,6 @@
                           (#\Backspace . 8)
                           (#\Newline . 10)
                           (#\Space . 32))
-                      ;; One the lispm, #\Newline is #\Return, but we'd really like
-                      ;; #\Newline to translate to ascii code 10, so we swap the
-                      ;; Ascii codes for #\Return and #\Linefeed. We also provide
-                      ;; mappings from the counterparts of these control characters
-                      ;; so that the character mapping from the lisp machine
-                      ;; character set to ascii is invertible.
-                      #+lispm
-                      ,@`((#\Return . 10)   (,(code-char  10) . ,(char-code #\Return))
-                          (#\Linefeed . 13) (,(code-char  13) . ,(char-code #\Linefeed))
-                          (#\Rubout . 127)  (,(code-char 127) . ,(char-code #\Rubout))
-                          (#\Page . 12)     (,(code-char  12) . ,(char-code #\Page))
-                          (#\Tab . 9)       (,(code-char   9) . ,(char-code #\Tab))
-                          (#\Backspace . 8) (,(code-char   8) . ,(char-code #\Backspace))
-                          (#\Newline . 10)  (,(code-char  10) . ,(char-code #\Newline))
-                          (#\Space . 32)    (,(code-char  32) . ,(char-code #\Space)))
                       ;; The rest of the common lisp charater set with the normal
                       ;; ascii codes for them.
                       (#\! . 33) (#\" . 34) (#\# . 35) (#\$ . 36)
@@ -520,7 +441,7 @@
                            #.(declare-buffun)
                            (the base-char (code-char card8)))))))))
   (char-translators))
-
+
 ;;-----------------------------------------------------------------------------
 ;; Process Locking
 ;;
@@ -532,90 +453,9 @@
 
 ;;; MAKE-PROCESS-LOCK: Creating a process lock.
 
-#-(or abcl sbcl (and cmu mp) (and ecl threads) (and clasp threads))
-(defun make-process-lock (name)
-  (declare (ignore name))
-  nil)
-
-#+(and cmu mp)
-(defun make-process-lock (name)
-  (mp:make-lock name))
-
-#+sbcl
 (defun make-process-lock (name)
   (sb-thread:make-mutex :name name))
 
-#+(and ecl threads)
-(defun make-process-lock (name)
-  (mp:make-lock :name name :recursive t))
-
-#+(and clasp threads)
-(defun make-process-lock (name)
-  (mp:make-recursive-mutex name))
-
-#+abcl
-(defun make-process-lock (name)
-  (threads:make-thread-lock))
-
-;;; HOLDING-LOCK: Execute a body of code with a lock held.
-
-;;; The holding-lock macro takes a timeout keyword argument.  EVENT-LISTEN
-;;; passes its timeout to the holding-lock macro, so any timeout you want to
-;;; work for event-listen you should do for holding-lock.
-
-;; If you're not sharing DISPLAY objects within a multi-processing
-;; shared-memory environment, this is sufficient
-#-(or abcl sbcl (and CMU mp) (and ecl threads) (and clasp threads))
-(defmacro holding-lock ((locator display &optional whostate &key timeout) &body body)
-  (declare (ignore locator display whostate timeout))
-  `(progn ,@body))
-
-;;; HOLDING-LOCK for CMU Common Lisp.
-;;;
-;;; We are not multi-processing, but we use this macro to try to protect
-;;; against re-entering request functions.  This can happen if an interrupt
-;;; occurs and the handler attempts to use X over the same display connection.
-;;; This can happen if the GC hooks are used to notify the user over the same
-;;; display connection.  We inhibit GC notifications since display of them
-;;; could cause recursive entry into CLX.
-;;;
-#+(and cmu (not mp))
-(defmacro holding-lock ((locator display &optional whostate &key timeout)
-                        &body body)
-  `(let ((ext:*gc-verbose* nil)
-         (ext:*gc-inhibit-hook* nil)
-         (ext:*before-gc-hooks* nil)
-         (ext:*after-gc-hooks* nil))
-     ,locator ,display ,whostate ,timeout
-     (system:without-interrupts (progn ,@body))))
-
-;;; HOLDING-LOCK for CMU Common Lisp with multi-processes.
-;;;
-#+(and cmu mp)
-(defmacro holding-lock ((lock display &optional (whostate "CLX wait")
-                              &key timeout)
-                        &body body)
-  (declare (ignore display))
-  `(mp:with-lock-held (,lock ,whostate ,@(and timeout `(:timeout ,timeout)))
-     ,@body))
-
-#+(and ecl threads)
-(defmacro holding-lock ((lock display &optional (whostate "CLX wait")
-                              &key timeout)
-                        &body body)
-  (declare (ignore display))
-  `(mp::with-lock (,lock)
-     ,@body))
-
-#+(and clasp threads)
-(defmacro holding-lock ((lock display &optional (whostate "CLX wait")
-                              &key timeout)
-                        &body body)
-  (declare (ignore display))
-  `(mp::with-lock (,lock)
-      ,@body))
-
-#+sbcl
 (defmacro holding-lock ((lock display &optional (whostate "CLX wait")
                               &key timeout)
                         &body body)
@@ -624,14 +464,6 @@
   (declare (ignore display whostate))
   `(sb-thread:with-recursive-lock (,lock ,@(when timeout
                                              `(:timeout ,timeout)))
-     ,@body))
-
-#+abcl
-(defmacro holding-lock ((lock display &optional (whostate "CLX wait")
-                              &key timeout)
-                        &body body)
-  (declare (ignore display whostate timeout))
-  `(threads:with-thread-lock (,lock)
      ,@body))
 
 ;;; WITHOUT-ABORTS
@@ -648,19 +480,6 @@
 ;;; Caller guarantees that PROCESS-WAKEUP will be called after the predicate's
 ;;; value changes.
 
-#-(or (and sb-thread sbcl) (and cmu mp) (and ecl threads) (and clasp threads))
-(defun process-block (whostate predicate &rest predicate-args)
-  (declare (ignore whostate))
-  (or (apply predicate predicate-args)
-      (error "Program tried to wait with no scheduler.")))
-
-#+(and cmu mp)
-(defun process-block (whostate predicate &rest predicate-args)
-  (declare (type function predicate))
-  (mp:process-wait whostate #'(lambda ()
-                                (apply predicate predicate-args))))
-
-#+(and sbcl sb-thread)
 (progn
   (declaim (inline yield))
   (defun yield ()
@@ -669,7 +488,6 @@
      (sb-alien:extern-alien "sched_yield" (function sb-alien:int)))
     (values)))
 
-#+(and sbcl sb-thread)
 (defun process-block (whostate predicate &rest predicate-args)
   (declare (ignore whostate))
   (declare (type function predicate))
@@ -678,7 +496,6 @@
        (return))
      (yield)))
 
-#+(and ecl threads)
 (defun process-block (whostate predicate &rest predicate-args)
   (declare (ignore whostate))
   (declare (type function predicate))
@@ -687,7 +504,6 @@
        (return))
      (mp:process-yield)))
 
-#+(and clasp threads)
 (defun process-block (whostate predicate &rest predicate-args)
   (declare (ignore whostate))
   (declare (type function predicate))
@@ -731,46 +547,9 @@
 
 (declaim (inline process-wakeup))
 
-#-(or abcl (and sbcl sb-thread) (and cmu mp) (and ecl threads) (and clasp threads))
-(defun process-wakeup (process)
-  (declare (ignore process))
-  nil)
-
-#+abcl
-(defun process-wakeup (process)
-  (declare (ignore process))
-  (threads:yield))
-
-#+(and cmu mp)
-(defun process-wakeup (process)
-  (declare (ignore process))
-  (mp:process-yield))
-
-#+(and sb-thread sbcl)
 (defun process-wakeup (process)
   (declare (ignore process))
   (yield))
-
-#+(and ecl threads)
-(defun process-wakeup (process)
-  (declare (ignore process))
-  (mp:process-yield))
-
-#+(and clasp threads)
-(defun process-wakeup (process)
-  (declare (ignore process))
-  (mp:process-yield))
-
-#+(or)
-(defun process-wakeup (process)
-  (declare (ignore process))
-  (destructuring-bind (lock . queue)
-      (gethash (sb-thread:current-thread-id) *process-conditions*
-               (cons nil nil))
-    (declare (ignore lock))
-    (when queue
-      (sb-thread:condition-notify queue))))
-
 
 ;;; CURRENT-PROCESS: Return the current process object for input locking and
 ;;; for calling PROCESS-WAKEUP.
@@ -779,44 +558,14 @@
 
 ;;; Default return NIL, which is acceptable even if there is a scheduler.
 
-#-(or abcl sbcl (and cmu mp) (and ecl threads) (and clasp threads))
-(defun current-process ()
-  nil)
-
-#+(or (and cmu mp) (and ecl threads) (and clasp threads))
-(defun current-process ()
-  mp:*current-process*)
-
-#+sbcl
 (defun current-process ()
   sb-thread:*current-thread*)
 
-#+abcl
-(defun current-process ()
-  (threads:current-thread))
-
 ;;; WITHOUT-INTERRUPTS -- provide for atomic operations.
 
-#-(or ecl cmu sbcl clasp)
-(defmacro without-interrupts (&body body)
-  `(progn ,@body))
-
-#+cmu
-(defmacro without-interrupts (&body body)
-  `(system:without-interrupts ,@body))
-
-#+ecl
-(defmacro without-interrupts (&body body)
-  `(mp:without-interrupts ,@body))
-
-#+clasp
-(defmacro without-interrupts (&body body)
-  `(mp:without-interrupts ,@body))
-
-#+sbcl
 (defvar *without-interrupts-sic-lock*
   (sb-thread:make-mutex :name "lock simulating *without-interrupts*"))
-#+sbcl
+
 (defmacro without-interrupts (&body body)
   `(sb-thread:with-recursive-lock (*without-interrupts-sic-lock*)
      ,@body))
@@ -826,30 +575,6 @@
 ;; This should use GET-SETF-METHOD to avoid evaluating subforms multiple times.
 ;; It doesn't because CLtL doesn't pass the environment to GET-SETF-METHOD.
 
-#-(or (and clasp threads) ecl sbcl)
-(progn
-  (defvar *conditional-store-lock*
-    (make-process-lock "conditional store"))
-  (defmacro conditional-store (place old-value new-value)
-    `(holding-lock (*conditional-store-lock* nil)
-       (if (eq ,place ,old-value)
-           (prog1 t
-             (setf ,place ,new-value))
-           nil))))
-
-#+(and clasp threads)
-(defmacro conditional-store (place old-value new-value)
-  (let ((ov (gensym)))
-    `(let ((,ov ,old-value))
-       (eq ,ov (mp:cas ,place ,ov ,new-value)))))
-
-#+ecl
-(defmacro conditional-store (place old-value new-value)
-  (let ((ov (gensym)))
-    `(let ((,ov ,old-value))
-       (eq ,ov (mp:compare-and-swap ,place ,ov ,new-value)))))
-
-#+sbcl
 (defmacro conditional-store (place old-value new-value)
   (let ((ov (gensym)))
     `(let ((,ov ,old-value))
@@ -872,7 +597,6 @@
   ;; Error recovery wrapper
   `(progn ,@body))
 
-
 ;;;----------------------------------------------------------------------------
 ;;; System dependent IO primitives
 ;;;	Functions for opening, reading writing forcing-output and closing
@@ -882,34 +606,6 @@
 ;;; OPEN-X-STREAM - create a stream for communicating to the appropriate X
 ;;; server
 
-#-(or CMU sbcl ecl clisp clasp)
-(defun open-x-stream (host display protocol)
-  host display protocol ;; unused
-  (error "OPEN-X-STREAM not implemented yet."))
-
-#+clisp
-(defun open-x-stream (host display protocol)
-  (declare (ignore protocol)
-           (type (integer 0) display))
-  (let ((socket
-         ;; are we dealing with a localhost?
-         (when (or (string= host "")
-                   (string= host "unix"))
-           ;; ok, try to connect to a AF_UNIX domain socket
-           (sys::make-socket-stream "" display))))
-    (if socket
-        socket
-        ;; try to connect by hand
-        (let ((host (host-address host)))
-          (when host
-            ;; Fixme: get a descent ip standard in CLX: a vector!
-            (let ((ip (format nil
-                              "~{~D~^.~}"
-                              (rest host))))
-              (socket:socket-connect (+ 6000 display) ip
-                                     :element-type '(unsigned-byte 8))))))))
-
-#+(or sbcl ecl)
 (defun open-x-stream (host display protocol)
   (declare (ignore protocol)
            (type (integer 0) display))
@@ -927,121 +623,11 @@
    :element-type '(unsigned-byte 8)
    :input t :output t :buffering :none))
 
-#+clasp
-(defun open-x-stream (host display protocol)
-  (declare (ignore protocol)
-           (type (integer 0) display))
-  (SB-BSD-SOCKETS:socket-make-stream
-   (let ((unix-domain-socket-path (unix-socket-path-from-host host display)))
-     (if unix-domain-socket-path
-         (let ((s (make-instance 'SB-BSD-SOCKETS:local-socket :type :stream)))
-           (SB-BSD-SOCKETS:socket-connect s unix-domain-socket-path)
-           s)
-         (let ((host (car (SB-BSD-SOCKETS:host-ent-addresses (SB-BSD-SOCKETS:get-host-by-name host)))))
-           (when host
-             (let ((s (make-instance 'SB-BSD-SOCKETS:inet-socket :type :stream :protocol :tcp)))
-               (SB-BSD-SOCKETS:socket-connect s host (+ 6000 display))
-               s)))))
-   :element-type '(unsigned-byte 8)
-   :input t :output t :buffering :none))
-
-#+cmu
-(defun open-x-stream (host display protocol)
-  (let ((stream-fd
-         (ecase protocol
-           ;; establish a TCP connection to the X11 server, which is
-           ;; listening on port 6000 + display-number
-           ((:internet :tcp nil)
-            (let ((fd (ext:connect-to-inet-socket host (+ *x-tcp-port* display))))
-              (unless (plusp fd)
-                (error 'connection-failure
-                       :major-version *protocol-major-version*
-                       :minor-version *protocol-minor-version*
-                       :host host
-                       :display display
-                       :reason (format nil "Cannot connect to internet socket: ~S"
-                                       (unix:get-unix-error-msg))))
-              fd))
-           ;; establish a connection to the X11 server over a Unix
-           ;; socket.  (:|| comes from Darwin's weird DISPLAY
-           ;; environment variable)
-           ((:unix :local :||)
-            (let ((path (unix-socket-path-from-host host display)))
-              (unless (probe-file path)
-                (error 'connection-failure
-                       :major-version *protocol-major-version*
-                       :minor-version *protocol-minor-version*
-                       :host host
-                       :display display
-                       :reason (format nil "Unix socket ~s does not exist" path)))
-              (let ((fd (ext:connect-to-unix-socket (namestring path))))
-                (unless (plusp fd)
-                  (error 'connection-failure
-                         :major-version *protocol-major-version*
-                         :minor-version *protocol-minor-version*
-                         :host host
-                         :display display
-                         :reason (format nil "Can't connect to unix socket: ~S"
-                                         (unix:get-unix-error-msg))))
-                fd))))))
-    (system:make-fd-stream stream-fd :input t :output t :element-type '(unsigned-byte 8))))
-
 ;;; BUFFER-INPUT-WAIT-DEFAULT - wait for for input to be available for the
 ;;; buffer.  This is called in read-input between requests, so that a process
 ;;; waiting for input is abortable when between requests.  Should return
 ;;; :TIMEOUT if it times out, NIL otherwise.
 
-;;; The default implementation
-#-(or cmu sbcl clisp (and ecl serve-event))
-(progn
-  ;; Issue a warning to incentivize providing better implementation.
-  (eval-when (:compile-toplevel :load-toplevel :execute)
-    (warn "XLIB::BUFFER-INPUT-WAIT-DEFAULT: timeout polling used."))
-  ;; Poll for input every *buffer-read-polling-time* SECONDS.
-  (defparameter *buffer-read-polling-time* 0.01)
-  (defun buffer-input-wait-default (display timeout)
-    (declare (type display display)
-             (type (or null (real 0 *)) timeout))
-    (declare (clx-values timeout))
-    (let ((stream (display-input-stream display)))
-      (declare (type (or null stream) stream))
-      (cond ((null stream))
-            ((listen stream) nil)
-            ((and timeout (= timeout 0)) :timeout)
-            ((not (null timeout))
-             (multiple-value-bind (npoll fraction)
-                 (truncate timeout *buffer-read-polling-time*)
-               (dotimes (i npoll)        ; Sleep for a time, then listen again
-                 (sleep *buffer-read-polling-time*)
-                 (when (listen stream)
-                   (return-from buffer-input-wait-default nil)))
-               (when (plusp fraction)
-                 (sleep fraction)        ; Sleep a fraction of a second
-                 (when (listen stream)   ; and listen one last time
-                   (return-from buffer-input-wait-default nil)))
-               :timeout))))))
-
-#+(and ecl serve-event)
-(defun buffer-input-wait-default (display timeout)
-  (declare (type display display)
-           (type (or null number) timeout))
-  (let ((stream (display-input-stream display)))
-    (declare (type (or null stream) stream))
-    (cond ((null stream))
-          ((listen stream) nil)
-          ((eql timeout 0) :timeout)
-          (T (flet ((usable! (fd)
-                      (declare (ignore fd))
-                      (return-from buffer-input-wait-default)))
-               (serve-event:with-fd-handler ((ext:file-stream-fd
-                                              (typecase stream
-                                                (two-way-stream (two-way-stream-input-stream stream))
-                                                (otherwise stream)))
-                                             :input #'usable!)
-                 (serve-event:serve-event timeout)))
-             :timeout))))
-
-#+(or cmu sbcl clisp)
 (defun buffer-input-wait-default (display timeout)
   (declare (type display display)
            (type (or null number) timeout))
@@ -1051,15 +637,10 @@
           ((listen stream) nil)
           ((eql timeout 0) :timeout)
           ;; MP package protocol may be shared between clisp and cmu.
-          ((or #+sbcl (sb-sys:wait-until-fd-usable (sb-sys:fd-stream-fd stream) :input timeout)
-               #+mp (mp:process-wait-until-fd-usable (system:fd-stream-fd stream) :input timeout)
-               #+clisp (multiple-value-bind (sec usec) (floor (or timeout 0))
-                         (ext:socket-status stream (and timeout sec) (round usec 1d-6)))
-               #+cmu (system:wait-until-fd-usable (system:fd-stream-fd stream) :input timeout))
+          ((or (sb-sys:wait-until-fd-usable (sb-sys:fd-stream-fd stream) :input timeout))
            nil)
-          (T :timeout))))
+          (t :timeout))))
 
-
 ;;;----------------------------------------------------------------------------
 ;;; System dependent speed hacks
 ;;;----------------------------------------------------------------------------
@@ -1092,31 +673,11 @@
 
 (declaim (inline buffer-replace))
 
-#+cmu
-(defun buffer-replace (buf1 buf2 start1 end1 &optional (start2 0))
-  (declare (type buffer-bytes buf1 buf2)
-           (type array-index start1 end1 start2))
-  #.(declare-buffun)
-  (kernel:bit-bash-copy
-   buf2 (+ (* start2 vm:byte-bits)
-           (* vm:vector-data-offset vm:word-bits))
-   buf1 (+ (* start1 vm:byte-bits)
-           (* vm:vector-data-offset vm:word-bits))
-   (* (- end1 start1) vm:byte-bits)))
-
-#+clx-overlapping-arrays
-(defun buffer-replace (buf1 buf2 start1 end1 &optional (start2 0))
-  (declare (type vector buf1 buf2)
-           (type array-index start1 end1 start2))
-  (replace buf1 buf2 :start1 start1 :end1 end1 :start2 start2))
-
-#-(or CMU clx-overlapping-arrays)
 (defun buffer-replace (buf1 buf2 start1 end1 &optional (start2 0))
   (declare (type buffer-bytes buf1 buf2)
            (type array-index start1 end1 start2))
   (replace buf1 buf2 :start1 start1 :end1 end1 :start2 start2))
 
-#-lispm
 (defmacro with-gcontext-bindings ((gc saved-state indexes ts-index temp-mask temp-gc)
                                   &body body)
   (let ((local-state (gensym))
@@ -1134,7 +695,7 @@
        (when ,temp-gc
          (restore-gcontext-temp-state ,gc ,temp-mask ,temp-gc))
        (deallocate-gcontext-state ,saved-state))))
-
+
 ;;;----------------------------------------------------------------------------
 ;;; How much error detection should CLX do?
 ;;; Several levels are possible:
@@ -1184,27 +745,7 @@
 ;; dispatching, not just type checking.  -- Ram.
 
 (defmacro type? (object type)
-  #+(or cmu sbcl clisp)
-  `(typep ,object ,type)
-  #-(or cmu sbcl clisp)
-  (if (not (constantp type))
-      `(typep ,object ,type)
-      (progn
-        (setq type (eval type))
-        (let ((predicate (assoc type
-                                '((drawable drawable-p) (window window-p)
-                                  (pixmap pixmap-p) (cursor cursor-p)
-                                  (font font-p) (gcontext gcontext-p)
-                                  (colormap colormap-p) (null null)
-                                  (integer integerp)))))
-          (cond (predicate
-                 `(,(second predicate) ,object))
-                ((eq type 'generalized-boolean)
-                 't)			; Everything is a generalized-boolean.
-                (+type-check?+
-                 `(locally (declare (optimize safety)) (typep ,object ',type)))
-                (t
-                 `(typep ,object ',type)))))))
+  `(typep ,object ,type))
 
 ;; X-TYPE-ERROR is the function called for type errors.
 ;; If you want lots of checking, but are concerned about code size,
@@ -1216,7 +757,6 @@
            :expected-type type
            :type-string error-string))
 
-
 ;;-----------------------------------------------------------------------------
 ;; Error handlers
 ;;    Hack up KMP error signaling using zetalisp until the real thing comes
@@ -1250,98 +790,13 @@
 ;;; descriptors, Mach messages, etc.) to come through one routine anyone can
 ;;; use to wait for input.
 ;;;
-#+(and CMU (not mp))
-(defun x-error (condition &rest keyargs)
-  (let ((condx (apply #'make-condition condition keyargs)))
-    (when (eq condition 'closed-display)
-      (let ((disp (closed-display-display condx)))
-        (warn "Disabled event handling on ~S." disp)
-        (ext::disable-clx-event-handling disp)))
-    (error condx)))
 
 (define-condition x-error (error) ())
 
-
 ;;-----------------------------------------------------------------------------
 ;;  HOST hacking
 ;;-----------------------------------------------------------------------------
 
-#-(or CMU sbcl ecl clisp clasp)
-(defun host-address (host &optional (family :internet))
-  ;; Return a list whose car is the family keyword (:internet :DECnet :Chaos)
-  ;; and cdr is a list of network address bytes.
-  (declare (type stringable host)
-           (type (or null (member :internet :decnet :chaos) card8) family))
-  (declare (clx-values list))
-  host family
-  (error "HOST-ADDRESS not implemented yet."))
-
-#+clisp
-(defun host-address (host &optional (family :internet))
-  "Return a list whose car is the family keyword (:internet :DECnet :Chaos)
-  and cdr is a list of network address bytes."
-  (declare (type stringable host)
-           (type (or null (member :internet :decnet :chaos) card8) family))
-  (declare (clx-values list))
-  (labels ((no-host-error ()
-             (error "Unknown host ~S" host))
-           (no-address-error ()
-             (error "Host ~S has no ~S address" host family)))
-
-    (let ((hostent (posix::resolve-host-ipaddr (string host))))
-      (when (not (posix::hostent-addr-list hostent))
-        (no-host-error))
-      (ecase family
-        ((:internet nil 0)
-         (unless (= (posix::hostent-addrtype hostent) 2)
-           (no-address-error))
-         (let ((addr (first (posix::hostent-addr-list hostent))))
-           (etypecase addr
-             (integer
-              (list :internet
-                    (ldb (byte 8 24) addr)
-                    (ldb (byte 8 16) addr)
-                    (ldb (byte 8  8) addr)
-                    (ldb (byte 8  0) addr)))
-             (string
-              (let ((parts (read-from-string
-                            (nsubstitute #\Space #\. (ext:string-concat
-                                                      "(" addr ")")))))
-                (check-type parts (cons (unsigned-byte 8)
-                                        (cons (unsigned-byte 8)
-                                              (cons (unsigned-byte 8)
-                                                    (cons (unsigned-byte 8)
-                                                          NULL)))))
-                (cons :internet parts))))))))))
-
-#+CMU
-(defun host-address (host &optional (family :internet))
-  ;; Return a list whose car is the family keyword (:internet :DECnet :Chaos)
-  ;; and cdr is a list of network address bytes.
-  (declare (type stringable host)
-           (type (or null (member :internet :decnet :chaos) card8) family))
-  (declare (clx-values list))
-  (labels ((no-host-error ()
-             (error "Unknown host ~S" host))
-           (no-address-error ()
-             (error "Host ~S has no ~S address" host family)))
-    (let ((hostent (ext:lookup-host-entry (string host))))
-      (when (not hostent)
-        (no-host-error))
-      (ecase family
-        ((:internet nil 0)
-         (unless (= (ext::host-entry-addr-type hostent) 2)
-           (no-address-error))
-         (let ((addr (first (ext::host-entry-addr-list hostent))))
-           (list :internet
-                 (ldb (byte 8 24) addr)
-                 (ldb (byte 8 16) addr)
-                 (ldb (byte 8  8) addr)
-                 (ldb (byte 8  0) addr))))))))
-
-;;#+sbcl
-;;(require :sockets)
-#+sbcl
 (defun host-address (host &optional (family :internet))
   ;; Return a list whose car is the family keyword (:internet :DECnet :Chaos)
   ;; and cdr is a list of network address bytes.
@@ -1353,37 +808,6 @@
       ((:internet nil 0)
        (cons :internet (coerce (host-ent-address hostent) 'list))))))
 
-#+ecl
-(defun host-address (host &optional (family :internet))
-  ;; Return a list whose car is the family keyword (:internet :DECnet :Chaos)
-  ;; and cdr is a list of network address bytes.
-  (declare (type stringable host)
-           (type (or null (member :internet :decnet :chaos) card8) family))
-  (declare (clx-values list))
-  (labels ((no-host-error ()
-             (error "Unknown host ~S" host)))
-    (let ((addr (first (nth-value 3 (si::lookup-host-entry (string host))))))
-      (unless addr
-        (no-host-error))
-      (list :internet
-            (ldb (byte 8 24) addr)
-            (ldb (byte 8 16) addr)
-            (ldb (byte 8  8) addr)
-            (ldb (byte 8  0) addr)))))
-
-#+clasp
-(defun host-address (host &optional (family :internet))
-  ;; Return a list whose car is the family keyword (:internet :DECnet :Chaos)
-  ;; and cdr is a list of network address bytes.
-  (declare (type stringable host)
-	   (type (or null (member :internet :decnet :chaos) card8) family))
-  (declare (clx-values list))
-  (let ((hostent (SB-BSD-SOCKETS:get-host-by-name (string host))))
-    (ecase family
-      ((:internet nil 0)
-       (cons :internet (coerce (SB-BSD-SOCKETS:host-ent-address hostent) 'list))))))
-
-
 ;;-----------------------------------------------------------------------------
 ;; Whether to use closures for requests or not.
 ;;-----------------------------------------------------------------------------
@@ -1400,7 +824,6 @@
 (defun clx-macroexpand (form env)
   (macroexpand form env))
 
-
 ;;-----------------------------------------------------------------------------
 ;; Resource stuff
 ;;-----------------------------------------------------------------------------
@@ -1409,24 +832,16 @@
 ;;; Utilities
 
 (defun getenv (name)
-  #+CMU (cdr (assoc name ext:*environment-list* :test #'string=))
-  #+sbcl (sb-ext:posix-getenv name)
-  #+ecl (si:getenv name)
-  #+clisp (ext:getenv name)
-  #+clasp (ext:getenv name)
-  #-(or sbcl CMU ecl clisp clasp) (progn name nil))
+  (sb-ext:posix-getenv name))
 
 (defun get-host-name ()
   "Return the same hostname as gethostname(3) would"
   ;; machine-instance probably works on a lot of lisps, but clisp is not
   ;; one of them
-  #+(or cmu sbcl ecl clasp) (machine-instance)
-  #+clisp (let ((s (machine-instance))) (subseq s 0 (position #\Space s)))
-  #-(or cmu sbcl ecl clisp clasp) (error "get-host-name not implemented"))
+  (machine-instance))
 
 (defun homedir-file-pathname (name)
-  (and #-(or unix mach) (search "Unix" (software-type) :test #'char-equal)
-       (merge-pathnames (user-homedir-pathname) (pathname name))))
+  (and (merge-pathnames (user-homedir-pathname) (pathname name))))
 
 ;;; DEFAULT-RESOURCES-PATHNAME - The pathname of the resources file to load if
 ;;; a resource manager isn't running.
@@ -1498,7 +913,6 @@ Returns a list of (host display-number screen protocol)."
                 (t :internet))))
     (list host (or display 0) (or screen 0) protocol)))
 
-
 ;;-----------------------------------------------------------------------------
 ;; GC stuff
 ;;-----------------------------------------------------------------------------
@@ -1517,7 +931,6 @@ Returns a list of (host display-number screen protocol)."
   (setq *temp-gcontext-cache* nil)
   nil)
 
-
 ;;-----------------------------------------------------------------------------
 ;; DEFAULT-KEYSYM-TRANSLATE
 ;;-----------------------------------------------------------------------------
@@ -1541,7 +954,6 @@ Returns a list of (host display-number screen protocol)."
            (clx-values t))
   object)
 
-
 ;;-----------------------------------------------------------------------------
 ;; Image stuff
 ;;-----------------------------------------------------------------------------
@@ -1567,27 +979,27 @@ Returns a list of (host display-number screen protocol)."
   '(unsigned-byte 32))
 
 (deftype pixarray-1  ()
-  '(#+(or cmu sbcl) simple-array
-    #-(or cmu sbcl) array pixarray-1-element-type (* *)))
+  '(simple-array
+    pixarray-1-element-type (* *)))
 
 (deftype pixarray-4  ()
-  '(#+(or cmu sbcl) simple-array
-    #-(or cmu sbcl) array pixarray-4-element-type (* *)))
+  '(simple-array
+    pixarray-4-element-type (* *)))
 
 (deftype pixarray-8  ()
-  '(#+(or cmu sbcl) simple-array
-    #-(or cmu sbcl) array pixarray-8-element-type (* *)))
+  '(simple-array
+    pixarray-8-element-type (* *)))
 
 (deftype pixarray-16 ()
-  '(#+(or cmu sbcl) simple-array
-    #-(or cmu sbcl) array pixarray-16-element-type (* *)))
+  '(simple-array
+    pixarray-16-element-type (* *)))
 
 (deftype pixarray-24 ()
-  '(#+(or cmu sbcl) simple-array
-    #-(or cmu sbcl) array pixarray-24-element-type (* *)))
+  '(simple-array
+    pixarray-24-element-type (* *)))
 
 (deftype pixarray-32 ()
-  '(#+(or cmu sbcl) simple-array #-(or cmu sbcl) array pixarray-32-element-type (* *)))
+  '(simple-array pixarray-32-element-type (* *)))
 
 (deftype pixarray ()
   '(or pixarray-1 pixarray-4 pixarray-8 pixarray-16 pixarray-24 pixarray-32))
@@ -1597,17 +1009,16 @@ Returns a list of (host display-number screen protocol)."
 
 ;;; WITH-UNDERLYING-SIMPLE-VECTOR
 
-#+(or CMU sbcl)
 ;;; We do *NOT* support viewing an array as having a different element type.
 ;;; Element-type is ignored.
 ;;;
 (defmacro with-underlying-simple-vector
     ((variable element-type pixarray) &body body)
   (declare (ignore element-type))
-  `(#+cmu lisp::with-array-data #+sbcl sb-kernel:with-array-data
-          ((,variable ,pixarray) (start) (end))
-          (declare (ignore start end))
-          ,@body))
+  `(sb-kernel:with-array-data
+       ((,variable ,pixarray) (start) (end))
+     (declare (ignore start end))
+     ,@body))
 
 ;;; These are used to read and write pixels from and to CARD8s.
 
@@ -1671,7 +1082,6 @@ Returns a list of (host display-number screen protocol)."
 
 ;;; FAST-READ-PIXARRAY - fill part of a pixarray from a buffer of card8s
 
-#+(or CMU sbcl)
 (defun fast-read-pixarray-24 (buffer-bbuf index array x y width height
                               padded-bytes-per-line bits-per-pixel)
   (declare (type buffer-bytes buffer-bbuf)
@@ -1702,7 +1112,6 @@ Returns a list of (host display-number screen protocol)."
                  (aref buffer-bbuf (index+ i 2))))))))
   t)
 
-#+(or CMU sbcl)
 (defun pixarray-element-size (pixarray)
   (let ((eltype (array-element-type pixarray)))
     (cond ((eq eltype 'bit) 1)
@@ -1718,32 +1127,6 @@ Returns a list of (host display-number screen protocol)."
 ;;; Widths are specified in bits.  Neither array can have a non-zero
 ;;; displacement.  We allow extra random bit-offset to be thrown into the X.
 ;;;
-#+cmu
-(defun copy-bit-rect (source source-width sx sy dest dest-width dx dy
-                      height width)
-  (declare (type array-index source-width sx sy dest-width dx dy height width))
-  #.(declare-buffun)
-  (lisp::with-array-data ((sdata source)
-                            (sstart)
-                            (send))
-    (declare (ignore send))
-    (lisp::with-array-data ((ddata dest)
-                              (dstart)
-                              (dend))
-      (declare (ignore dend))
-      (assert (and (zerop sstart) (zerop dstart)))
-      (do ((src-idx (index+ (* vm:vector-data-offset vm:word-bits)
-                            sx (index* sy source-width))
-                    (index+ src-idx source-width))
-           (dest-idx (index+ (* vm:vector-data-offset vm:word-bits)
-                             dx (index* dy dest-width))
-                     (index+ dest-idx dest-width))
-           (count height (1- count)))
-          ((zerop count))
-        (declare (type array-index src-idx dest-idx count))
-        (kernel:bit-bash-copy sdata src-idx ddata dest-idx width)))))
-
-#+sbcl
 (defun copy-bit-rect (source source-width sx sy dest dest-width dx dy
                       height width)
   (declare (type array-index source-width sx sy dest-width dx dy height width))
@@ -1764,15 +1147,14 @@ Returns a list of (host display-number screen protocol)."
         (declare (type array-index src-idx dest-idx count))
         (sb-kernel:ub1-bash-copy sdata src-idx ddata dest-idx width)))))
 
-#+(or CMU sbcl)
 (defun fast-read-pixarray-using-bitblt
     (bbuf boffset pixarray x y width height padded-bytes-per-line
      bits-per-pixel)
   (declare (type (array * 2) pixarray))
   #.(declare-buffun)
   (copy-bit-rect bbuf
-                 (index* padded-bytes-per-line #+cmu vm:byte-bits #+sbcl sb-vm:n-byte-bits)
-                 (index* boffset #+cmu vm:byte-bits #+sbcl sb-vm:n-byte-bits) 0
+                 (index* padded-bytes-per-line sb-vm:n-byte-bits)
+                 (index* boffset sb-vm:n-byte-bits) 0
                  pixarray
                  (index* (array-dimension pixarray 1) bits-per-pixel)
                  x y
@@ -1794,43 +1176,10 @@ Returns a list of (host display-number screen protocol)."
            (type generalized-boolean byte-lsb-first-p bit-lsb-first-p))
   (progn bbuf boffset pixarray x y width height padded-bytes-per-line
          bits-per-pixel unit byte-lsb-first-p bit-lsb-first-p)
-  (or
-   #+(or Genera lcl3.0 excl)
-   (fast-read-pixarray-with-swap
-    bbuf boffset pixarray x y width height padded-bytes-per-line
-    bits-per-pixel unit byte-lsb-first-p bit-lsb-first-p)
-   (let ((function
-          (or #+lispm
-              (and (= (sys:array-element-size pixarray) bits-per-pixel)
-                   (zerop (index-mod padded-bytes-per-line 4))
-                   (zerop (index-mod
-                           (* #+Genera (sys:array-row-span pixarray)
-                              #-Genera (array-dimension pixarray 1)
-                              bits-per-pixel)
-                           32))
-                   #'fast-read-pixarray-using-bitblt)
-              #+(or CMU)
-              (and (index= (pixarray-element-size pixarray) bits-per-pixel)
-                   #'fast-read-pixarray-using-bitblt)
-              #+(or lcl3.0 excl)
-              (and (index= bits-per-pixel 1)
-                   #'fast-read-pixarray-1)
-              #+(or lcl3.0 excl)
-              (and (index= bits-per-pixel 4)
-                   #'fast-read-pixarray-4)
-              #+(or Genera lcl3.0 excl CMU)
-              (and (index= bits-per-pixel 24)
-                   #'fast-read-pixarray-24))))
-     (when function
-       (read-pixarray-internal
-        bbuf boffset pixarray x y width height padded-bytes-per-line
-        bits-per-pixel function
-        unit byte-lsb-first-p bit-lsb-first-p
-        +image-unit+ +image-byte-lsb-first-p+ +image-bit-lsb-first-p+)))))
+  nil)
 
 ;;; FAST-WRITE-PIXARRAY - copy part of a pixarray into an array of CARD8s
 
-#+(or CMU sbcl)
 (defun fast-write-pixarray-24 (buffer-bbuf index array x y width height
                                padded-bytes-per-line bits-per-pixel)
   (declare (type buffer-bytes buffer-bbuf)
@@ -1863,7 +1212,6 @@ Returns a list of (host display-number screen protocol)."
                   (write-image-load-byte 16 pixel 24)))))))
   t)
 
-#+(or CMU sbcl)
 (defun fast-write-pixarray-using-bitblt
     (bbuf boffset pixarray x y width height padded-bytes-per-line
      bits-per-pixel)
@@ -1890,39 +1238,7 @@ Returns a list of (host display-number screen protocol)."
            (type generalized-boolean byte-lsb-first-p bit-lsb-first-p))
   (progn bbuf boffset pixarray x y width height padded-bytes-per-line
          bits-per-pixel unit byte-lsb-first-p bit-lsb-first-p)
-  (or
-   #+(or Genera lcl3.0 excl)
-   (fast-write-pixarray-with-swap
-    bbuf boffset pixarray x y width height padded-bytes-per-line
-    bits-per-pixel unit byte-lsb-first-p bit-lsb-first-p)
-   (let ((function
-          (or #+lispm
-              (and (= (sys:array-element-size pixarray) bits-per-pixel)
-                   (zerop (index-mod padded-bytes-per-line 4))
-                   (zerop (index-mod
-                           (* #+Genera (sys:array-row-span pixarray)
-                              #-Genera (array-dimension pixarray 1)
-                              bits-per-pixel)
-                           32))
-                   #'fast-write-pixarray-using-bitblt)
-              #+(or CMU)
-              (and (index= (pixarray-element-size pixarray) bits-per-pixel)
-                   #'fast-write-pixarray-using-bitblt)
-              #+(or lcl3.0 excl)
-              (and (index= bits-per-pixel 1)
-                   #'fast-write-pixarray-1)
-              #+(or lcl3.0 excl)
-              (and (index= bits-per-pixel 4)
-                   #'fast-write-pixarray-4)
-              #+(or Genera lcl3.0 excl CMU)
-              (and (index= bits-per-pixel 24)
-                   #'fast-write-pixarray-24))))
-     (when function
-       (write-pixarray-internal
-        bbuf boffset pixarray x y width height padded-bytes-per-line
-        bits-per-pixel function
-        +image-unit+ +image-byte-lsb-first-p+ +image-bit-lsb-first-p+
-        unit byte-lsb-first-p bit-lsb-first-p)))))
+  nil)
 
 ;;; FAST-COPY-PIXARRAY - copy part of a pixarray into another
 
@@ -1930,21 +1246,4 @@ Returns a list of (host display-number screen protocol)."
   (declare (type pixarray pixarray copy)
            (type card16 x y width height)
            (type (member 1 4 8 16 24 32) bits-per-pixel))
-  (progn pixarray copy x y width height bits-per-pixel nil)
-  #+CMU
-  (let* ((pixarray-padded-pixels-per-line
-          (array-dimension pixarray 1))
-         (pixarray-padded-bits-per-line
-          (* pixarray-padded-pixels-per-line bits-per-pixel))
-         (copy-padded-pixels-per-line
-          (array-dimension copy 1))
-         (copy-padded-bits-per-line
-          (* copy-padded-pixels-per-line bits-per-pixel)))
-    (when (index= (pixarray-element-size pixarray)
-                  (pixarray-element-size copy)
-                  bits-per-pixel)
-      (copy-bit-rect pixarray pixarray-padded-bits-per-line x y
-                     copy copy-padded-bits-per-line 0 0
-                     height
-                     (index* width bits-per-pixel))
-      t)))
+  (progn pixarray copy x y width height bits-per-pixel nil))

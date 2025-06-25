@@ -37,7 +37,7 @@ Franz Inc, Berkeley, Ca.
 Independent FOSS developers"
   :maintainer "sharplispers"
   :license "MIT"
-  :depends-on (#+(or ecl sbcl) sb-bsd-sockets)
+  :depends-on (sb-bsd-sockets)
   :version "0.7.6"
   :serial t
   :default-component-class clx-source-file
@@ -46,10 +46,7 @@ Independent FOSS developers"
   ((:file "package")
    (:file "depdefs")
    (:file "clx")
-   #-(or openmcl allegro lispworks) (:file "dependent")
-   #+openmcl (:file "dep-openmcl")
-   #+allegro (:file "dep-allegro")
-   #+lispworks (:file "dep-lispworks")
+   (:file "dependent")
    (:file "common")
    (:file "macros")
    (:file "bufmac")
@@ -67,7 +64,6 @@ Independent FOSS developers"
    (:file "manager")
    (:file "image")
    (:file "resource")
-   #+allegro (:file "excldep")
    (:module "extensions"
 	    :components
 	    ((:file "shape")
@@ -142,7 +138,6 @@ Independent FOSS developers"
              (:file "util")
              (:file "core-protocol" :depends-on ("package" "util"))))))
 
-#+sbcl
 (defmethod perform :around ((o compile-op) (f xrender-source-file))
   ;; RENDER would appear to be an inherently slow protocol; further,
   ;; it's not set in stone, and consequently we care less about speed
@@ -150,7 +145,6 @@ Independent FOSS developers"
   (handler-bind ((sb-ext:compiler-note #'muffle-warning))
     (call-next-method)))
 
-#+sbcl
 (defmethod perform :around ((o compile-op) (f clx-source-file))
   ;; a variety of accessors, such as AREF-CARD32, are not
   ;; declared INLINE.  Without this (non-ANSI)

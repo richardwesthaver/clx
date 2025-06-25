@@ -103,33 +103,18 @@
   `(aref-int8 buffer-bbuf (index+ buffer-boffset ,byte-index)))
 
 (defmacro read-card16 (byte-index)
-  #+clx-overlapping-arrays
-  `(aref-card16 buffer-wbuf (index+ buffer-woffset (index-ash ,byte-index -1)))
-  #-clx-overlapping-arrays
   `(aref-card16 buffer-bbuf (index+ buffer-boffset ,byte-index)))
 
 (defmacro read-int16 (byte-index)
-  #+clx-overlapping-arrays
-  `(aref-int16 buffer-wbuf (index+ buffer-woffset (index-ash ,byte-index -1)))
-  #-clx-overlapping-arrays
   `(aref-int16 buffer-bbuf (index+ buffer-boffset ,byte-index)))
 
 (defmacro read-card32 (byte-index)
-  #+clx-overlapping-arrays
-  `(aref-card32 buffer-lbuf (index+ buffer-loffset (index-ash ,byte-index -2)))
-  #-clx-overlapping-arrays
   `(aref-card32 buffer-bbuf (index+ buffer-boffset ,byte-index)))
 
 (defmacro read-int32 (byte-index)
-  #+clx-overlapping-arrays
-  `(aref-int32 buffer-lbuf (index+ buffer-loffset (index-ash ,byte-index -2)))
-  #-clx-overlapping-arrays
   `(aref-int32 buffer-bbuf (index+ buffer-boffset ,byte-index)))
 
 (defmacro read-card29 (byte-index)
-  #+clx-overlapping-arrays
-  `(aref-card29 buffer-lbuf (index+ buffer-loffset (index-ash ,byte-index -2)))
-  #-clx-overlapping-arrays
   `(aref-card29 buffer-bbuf (index+ buffer-boffset ,byte-index)))
 
 (defmacro event-code (reply-buffer)
@@ -159,42 +144,11 @@
      ,@(and display '(%buffer))
      (let* ((buffer-boffset (the array-index ,(or index 0)))
 	    #-clx-overlapping-arrays
-	    (buffer-bbuf (reply-ibuf8 %reply-buffer))
-	    #+clx-overlapping-arrays
-	    ,@(append
-		(when (member 8 sizes)
-		  `((buffer-bbuf (reply-ibuf8 %reply-buffer))))
-		(when (or (member 16 sizes) (member 160 sizes))
-		  `((buffer-woffset (index-ash buffer-boffset -1))
-		    (buffer-wbuf (reply-ibuf16 %reply-buffer))))
-		(when (member 32 sizes)
-		  `((buffer-loffset (index-ash buffer-boffset -2))
-		    (buffer-lbuf (reply-ibuf32 %reply-buffer))))))
+	    (buffer-bbuf (reply-ibuf8 %reply-buffer)))
        (declare (type array-index buffer-boffset))
-       #-clx-overlapping-arrays
        (declare (type buffer-bytes buffer-bbuf))
-       #+clx-overlapping-arrays
-       ,@(append
-	   (when (member 8 sizes)
-	     '((declare (type buffer-bytes buffer-bbuf))))
-	   (when (member 16 sizes)
-	     '((declare (type array-index buffer-woffset))
-	       (declare (type buffer-words buffer-wbuf))))
-	   (when (member 32 sizes)
-	     '((declare (type array-index buffer-loffset))
-	       (declare (type buffer-longs buffer-lbuf)))))
        buffer-boffset
-       #-clx-overlapping-arrays
        buffer-bbuf
-       #+clx-overlapping-arrays
-       ,@(append
-	   (when (member 8  sizes) '(buffer-bbuf))
-	   (when (member 16 sizes) '(buffer-woffset buffer-wbuf))
-	   (when (member 32 sizes) '(buffer-loffset buffer-lbuf)))
-       #+clx-overlapping-arrays
-       (macrolet ((%buffer-sizes () ',sizes))
-	 ,@body)
-       #-clx-overlapping-arrays
        ,@body)))
 
 (defun make-buffer (output-size constructor &rest options)
@@ -205,18 +159,6 @@
     (apply constructor
 	   :size output-size
 	   :obuf8 byte-output
-	   #+clx-overlapping-arrays
-	   :obuf16
-	   #+clx-overlapping-arrays
-	   (make-array (index-ash output-size -1)
-		       :element-type 'overlap16
-		       :displaced-to byte-output)
-	   #+clx-overlapping-arrays
-	   :obuf32
-	   #+clx-overlapping-arrays
-	   (make-array (index-ash output-size -2)
-		       :element-type 'overlap32
-		       :displaced-to byte-output)
 	   options))) 
 
 (defun make-reply-buffer (size)
@@ -225,19 +167,7 @@
 				:initial-element 0)))
     (make-reply-buffer-internal
       :size size
-      :ibuf8 byte-input
-      #+clx-overlapping-arrays
-      :ibuf16
-      #+clx-overlapping-arrays
-      (make-array (index-ash size -1)
-		  :element-type 'overlap16
-		  :displaced-to byte-input)
-      #+clx-overlapping-arrays
-      :ibuf32
-      #+clx-overlapping-arrays
-      (make-array (index-ash size -2)
-		  :element-type 'overlap32
-		  :displaced-to byte-input))))
+      :ibuf8 byte-input)))
 
 (defun buffer-ensure-size (buffer size)
   (declare (type buffer buffer)
@@ -248,16 +178,7 @@
       (let* ((new-buffer-size (index-ash 1 (integer-length (index1- size))))
 	     (new-buffer (make-array new-buffer-size :element-type 'card8
 				     :initial-element 0)))
-	(setf (buffer-obuf8 buffer) new-buffer)
-	#+clx-overlapping-arrays
-	(setf (buffer-obuf16 buffer)
-	      (make-array (index-ash new-buffer-size -1)
-			  :element-type 'overlap16
-			  :displaced-to new-buffer)
-	      (buffer-obuf32 buffer)
-	      (make-array (index-ash new-buffer-size -2)
-			  :element-type 'overlap32
-			  :displaced-to new-buffer))))))
+	(setf (buffer-obuf8 buffer) new-buffer)))))
 
 (defun buffer-pad-request (buffer pad)
   (declare (type buffer buffer)
@@ -524,7 +445,6 @@
 (define-list-readers (read-list-card8 read-list-card8-with-transform) card8
   8 1 read-card8)
 
-#-lispm
 (defun read-simple-array-card8 (reply-buffer nitems data start index)
   (declare (type reply-buffer reply-buffer)
 	   (type array-index nitems start index)
@@ -533,7 +453,6 @@
     (with-buffer-input (reply-buffer :sizes (8))
       (buffer-replace data buffer-bbuf start (index+ start nitems) index))))
 
-#-lispm
 (defun read-simple-array-card8-with-transform (reply-buffer nitems data transform start index)
   (declare (type reply-buffer reply-buffer)
 	   (type array-index nitems start index)
@@ -619,7 +538,6 @@
 (define-list-readers (read-list-card16 read-list-card16-with-transform) card16
   16 2 read-card16)
 
-#-lispm
 (defun read-simple-array-card16 (reply-buffer nitems data start index)
   (declare (type reply-buffer reply-buffer)
 	   (type array-index nitems start index)
@@ -632,11 +550,8 @@
 	    (index 0 (index+ index 2)))
 	   ((index>= j end))
 	(declare (type array-index j end index))
-	(setf (aref data j) (the card16 (read-card16 index))))
-      #+clx-overlapping-arrays
-      (buffer-replace data buffer-wbuf start (index+ start nitems) (index-floor index 2)))))
+	(setf (aref data j) (the card16 (read-card16 index)))))))
 
-#-lispm
 (defun read-simple-array-card16-with-transform (reply-buffer nitems data transform start index)
   (declare (type reply-buffer reply-buffer)
 	   (type array-index nitems start index)
@@ -653,10 +568,9 @@
 	(setf (aref data j) (the card16 (funcall transform (read-card16 index))))))))
 
 (defun read-vector-card16 (reply-buffer nitems data start index)
-  (declare (type reply-buffer reply-buffer)
-	   (type array-index nitems start index)
-	   (type vector data)
-	   (optimize #+cmu(ext:inhibit-warnings 3)))
+  (declare (reply-buffer reply-buffer)
+	   (array-index nitems start index)
+	   (vector data))
   (with-vector (data vector)
     (with-buffer-input (reply-buffer :sizes (16) :index index)
       #-clx-overlapping-arrays
@@ -665,16 +579,13 @@
 	    (index 0 (index+ index 2)))
 	   ((index>= j end))
 	(declare (type array-index j end index))
-	(setf (aref data j) (read-card16 index)))
-      #+clx-overlapping-arrays
-      (buffer-replace data buffer-wbuf start (index+ start nitems) (index-floor index 2)))))
+	(setf (aref data j) (read-card16 index))))))
 
 (defun read-vector-card16-with-transform (reply-buffer nitems data transform start index)
-  (declare (type reply-buffer reply-buffer)
-	   (type array-index nitems start index)
-	   (type vector data)
-	   (optimize #+cmu(ext:inhibit-warnings 3)))
-  (declare (type (function (card16) t) transform)
+  (declare (reply-buffer reply-buffer)
+	   (array-index nitems start index)
+	   (vector data)
+           ((function (card16) t) transform)
 	   (dynamic-extent transform))
   (with-vector (data vector)
     (with-buffer-input (reply-buffer :sizes (16) :index index)
@@ -698,7 +609,6 @@
 (define-list-readers (read-list-card32 read-list-card32-with-transform) card32
   32 4 read-card32)
 
-#-lispm
 (defun read-simple-array-card32 (reply-buffer nitems data start index)
   (declare (type reply-buffer reply-buffer)
 	   (type array-index nitems start index)
@@ -711,11 +621,8 @@
 	    (index 0 (index+ index 4)))
 	   ((index>= j end))
 	(declare (type array-index j end index))
-	(setf (aref data j) (the card32 (read-card32 index))))
-      #+clx-overlapping-arrays
-      (buffer-replace data buffer-lbuf start (index+ start nitems) (index-floor index 4)))))
+	(setf (aref data j) (the card32 (read-card32 index)))))))
 
-#-lispm
 (defun read-simple-array-card32-with-transform (reply-buffer nitems data transform start index)
   (declare (type reply-buffer reply-buffer)
 	   (type array-index nitems start index)
@@ -734,25 +641,20 @@
 (defun read-vector-card32 (reply-buffer nitems data start index)
   (declare (type reply-buffer reply-buffer)
 	   (type array-index nitems start index)
-	   (type vector data)
-	   (optimize #+cmu(ext:inhibit-warnings 3)))
+	   (type vector data))
   (with-vector (data vector)
     (with-buffer-input (reply-buffer :sizes (32) :index index)
-      #-clx-overlapping-arrays
       (do* ((j start (index+ j 1))
 	    (end (index+ start nitems))
 	    (index 0 (index+ index 4)))
 	   ((index>= j end))
 	(declare (type array-index j end index))
-	(setf (aref data j) (read-card32 index)))
-      #+clx-overlapping-arrays
-      (buffer-replace data buffer-lbuf start (index+ start nitems) (index-floor index 4)))))
+	(setf (aref data j) (read-card32 index))))))
 
 (defun read-vector-card32-with-transform (reply-buffer nitems data transform start index)
   (declare (type reply-buffer reply-buffer)
 	   (type array-index nitems start index)
-	   (type vector data)
-	   (optimize #+cmu(ext:inhibit-warnings 3)))
+	   (type vector data))
   (declare (type (function (card32) t) transform)
 	   (dynamic-extent transform))
   (with-vector (data vector)
@@ -823,29 +725,10 @@
 	  (declare (type array-index j))
 	  (,writer j (funcall transform (pop list))))))))
 
-;;; original CLX comment: "TI Compiler bug", in WRITE-LIST-CARD8
-#+ti
-(progn
-  (defun write-list-card8 (buffer boffset data start end)
-    (writing-buffer-chunks card8
-	((list (nthcdr start data)))
-	((type list list))
-      (dotimes (j chunk)
-	(setf (aref buffer-bbuf (index+ buffer-boffset j)) (pop list)))))
-  (defun write-list-card8-with-transform (buffer boffset data start end transform)
-    (writing-buffer-chunks card8
-	((list (nthcdr start data)))
-	((type list lst))
-      (dotimes (j chunk)
-	(declare (type array-index j))
-	(write-card8 j (funcall transform (pop lst)))))))
-
-#-ti
 (define-list-writers (write-list-card8 write-list-card8-with-transform) card8
   1 write-card8)
 
 ;;; Should really write directly from data, instead of into the buffer first
-#-lispm
 (defun write-simple-array-card8 (buffer boffset data start end)
   (declare (type buffer buffer)
 	   (type (simple-array card8 (*)) data)
@@ -860,7 +743,6 @@
 		      index)))
   nil)
 
-#-lispm
 (defun write-simple-array-card8-with-transform (buffer boffset data start end transform)
   (declare (type buffer buffer)
 	   (type (simple-array card8 (*)) data)
@@ -940,11 +822,9 @@
   int8->card8 write-sequence-card8)
 
 ;;; Writing sequences of card16's
-
 (define-list-writers (write-list-card16 write-list-card16-with-transform) card16
   2 write-card16)
 
-#-lispm
 (defun write-simple-array-card16 (buffer boffset data start end)
   (declare (type buffer buffer)
 	   (type (simple-array card16 (*)) data)
@@ -968,7 +848,6 @@
 	(setq index (index+ index length)))))
   nil)
 
-#-lispm
 (defun write-simple-array-card16-with-transform (buffer boffset data start end transform)
   (declare (type buffer buffer)
 	   (type (simple-array card16 (*)) data)
@@ -990,8 +869,7 @@
 (defun write-vector-card16 (buffer boffset data start end)
   (declare (type buffer buffer)
 	   (type vector data)
-	   (type array-index boffset start end)
-	   (optimize #+cmu(ext:inhibit-warnings 3)))
+	   (type array-index boffset start end))
   (with-vector (data vector)
     (writing-buffer-chunks card16
 			   ((index start))
@@ -1014,8 +892,7 @@
 (defun write-vector-card16-with-transform (buffer boffset data start end transform)
   (declare (type buffer buffer)
 	   (type vector data)
-	   (type array-index boffset start end)
-	   (optimize #+cmu(ext:inhibit-warnings 3)))
+	   (type array-index boffset start end))
   (declare (type (function (t) card16) transform)
 	   (dynamic-extent transform))
   (with-vector (data vector)
@@ -1040,7 +917,6 @@
 (define-list-writers (write-list-int16 write-list-int16-with-transform) int16
   2 write-int16)
 
-#-lispm
 (defun write-simple-array-int16 (buffer boffset data start end)
   (declare (type buffer buffer)
 	   (type (simple-array int16 (*)) data)
@@ -1064,7 +940,6 @@
 	(setq index (index+ index length)))))
   nil)
 
-#-lispm
 (defun write-simple-array-int16-with-transform (buffer boffset data start end transform)
   (declare (type buffer buffer)
 	   (type (simple-array int16 (*)) data)
@@ -1136,7 +1011,6 @@
 (define-list-writers (write-list-card32 write-list-card32-with-transform) card32
   4 write-card32)
 
-#-lispm
 (defun write-simple-array-card32 (buffer boffset data start end)
   (declare (type buffer buffer)
 	   (type (simple-array card32 (*)) data)
@@ -1160,7 +1034,6 @@
 	(setq index (index+ index length)))))
   nil)
 
-#-lispm
 (defun write-simple-array-card32-with-transform (buffer boffset data start end transform)
   (declare (type buffer buffer)
 	   (type (simple-array card32 (*)) data)
@@ -1182,8 +1055,7 @@
 (defun write-vector-card32 (buffer boffset data start end)
   (declare (type buffer buffer)
 	   (type vector data)
-	   (type array-index boffset start end)
-	   (optimize #+cmu(ext:inhibit-warnings 3)))
+	   (type array-index boffset start end))
   (with-vector (data vector)
     (writing-buffer-chunks card32
 			   ((index start))
@@ -1276,7 +1148,6 @@
 (define-list-writers (write-list-char2b write-list-char2b-with-transform) card16
   2 write-char2b)
 
-#-lispm
 (defun write-simple-array-char2b (buffer boffset data start end)
   (declare (type buffer buffer)
 	   (type (simple-array card16 (*)) data)
@@ -1292,7 +1163,6 @@
 	(setq index (index+ index 1)))))
   nil)
 
-#-lispm
 (defun write-simple-array-char2b-with-transform (buffer boffset data start end transform)
   (declare (type buffer buffer)
 	   (type (simple-array card16 (*)) data)
@@ -1313,8 +1183,7 @@
 (defun write-vector-char2b (buffer boffset data start end)
   (declare (type buffer buffer)
 	   (type vector data)
-	   (type array-index boffset start end)
-	   (optimize #+cmu(ext:inhibit-warnings 3)))
+	   (type array-index boffset start end))
   (with-vector (data vector)
     (writing-buffer-chunks card16
 			   ((index start))
@@ -1329,8 +1198,7 @@
 (defun write-vector-char2b-with-transform (buffer boffset data start end transform)
   (declare (type buffer buffer)
 	   (type vector data)
-	   (type array-index boffset start end)
-	   (optimize #+cmu(ext:inhibit-warnings 3)))
+	   (type array-index boffset start end))
   (declare (type (function (t) card16) transform)
 	   (dynamic-extent transform))
   (with-vector (data vector)

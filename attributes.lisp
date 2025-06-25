@@ -355,8 +355,6 @@
                (change-window-attribute window 0 (pixmap-id background))))))
   background)
 
-#+Genera (eval-when (compile) (compiler:function-defined 'window-background))
-
 (defsetf window-background set-window-background)
 
 (deftype window-border ()
@@ -374,8 +372,6 @@
               ((integerp border) ; Border pixel
                (change-window-attribute window 3 border)))))
   border)
-
-#+Genera (eval-when (compile) (compiler:function-defined 'window-border))
 
 (defsetf window-border set-window-border)
 
@@ -644,8 +640,6 @@
     (when sibling
       (change-drawable-geometry window 5 (encode-type window sibling))))
   mode)
-
-#+Genera (eval-when (compile) (compiler:function-defined 'window-priority))
 
 (defsetf window-priority (window &optional sibling) (mode)
   ;; A bit strange, but retains setf form.

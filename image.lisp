@@ -2427,8 +2427,7 @@
 		 (kintern
 		   (substitute
 		     #\- #\_
-		     (#-excl string-upcase
-		      #+excl correct-case
+		     (string-upcase
 		      (subseq line start end))
 		     :test #'char=))))
 	  (when (null name)

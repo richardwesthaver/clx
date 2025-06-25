@@ -137,7 +137,6 @@
 ;(defun <mumble>-p (<mumble>-1 <mumble>-2)
 ;  (declare (type <mumble> <mumble>-1 <mumble>-2)
 ;	   (clx-values boolean)))
-
 
 (deftype generalized-boolean () 't)	; (or null (not null))
 
@@ -334,8 +333,7 @@
 (defun print-display-name (display stream)
   (declare (type (or null display) display))
   (cond (display
-	 #-allegro (princ (display-host display) stream)
-	 #+allegro (write-string (string (display-host display)) stream)
+	 (princ (display-host display) stream)
 	 (write-string ":" stream)
 	 (princ (display-display display) stream))
 	(t

@@ -89,9 +89,7 @@
       (setq event-mask (encode-event-mask event-mask)))
     (when do-not-propagate-mask
       (setq do-not-propagate-mask (encode-device-event-mask do-not-propagate-mask)))
-
-						;Make the request
-    (with-buffer-request (display +x-createwindow+)
+    (with-buffer-request (display +x-createwindow+) ;Make the request
       (data depth)
       (resource-id wid)
       (window parent)

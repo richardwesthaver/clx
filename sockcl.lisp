@@ -47,7 +47,6 @@ enum smmode {			/*  stream mode  */
 };
 ")
 
-#-akcl
 (CLINES "
 struct stream {
 	short	t, m;
@@ -61,7 +60,6 @@ struct stream {
 };
 ")
 
-
 ;;;; Connect to the server.
 
 ;;; A lisp string is not a reasonable type for C, so copy the characters
@@ -92,7 +90,6 @@ konnect_to_server(host,display)
 
 (defentry konnect-to-server (object int) (int "konnect_to_server"))
 
-
 ;;;; Make a one-way stream from a file descriptor.
 
 (CLINES "
@@ -144,7 +141,6 @@ konnect_stream(host,fd,flag,elem)
 
 (defentry konnect-stream (object int int object) (object "konnect_stream"))
 
-
 ;;;; Open an X stream
 
 (defun open-socket-stream (host display)

@@ -22,12 +22,9 @@
 (unless (find-package "XLIB")
   (make-package "XLIB" :use '("COMMON-LISP")))
 
-#-sbcl
-(compile-file "clx:defsystem.lisp" :error-file nil :load t)
-
-#+sbcl
-(progn (compile-file "clx:defsystem.lisp")
-       (load "clx:defsystem"))
+(progn 
+  (compile-file "clx:defsystem.lisp")
+  (load "clx:defsystem"))
 
 (with-compilation-unit ()
-  (#+cmu xlib:compile-clx #-cmu compile-clx (pathname "CLX:")))
+  (compile-clx (pathname "CLX:")))

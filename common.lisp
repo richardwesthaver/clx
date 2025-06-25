@@ -26,34 +26,6 @@
           ((= n start) :end-of-file)
           (t :truncated)))))
 
-;;; This is a legacy and obsolete fallback implementation.
-;;;
-;;; WARNING
-;;;	CLX performance will suffer if your lisp uses read-byte for receiving
-;;;	all data from the X Window System server.  You are encouraged to write a
-;;;	specialized version of buffer-read-default that does block transfers.
-#+(or)
-(defun buffer-read-default (display vector start end timeout)
-  (declare (type display display)
-           (type buffer-bytes vector)
-           (type array-index start end)
-           (type (or null (real 0 *)) timeout))
-  #.(declare-buffun)
-  (let ((stream (display-input-stream display)))
-    (declare (type (or null stream) stream))
-    (or (cond ((null stream))
-              ((listen stream) nil)
-              ((and timeout (= timeout 0)) :timeout)
-              ((buffer-input-wait-default display timeout)))
-        (do* ((index start (index1+ index)))
-             ((index>= index end) nil)
-          (declare (type array-index index))
-          (let ((c (read-byte stream nil nil)))
-            (declare (type (or null card8) c))
-            (if (null c)
-                (return t)
-                (setf (aref vector index) (the card8 c))))))))
-
 ;;; BUFFER-WRITE-DEFAULT - write data to the X stream
 ;;;
 ;;; WRITE-SEQUENCE was not present in ANSI Common Lisp when CLX was
@@ -66,29 +38,6 @@
 
   (write-sequence vector (display-output-stream display) :start start :end end)
   nil)
-
-;;; This is a legacy and obsolete fallback implementation.
-;;;
-;;; WARNING:
-;;;	CLX performance will be severely degraded if your lisp uses
-;;;	write-byte to send all data to the X Window System server.
-;;;	You are STRONGLY encouraged to write a specialized version
-;;;	of buffer-write-default that does block transfers.
-#+(or)
-(defun buffer-write-default (vector display start end)
-  ;; The default buffer write function for use with common-lisp streams
-  (declare (type buffer-bytes vector)
-           (type display display)
-           (type array-index start end))
-  #.(declare-buffun)
-  (let ((stream (display-output-stream display)))
-    (declare (type (or null stream) stream))
-    (unless (null stream)
-      (with-vector (vector buffer-bytes)
-        (do ((index start (index1+ index)))
-            ((index>= index end))
-          (declare (type array-index index))
-          (write-byte (aref vector index) stream))))))
 
 ;;; BUFFER-FORCE-OUTPUT-DEFAULT - force output to the X stream
 
