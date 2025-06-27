@@ -502,7 +502,7 @@
   (loop
      (when (apply predicate predicate-args)
        (return))
-     (mp:process-yield)))
+    (yield)))
 
 (defun process-block (whostate predicate &rest predicate-args)
   (declare (ignore whostate))
@@ -510,7 +510,7 @@
   (loop
    (when (apply predicate predicate-args)
      (return))
-     (mp:process-yield)))
+     (yield)))
 
 ;;; FIXME: the below implementation for threaded PROCESS-BLOCK using
 ;;; queues and condition variables might seem better, but in fact it
