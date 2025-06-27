@@ -32,6 +32,8 @@
 
 ;;; Created 09/14/87 by LaMott G. OREN
 
+;; NOTE 2025-06-27: above is outdated - more-info support has been removed.
+
 (in-package :xlib)
 
 (eval-when (load eval)
@@ -188,8 +190,7 @@
       (when (zerop length)
 	(warn "Zero length in buffer")
 	(return nil))
-      (push (cons (cons 0 (trace-more-info display request vector
-					   i (min (+ i length) end)))
+      (push (cons (list 0)
 		  (subseq vector i (min (+ i length) end))) new-history)
       (when (zerop request)
 	(warn "Zero length in buffer")
@@ -216,19 +217,11 @@
     (when (plusp length)
       (let ((reply-type (case (aref vector start) (0 :error) (1 :reply)
 			      (otherwise :event))))
-	(push (cons (cons reply-type
-			  (trace-more-info display reply-type vector start
-					   (+ start length)))
+	(push (cons (list reply-type)
 		    (subseq vector start (+ start length)))
 	    (display-trace-history display))))))
 
-(defun trace-more-info (display request-id vector start end)
-  ;; Currently only returns current process.
-  #+allegro
-  (list mp::*current-process*))
-
-
-(defun show-trace (display &key length show-process)
+(defun show-trace (display &key length)
   "Display the trace history for DISPLAY.
  The default is to show ALL history entries.
  When the LENGTH parameter is used, only the last LENGTH entries are
@@ -251,25 +244,16 @@
 		     (aref *event-key-vector* request)
 		   "Unknown")
 		 request
-		 (byte-ref16 vector 2))
-	 (when show-process
-	   #+allegro
-	   (format t ", Proc ~a" (mp::process-name (car more-info)))))
+		 (byte-ref16 vector 2)))
 	(:reply
 	 (format t "To ~d length ~d"
 		 (byte-ref16 vector 2) length)
 	 (let ((actual-length (index+ 32 (index* 4 (byte-ref32 vector 4)))))
 	   (unless (= length actual-length)
-	     (format t " Should be ~d **************" actual-length)))
-	 (when show-process
-	   #+allegro
-	   (format t ", Proc ~a" (mp::process-name (car more-info)))))
+	     (format t " Should be ~d **************" actual-length))))
 	(otherwise
 	 (format t "~a (~d) length ~d"
-		 (request-name request) request length)
-	 (when show-process
-	   #+allegro
-	   (format t ", Proc ~a" (mp::process-name (car more-info)))))))))
+		 (request-name request) request length))))))
 
 ;; For backwards compatibility
 (defun display-trace (&rest args)

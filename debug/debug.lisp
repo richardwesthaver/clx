@@ -50,9 +50,7 @@
 	  (unless (= i buffer-boffset)
 	    (warn "Buffer size ~d  Requests end at ~d" buffer-boffset i)))
       
-      (let ((buffer-boffset 0)
-	    #+clx-overlapping-arrays
-	    (buffer-woffset 0))
+      (let ((buffer-boffset 0))
 	(setq request (card8-get i))
 	(setq length (* 4 (card16-get (+ i 2)))))
       (when (zerop request)

@@ -2099,7 +2099,6 @@
 
 (declaim (inline aset-float32 aset-float64))
 
-#+sbcl
 (defun aset-float32 (value array index)
   (declare (type single-float value)
            (type buffer-bytes array)
@@ -2111,52 +2110,6 @@
   value)
 
 
-#+cmu
-(defun aset-float32 (value array index)
-  (declare (type single-float value)
-           (type buffer-bytes array)
-           (type array-index index))
-  #.(declare-buffun)
-  (let ((bits (kernel:single-float-bits  value)))
-    (declare (type (unsigned-byte 32) bits))
-    (aset-card32 bits array index))
-  value)
-
-
-#+openmcl
-(defun aset-float32 (value array index)
-  (declare (type single-float value)
-           (type buffer-bytes array)
-           (type array-index index))
-  #.(declare-buffun)
-  (let ((bits (ccl::single-float-bits value)))
-    (declare (type (unsigned-byte 32) bits))
-    (aset-card32 bits array index))
-  value)
-
-
-#+lispworks
-(progn
-  (defun %single-float-bits (x)
-    (declare (type single-float x))
-    (fli:with-dynamic-foreign-objects ((bits :int32))
-      (fli:with-coerced-pointer (pointer :type :lisp-single-float) bits
-        (setf (fli:dereference pointer) x))
-      (fli:dereference bits)))
-
-  (declaim (notinline aset-float32))
-  (defun aset-float32 (value array index)
-    (declare (type (or short-float single-float) value)
-             (type buffer-bytes array)
-             (type array-index index))
-    #.(declare-buffun)
-    (let ((bits (%single-float-bits (coerce value 'single-float))))
-      (declare (type (unsigned-byte 32) bits))
-      (aset-card32 bits array index))
-    value))
-
-
-#+sbcl
 (defun aset-float64 (value array index)
   (declare (type double-float value)
            (type buffer-bytes array)
@@ -2168,65 +2121,6 @@
     (aset-card32 low array index)
     (aset-card32 high array (the array-index (+ index 4))))
   value)
-
-
-#+cmu
-(defun aset-float64 (value array index)
-  (declare (type double-float value)
-           (type buffer-bytes array)
-           (type array-index index))
-  #.(declare-buffun)
-  (let ((low (kernel:double-float-low-bits value))
-        (high (kernel:double-float-high-bits value)))
-    (declare (type (unsigned-byte 32) low high))
-    (aset-card32 low array index)
-    (aset-card32 high array (+ index 4)))
-  value)
-
-
-#+openmcl
-(defun aset-float64 (value array index)
-  (declare (type double-float value)
-           (type buffer-bytes array)
-           (type array-index index))
-  #.(declare-buffun)
-  (multiple-value-bind (low high)
-      (ccl::double-float-bits value)
-    (declare (type (unsigned-byte 32) low high))
-    (aset-card32 low array index)
-    (aset-card32 high array (the array-index (+ index 4))))
-  value)
-
-
-#+lispworks
-(progn
-  (fli:define-c-struct %uint64
-    (high :uint32)
-    (low :uint32))
-
-  (defun %double-float-bits (x)
-    (declare (type double-float x))
-    (fli:with-dynamic-foreign-objects ((bits %uint64))
-      (fli:with-coerced-pointer (pointer :type :lisp-double-float) bits
-        (setf (fli:dereference pointer) x))
-
-      (values (fli:foreign-slot-value bits 'low :type :uint32 :object-type '%uint64)
-              (fli:foreign-slot-value bits 'high :type :uint32 :object-type '%uint64))))
-
-  (declaim (notinline aset-float64))
-  (defun aset-float64 (value array index)
-    (declare (type double-float value)
-             (type buffer-bytes array)
-             (type array-index index))
-    #.(declare-buffun)
-    (multiple-value-bind (low high)
-        (%double-float-bits value)
-      (declare (type (unsigned-byte 32) low high))
-
-      (aset-card32 low array index)
-      (aset-card32 high array (the array-index (+ index 4))))
-    value))
-
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
 (defun byte-width (type)
@@ -2262,7 +2156,6 @@
     (float32    'sset-float32)
     (float64    'sset-float64)))
 
-
 (defmacro define-sequence-setter (type)
   `(defun ,(intern (format nil "~A-~A" 'sset type)) (seq buffer start length)
      (declare (type sequence seq)
@@ -2294,7 +2187,6 @@
             buffer
             (the array-index (+ start (* i ,(byte-width type))))))))))
 
-
 (define-sequence-setter int8)
 (define-sequence-setter int16)
 (define-sequence-setter int32)
@@ -2304,8 +2196,6 @@
 (define-sequence-setter card32)
 (define-sequence-setter float32)
 (define-sequence-setter float64)
-
-
 
 (defun make-argspecs (list)
   (destructuring-bind (name type)
@@ -2319,7 +2209,6 @@
          ,(if (consp (third type))
               (make-symbol (format nil "~A-~A" name 'length))
               nil))))))
-
 
 (defun byte-width-calculation (argspecs)
   (let ((constant 0)
@@ -2335,14 +2224,12 @@
         constant
         (list* '+ constant calculated))))
 
-
 (defun composite-args (argspecs)
   (loop for (nil nil length length-var) in argspecs
         ;;       ^ type
         ;;   ^ name
         when (consp length)
         collect (list length-var length)))
-
 
 (defun make-setter-forms (argspecs)
   (loop
@@ -2358,7 +2245,6 @@
                                       (the fixnum (* ,(byte-width type)
                                                      ,(if length-var length-var length)))))))))
 
-
 (defmacro define-rendering-command (name opcode &rest args)
   ;; FIXME: Must heavily type-annotate.
   (labels ((expand-args (list)
@@ -2370,7 +2256,6 @@
                           collecting (list name type))
                 else
                 collect (list arg type))))
-
     (let* ((args (expand-args args))
            (argspecs (mapcar 'make-argspecs args))
            (total-byte-width (byte-width-calculation argspecs))
@@ -2400,7 +2285,6 @@
                                   `(type fixnum ,(first list)))
                               composite-args)
                     (type fixnum .length.))
-
            (when (< (- (length .rbuf.) 8)
                     (+ .index. .length.))
              (error "Rendering command sequence too long.  Implement automatic buffer flushing."))
@@ -2408,14 +2292,9 @@
            (aset-card16 .length. .rbuf. (the array-index .index0.))
            (aset-card16 ,opcode .rbuf. (the array-index (+ .index0. 2)))
            ,@(make-setter-forms argspecs)
-           (setf (context-index .ctx.) (the array-index (+ .index0. .length.))))))))
+           (setf (context-index .ctx.) (the array-index (+ .index0. .length.))))))))) ; eval-when
 
-) ;; eval-when
-
-
 ;;; Command implementation.
-
-
 (defun get-string (name)
   (assert (context-p *current-context*)
           (*current-context*)
@@ -2438,39 +2317,29 @@
         ;; FIXME: How does this interact with unicode?
         (map-into (make-string (1- length)) #'code-char bytes)))))
 
-
-
-
 ;;; Rendering commands (in alphabetical order).
-
-
 (define-rendering-command accum 137
   ;; *** ENUM
   (op           card32)
   (value        float32))
 
-
 (define-rendering-command active-texture-arb 197
   ;; *** ENUM
   (texture      card32))
-
 
 (define-rendering-command alpha-func 159
   ;; *** ENUM
   (func         card32)
   (ref          float32))
 
-
 (define-rendering-command begin 4
   ;; *** ENUM
   (mode         card32))
-
 
 (define-rendering-command bind-texture 4117
   ;; *** ENUM
   (target       card32)
   (texture      card32))
-
 
 (define-rendering-command blend-color 4096
   (red          float32)
@@ -2478,11 +2347,9 @@
   (blue         float32)
   (alpha        float32))
 
-
 (define-rendering-command blend-equotion 4097
   ;; *** ENUM
   (mode         card32))
-
 
 (define-rendering-command blend-func 160
   ;; *** ENUM
@@ -2490,15 +2357,12 @@
   ;; *** ENUM
   (dfactor      card32))
 
-
 (define-rendering-command call-list 1
   (list         card32))
-
 
 (define-rendering-command clear 127
   ;; *** BITFIELD
   (mask         card32))
-
 
 (define-rendering-command clear-accum 128
   (red          float32)
@@ -2506,25 +2370,20 @@
   (blue         float32)
   (alpha        float32))
 
-
 (define-rendering-command clear-color 130 
   (red          float32)
   (green        float32)
   (blue         float32)
   (alpha        float32))
 
-
 (define-rendering-command clear-depth 132
   (depth        float64))
-
 
 (define-rendering-command clear-index 129
   (c            float32))
 
-
 (define-rendering-command clear-stencil 131
   (s            int32))
-
 
 (define-rendering-command clip-plane 77
   (equotion-0   float64)
@@ -2533,7 +2392,6 @@
   (equotion-3   float64)
   ;; *** ENUM
   (plane        card32))
-
 
 (define-rendering-command color-3b 6
   ((r g b)      int8))
@@ -2559,7 +2417,6 @@
 (define-rendering-command color-3us 13
   ((r g b)      card16))
 
-
 (define-rendering-command color-4b 14
   ((r g b a)    int8))
 
@@ -2584,20 +2441,17 @@
 (define-rendering-command color-4us 21
   ((r g b a)    card16))
 
-
 (define-rendering-command color-mask 134
   (red          bool)
   (green        bool)
   (blue         bool)
   (alpha        bool))
 
-
 (define-rendering-command color-material 78
   ;; *** ENUM
   (face         card32)
   ;; *** ENUM
   (mode         card32))
-
 
 (define-rendering-command color-table-parameter-fv 2054
   ;; *** ENUM
@@ -2610,7 +2464,6 @@
   (pname        card32)
   (params       (list float32 4)))
 
-
 (define-rendering-command color-table-parameter-iv 2055
   ;; *** ENUM
   (target       card32)
@@ -2622,14 +2475,12 @@
   (pname        card32)
   (params       (list int32 4)))
 
-
 (define-rendering-command convolution-parameter-f 4103
   ;; *** ENUM
   (target       card32)
   ;; *** ENUM
   (pname        card32)
   (params       float32))
-
 
 (define-rendering-command convolution-parameter-fv 4104
   ;; *** ENUM
@@ -2648,14 +2499,12 @@
                                   #.+convolution-filter-bias+)
                                  4)))))
 
-
 (define-rendering-command convolution-parameter-i 4105
   ;; *** ENUM
   (target       card32)
   ;; *** ENUM
   (pname        card32)
   (params       int32))
-
 
 (define-rendering-command convolution-parameter-iv 4106
   ;; *** ENUM
@@ -2674,7 +2523,6 @@
                                 #.+convolution-filter-bias+)
                                4)))))
 
-
 (define-rendering-command copy-color-sub-table 196
   ;; *** ENUM
   (target       card32)
@@ -2682,7 +2530,6 @@
   (x            int32)
   (y            int32)
   (width        int32))
-
 
 (define-rendering-command copy-color-table 2056
   ;; *** ENUM
@@ -2693,7 +2540,6 @@
   (y            int32)
   (width        int32))
 
-
 (define-rendering-command copy-convolution-filter-id 4107
   ;; *** ENUM
   (target       card32)
@@ -2702,7 +2548,6 @@
   (x            int32)
   (y            int32)
   (width        int32))
-
 
 (define-rendering-command copy-convolution-filter-2d 4108
   ;; *** ENUM
@@ -2714,7 +2559,6 @@
   (width        int32)
   (height       int32))
 
-
 (define-rendering-command copy-pixels 172
   (x            int32)
   (y            int32)
@@ -2722,7 +2566,6 @@
   (height       int32)
   ;; *** ENUM
   (type         card32))
-
 
 (define-rendering-command copy-tex-image-1d 4119
   ;; *** ENUM
@@ -2735,7 +2578,6 @@
   (width        int32)
   (border       int32))
 
-
 (define-rendering-command copy-tex-image-2d 4120
   ;; *** ENUM
   (target       card32)
@@ -2747,7 +2589,6 @@
   (width        int32)
   (height       int32)
   (border       int32))
-
 
 (define-rendering-command copy-tex-sub-image-1d 4121
   ;; *** ENUM

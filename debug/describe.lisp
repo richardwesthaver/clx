@@ -96,12 +96,7 @@
 		(setq type (car type))))
     (case type
       ((window pixmap drawable cursor font gcontext colormap atom)
-       (format t "[#x~x]" value)
-       #+comment
-       (let ((temp (lookup-resource-id display value)))
-	 (when (eq (first type) 'atom)
-	   (setq temp (lookup-xatom display value)))
-	 (when temp (format t " (~s)" (type-of temp)))))
+       (format t "[#x~x]" value))
       (int16 (setq temp (card16->int16 value))
 	     (when (minusp temp) (format t "~d" temp)))
       (otherwise
