@@ -37,7 +37,7 @@ Franz Inc, Berkeley, Ca.
 Independent FOSS developers"
   :maintainer "sharplispers"
   :license "MIT"
-  :depends-on (sb-bsd-sockets)
+  :depends-on (sb-bsd-sockets std)
   :version "0.7.6"
   :serial t
   :default-component-class clx-source-file

@@ -16,8 +16,6 @@
   (:export #:demo))
 
 (in-package :xlib-demo/demos)
-
-
 ;;;; Graphic demos wrapper macro.
 
 ;;; This wrapper macro should be reconsidered with respect to its property
@@ -25,7 +23,6 @@
 ;;; pointing to these instead of function names.  Also, something should
 ;;; be done about a title window that displays the name of the demo while
 ;;; it is running.
-
 (defparameter *demos* nil)
 (defparameter *delay* 0.5)
 
@@ -75,7 +72,7 @@
     (pushnew ',fun-name *demos*)
     ',fun-name))
 
-
+
 ;;; DEMO
 
 (defvar *name-to-function* (make-hash-table :test #'eq))
@@ -117,7 +114,7 @@
             (xlib:display-finish-output display)
             (xlib:close-display display)))))))
 
-
+
 ;;;; Shared demo utilities.
 
 (defun full-window-state (w)
@@ -126,7 +123,7 @@
 	    (xlib:drawable-x w) (xlib:drawable-y w)
 	    (xlib:window-map-state w))))
 
-
+
 (defun make-random-bitmap ()
   (let ((bitmap-data (make-array '(32 32) :initial-element 0
 				 :element-type 'xlib::bit)))
@@ -250,7 +247,7 @@
   "Displays random grey rectangles."
   (greynetic *window* duration))
 
-
+
 ;;;; Qix.
 
 (defstruct qix
@@ -356,7 +353,7 @@
   (qix *window* lengths duration))
 
 
-
+
 ;;;; Petal.
 
 ;;; Fast sine constants:
@@ -414,7 +411,7 @@
   `(let ((tmp (- ,x d270)))
      (psin (if (minusp tmp) (+ tmp d360) tmp))))
 
-
+
 ;;;; Miscellaneous petal hackery.
 
 (defmacro high-16bits-* (a b)
@@ -440,7 +437,7 @@
     (setq needed (floor vecmax repnum))
     (if (and (not (oddp needed)) (oddp petal)) (floor needed 2) needed)))
 
-
+
 ;;;; Petal Parameters and Petal itself
 
 (defparameter continuous t)
@@ -507,7 +504,7 @@
   "Flower-like display."
   (petal *window* how-many style petal))
 
-
+
 ;;;; Hanoi.
 
 ;;; Random parameters:
@@ -561,7 +558,7 @@
 (defmacro update-screen ()
   `(xlib:display-force-output *display*))
 
-
+
 ;;;; Moving disks up and down
 
 ;;; Slide-Up slides the image of a disk up from the coordinates X,
@@ -608,7 +605,7 @@
       (invert-rectangle X new-y disk-thickness width)
       (update-screen))))
 
-
+
 ;;;; Lifting and Droping Disks
 
 ;;; Lift-disk pops the top disk off of needle and raises it up to the
@@ -652,7 +649,7 @@
 		(disk-size disk))
     t))
 
-
+
 ;;;; Sliding Disks Right and Left
 
 ;;; Slide-Right slides the image of a disk located at START-X, Y to the
@@ -700,7 +697,7 @@
       (invert-rectangle right-x Y disk-thickness *horizontal-velocity*)
       (update-screen))))
 
-
+
 ;;;; Transferring Disks
 
 ;;; Transfer disk slides a disk at the transfer height from a position
@@ -743,7 +740,7 @@
 	 (move-n-disks (1- n) temp-needle end-needle start-needle)))
   t)
 
-
+
 ;;;; Hanoi itself.
 
 (defun hanoi (window n)
@@ -787,7 +784,7 @@
   (hanoi *window* how-many))
 
 
-
+
 ;;;; Bounce window.
 
 ;;; BOUNCE-WINDOW takes a window and seemingly drops it to the bottom of
@@ -871,7 +868,7 @@
   "Drops the demo window which bounces off screen borders."
   (bounce-window *window*))
 
-
+
 ;;;; Recurrence Demo
 
 ;;; Copyright (C) 1988 Michael O. Newton (newton@csvax.caltech.edu)
@@ -921,7 +918,7 @@
   "Plots a cool recurrence relation."
   (recurrence *display* *window*))
 
-
+
 ;;;; Plaid
 
 ;;; 
@@ -979,9 +976,7 @@
   "Plaid, man."
   (plaid *display* *window* iterations num-rectangles))
 
-
 ;;;; Bball demo
-
 ;;; 
 ;;; Ported to CLX by Blaine Burks
 ;;; 
