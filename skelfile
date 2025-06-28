@@ -1,0 +1,7 @@
+;;; clx @ 2025-06-27.22:43:51 -*- mode:skel; -*-
+:name "clx"
+:author ""
+:version "1.0.0"
+:vc (:hg "https://vc.compiler.company/ext/clx"
+     (upstream (:git "https://github.com/sharplispers/clx"))
+     (gh (:git "ssh://github.com/richardwesthaver/clx")))
