@@ -3,9 +3,9 @@
 (in-package :xlib)
 
 ;;; BUFFER-READ-DEFAULT - read data from the X stream
-;;;
-;;; READ-SEQUENCE was not present in ANSI Common Lisp when CLX was written. This
-;;; implementation is portable and implements block transfer.
+
+;; READ-SEQUENCE was not present in ANSI Common Lisp when CLX was written. This
+;; implementation is portable and implements block transfer.
 
 (defun buffer-read-default (display vector start end timeout)
   (declare (type display display)
@@ -27,9 +27,9 @@
           (t :truncated)))))
 
 ;;; BUFFER-WRITE-DEFAULT - write data to the X stream
-;;;
-;;; WRITE-SEQUENCE was not present in ANSI Common Lisp when CLX was
-;;; written. This implementation is portable and implements block transfer.
+
+;; WRITE-SEQUENCE was not present in ANSI Common Lisp when CLX was
+;; written. This implementation is portable and implements block transfer.
 (defun buffer-write-default (vector display start end)
   (declare (type buffer-bytes vector)
 	   (type display display)
@@ -40,7 +40,6 @@
   nil)
 
 ;;; BUFFER-FORCE-OUTPUT-DEFAULT - force output to the X stream
-
 (defun buffer-force-output-default (display)
   ;; The default buffer force-output function for use with common-lisp streams
   (declare (type display display))
@@ -50,7 +49,6 @@
       (force-output stream))))
 
 ;;; BUFFER-CLOSE-DEFAULT - close the X stream
-
 (defun buffer-close-default (display &key abort)
   ;; The default buffer close function for use with common-lisp streams
   (declare (type display display))

@@ -1,9 +1,4 @@
-(defpackage #:clx-test-utils
-  (:use #:cl)
-  (:export #:test-required-params
-          #:with-default-display))
-
-(in-package #:clx-test-utils)
+(in-package #:xlib/tests)
 
 ;;; -----------------
 ;;; Custom assertions
@@ -30,8 +25,8 @@
 					 (get-all-combinations-without-one-elem
 					  (make-pairs required-params)))
 	    collecting
-              `(fiasco:signals xlib:missing-parameter
-                 (,@(alexandria:ensure-list function-form) ,@param-list))))))
+              `(rt:signals xlib:missing-parameter
+                 (,@(std:ensure-list function-form) ,@param-list))))))
 
 ;;; -------
 ;;; Helpers

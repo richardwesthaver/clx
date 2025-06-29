@@ -37,7 +37,7 @@ Independent FOSS developers"
   :version "0.7.6"
   :serial t
   :default-component-class clx-source-file
-  :in-order-to ((test-op (test-op "clx/test")))
+  :in-order-to ((test-op (test-op "clx/tests")))
   :components
   ((:file "package")
    (:file "depdefs")
@@ -76,14 +76,7 @@ Independent FOSS developers"
              (:file "dbe")
              (:file "xc-misc")
              (:file "dri2")
-             (:file "composite")))
-   (:static-file "NEWS")
-   (:static-file "CHANGES")
-   (:static-file "README.md")
-   (:static-file "README-R5")
-   (:module "manual"
-	    ;; TODO: teach asdf how to process texinfo files
-	    :components ((:static-file "clx.texinfo")))))
+             (:file "composite")))))
 
 (defsystem #:clx/demo
   :depends-on ("clx")
@@ -105,16 +98,15 @@ Independent FOSS developers"
 	     (:file "image")
 	     (:file "trapezoid" :depends-on ("zoid"))))))
 
-(defsystem #:clx/test
-  :depends-on ("clx" "fiasco")
-  :perform (test-op (o s)
-		    (uiop:symbol-call :fiasco :run-tests :xlib-test))
+(defsystem #:clx/tests
+  :depends-on ("clx" "rt")
+  :perform (test-op (o s) (uiop:symbol-call :rt :do-tests :xlib-test))
   :components
   ((:module "tests"
-	    :components
-	    ((:file "package")
-             (:file "util")
-             (:file "core-protocol" :depends-on ("package" "util"))))))
+    :components
+    ((:file "package")
+     (:file "util")
+     (:file "core-protocol" :depends-on ("package" "util"))))))
 
 (defmethod perform :around ((o compile-op) (f xrender-source-file))
   ;; RENDER would appear to be an inherently slow protocol; further,
