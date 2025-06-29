@@ -76,7 +76,8 @@ Independent FOSS developers"
              (:file "dbe")
              (:file "xc-misc")
              (:file "dri2")
-             (:file "composite")))))
+             (:file "composite")
+             (:file "xkeyboard")))))
 
 (defsystem #:clx/demo
   :depends-on ("clx")
@@ -100,7 +101,7 @@ Independent FOSS developers"
 
 (defsystem #:clx/tests
   :depends-on ("clx" "rt")
-  :perform (test-op (o s) (uiop:symbol-call :rt :do-tests :xlib-test))
+  :perform (test-op (o s) (uiop:symbol-call :rt :do-tests :xlib))
   :components
   ((:module "tests"
     :components

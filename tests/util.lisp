@@ -21,7 +21,7 @@
 			    (list pre))))
 	       (get-combinations-rec nil (car keyword-list) (cdr keyword-list)))))
     `(progn
-       ,@(loop for param-list in (mapcar #'alexandria:flatten
+       ,@(loop for param-list in (mapcar #'std:flatten
 					 (get-all-combinations-without-one-elem
 					  (make-pairs required-params)))
 	    collecting
