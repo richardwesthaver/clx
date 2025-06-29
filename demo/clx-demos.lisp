@@ -114,15 +114,12 @@
             (xlib:display-finish-output display)
             (xlib:close-display display)))))))
 
-
 ;;;; Shared demo utilities.
-
 (defun full-window-state (w)
   (xlib:with-state (w)
     (values (xlib:drawable-width w) (xlib:drawable-height w)
 	    (xlib:drawable-x w) (xlib:drawable-y w)
 	    (xlib:window-map-state w))))
-
 
 (defun make-random-bitmap ()
   (let ((bitmap-data (make-array '(32 32) :initial-element 0
@@ -146,7 +143,6 @@
                   (aref bitmap-data (+ 28 i) j) bit)))))
     bitmap-data))
 
-
 (defun make-random-pixmap ()
   (let ((image (xlib:create-image :depth 1 :data (make-random-bitmap))))
     (make-pixmap image 32 32)))
@@ -163,12 +159,10 @@
     (xlib:free-gcontext gc)
     pixmap))
 
-
 ;;;
 ;;; This function returns one of the pixmaps in the *pixmaps* array.
 (defun greynetic-pixmapper ()
   (aref *pixmaps* (random (length *pixmaps*))))
-
 
 (defun greynetic (window duration)
   (let* ((depth (xlib:drawable-depth window))
@@ -181,7 +175,6 @@
 		      (dotimes (i 30)
 			(setf (aref pixmap-array i) (make-random-pixmap)))
 		      pixmap-array)))
-
     (unwind-protect
 	(multiple-value-bind (width height) (full-window-state window)
 	  (declare (fixnum width height))
@@ -241,15 +234,12 @@
 	(xlib:free-pixmap (aref *pixmaps* i)))
       (xlib:free-gcontext draw-gcontext))))
 
-
 (defdemo greynetic-demo "Greynetic" (&optional (duration 300))
   100 100 600 600
   "Displays random grey rectangles."
   (greynetic *window* duration))
 
-
 ;;;; Qix.
-
 (defstruct qix
   buffer
   (dx1 5)
@@ -265,7 +255,6 @@
 (defun make-circular-list (length)
   (let ((l (make-list length)))
     (rplacd (last l) l)))
-
 
 (defun qix (window lengths duration)
   "Each length is the number of lines to put in a qix, and that many qix
@@ -336,7 +325,7 @@
 	  (setf (qix-dx2 qix) dx2)
 	  (setf (qix-dy1 qix) dy1)
 	  (setf (qix-dx1 qix) dx1)
-`	  (when (svref next-line 0)
+          (when (svref next-line 0)
 	    (xlib:draw-line window gc
 			    (svref next-line 0) (svref next-line 1)
 			    (svref next-line 2) (svref next-line 3)))
@@ -504,11 +493,8 @@
   "Flower-like display."
   (petal *window* how-many style petal))
 
-
 ;;;; Hanoi.
-
 ;;; Random parameters:
-
 (defparameter disk-thickness 15 "The thickness of a disk in pixels.")
 (defparameter disk-spacing (+ disk-thickness 3)
   "The amount of vertical space used by a disk on a needle.")
@@ -516,14 +502,12 @@
 (defvar *vertical-velocity* 12 "The speed at which disks move up and down.")
 
 ;;; These variables are bound by the main function.
-
 (defvar *hanoi-window* () "The window that Hanoi is happening on.")
 (defvar *hanoi-window-height* () "The height of the viewport Hanoi is happening on.")
 (defvar *transfer-height* () "The height at which disks are transferred.")
 (defvar *hanoi-gcontext* () "The graphics context for Hanoi under X11.")
 
 ;;; Needle Functions
-
 (defstruct disk
   size)
 
@@ -532,7 +516,6 @@
   disk-stack)
 
 ;;; Needle-Top-Height returns the height of the top disk on NEEDLE.
-
 (defun needle-top-height (needle)
   (- *hanoi-window-height*
      (* disk-spacing (length (the list (needle-disk-stack needle))))))
@@ -558,13 +541,11 @@
 (defmacro update-screen ()
   `(xlib:display-force-output *display*))
 
-
 ;;;; Moving disks up and down
 
 ;;; Slide-Up slides the image of a disk up from the coordinates X,
 ;;; START-Y to the point X, END-Y.  DISK-SIZE is the size of the disk to
 ;;; move.  START-Y must be greater than END-Y
-
 (defun slide-up (start-y end-y x disk-size)
   (multiple-value-bind (number-moves pixels-left)
 		       (truncate (- start-y end-y) *vertical-velocity*)
@@ -586,7 +567,6 @@
 ;;; Slide-Down slides the image of a disk down from the coordinates X,
 ;;; START-Y to the point X, END-Y.  DISK-SIZE is the size of the disk to
 ;;; move.  START-Y must be less than END-Y.
-
 (defun slide-down (start-y end-y x disk-size)
   (multiple-value-bind (number-moves pixels-left)
 		       (truncate (- end-y start-y) *vertical-velocity*)
@@ -605,12 +585,10 @@
       (invert-rectangle X new-y disk-thickness width)
       (update-screen))))
 
-
 ;;;; Lifting and Droping Disks
 
 ;;; Lift-disk pops the top disk off of needle and raises it up to the
 ;;; transfer height.  The disk is returned.
-
 (defun lift-disk (needle)
   "Pops the top disk off of NEEDLE, Lifts it above the needle, & returns it."
   (let* ((height (needle-top-height needle))
@@ -623,7 +601,6 @@
 
 ;;; Drop-disk drops a disk positioned over needle at the transfer height
 ;;; onto needle.  The disk is pushed onto needle.
-
 (defun drop-disk (disk needle)
   "DISK must be positioned above NEEDLE.  It is dropped onto NEEDLE."
   (push disk (needle-disk-stack needle))
@@ -633,10 +610,8 @@
 	      (disk-size disk))
   t)
 
-
 ;;; Drop-initial-disk is the same as drop-disk except that the disk is
 ;;; drawn once before dropping.
-
 (defun drop-initial-disk (disk needle)
   "DISK must be positioned above NEEDLE.  It is dropped onto NEEDLE."
   (let* ((size (disk-size disk))
@@ -649,13 +624,11 @@
 		(disk-size disk))
     t))
 
-
 ;;;; Sliding Disks Right and Left
 
 ;;; Slide-Right slides the image of a disk located at START-X, Y to the
 ;;; position END-X, Y.  DISK-SIZE is the size of the disk.  START-X is
 ;;; less than END-X.
-
 (defun slide-right (start-x end-x Y disk-size)
   (multiple-value-bind (number-moves pixels-left)
 		       (truncate (- end-x start-x) *horizontal-velocity*)
@@ -675,7 +648,6 @@
 
 ;;; Slide-Left is the same as Slide-Right except that START-X is greater
 ;;; than END-X.
-
 (defun slide-left (start-x end-x Y disk-size)
   (multiple-value-bind (number-moves pixels-left)
 		       (truncate (- start-x end-x) *horizontal-velocity*)
@@ -697,13 +669,11 @@
       (invert-rectangle right-x Y disk-thickness *horizontal-velocity*)
       (update-screen))))
 
-
 ;;;; Transferring Disks
 
 ;;; Transfer disk slides a disk at the transfer height from a position
 ;;; over START-NEEDLE to a position over END-NEEDLE.  Modified disk is
 ;;; returned.
-
 (defun transfer-disk (disk start-needle end-needle)
   "Moves DISK from a position over START-NEEDLE to a position over END-NEEDLE."
   (let ((start (needle-position start-needle))
@@ -713,9 +683,7 @@
 	(slide-left start end *transfer-height* (disk-size disk)))
     disk))
 
-
 ;;; Move-One-Disk moves the top disk from START-NEEDLE to END-NEEDLE.
-
 (defun move-one-disk (start-needle end-needle)
   "Moves the disk on top of START-NEEDLE to the top of END-NEEDLE."
   (drop-disk (transfer-disk (lift-disk start-needle)
@@ -728,7 +696,6 @@
 ;;; Move-N-Disks moves the top N disks from START-NEEDLE to END-NEEDLE
 ;;; obeying the rules of the towers of hannoi problem.  To move the
 ;;; disks, a third needle, TEMP-NEEDLE, is needed for temporary storage.
-
 (defun move-n-disks (n start-needle end-needle temp-needle)
   "Moves the top N disks from START-NEEDLE to END-NEEDLE.  
    Uses TEMP-NEEDLE for temporary storage."
@@ -740,9 +707,7 @@
 	 (move-n-disks (1- n) temp-needle end-needle start-needle)))
   t)
 
-
 ;;;; Hanoi itself.
-
 (defun hanoi (window n)
   (multiple-value-bind (width height) (full-window-state window)
     (declare (ignore width))
@@ -770,20 +735,17 @@
 	t))))
 
 ;;; Change the names of these when the DEMO loop isn't so stupid.
-;;; 
 (defdemo slow-hanoi-demo "Slow-towers-of-Hanoi" (&optional (how-many 4))
   0 100 768 300
   "Solves the Towers of Hanoi problem before your very eyes."
   (let ((*horizontal-velocity* 3)
 	(*vertical-velocity* 1))
     (hanoi *window* how-many)))
-;;;
+
 (defdemo fast-hanoi-demo "Fast-towers-of-Hanoi" (&optional (how-many 7))
   0 100 768 300
   "Solves the Towers of Hanoi problem before your very eyes."
   (hanoi *window* how-many))
-
-
 
 ;;;; Bounce window.
 
@@ -801,7 +763,6 @@
 ;;; cause the window to bounce forever, so we have prev-neg-velocity and
 ;;; number-problems to check for this.  This is not crucial with the x
 ;;; velocity since the loop terminates as a function of the y velocity.
-;;; 
 (defun bounce-window (window &optional
 			     (x-velocity 0) (elasticity 0.85) (gravity 2))
   (unless (< 0 elasticity 1)
@@ -856,7 +817,6 @@
 	      (xlib:display-force-output *display*))))))))
 
 ;;; Change the name of this when DEMO is not so stupid.
-;;; 
 (defdemo shove-bounce-demo "Shove-bounce" ()
   100 100 300 300
   "Drops the demo window with an inital X velocity which bounces off
@@ -867,7 +827,6 @@
   100 100 300 300
   "Drops the demo window which bounces off screen borders."
   (bounce-window *window*))
-
 
 ;;;; Recurrence Demo
 
@@ -885,7 +844,6 @@
 ;;;      x <- y(1+sin(0.7x)) - 1.2(|x|)^.5
 ;;;      y <- .21 - x
 ;;; As described in a ?? 1983 issue of the Mathematical Intelligencer
-
 (defun recurrence (display window &optional (point-count 10000))
   (let ((gc (xlib:create-gcontext :drawable window
 				  :background *white-pixel*
@@ -900,7 +858,6 @@
 ;;; Draw points.  X assumes points are in the range of width x height,
 ;;; with 0,0 being upper left and 0,H being lower left.
 ;;; hw and hh are half-width and half-height of screen
-
 (defun draw-ppict (win gc count x y hw hh)
   "Recursively draw pretty picture"
   (unless (zerop count)
@@ -918,13 +875,9 @@
   "Plots a cool recurrence relation."
   (recurrence *display* *window*))
 
-
 ;;;; Plaid
 
-;;; 
 ;;; Translated from the X11 Plaid Demo written in C by Christopher Hoover.
-;;; 
-
 (defmacro rect-x (rects n)
   `(svref ,rects (ash ,n 2)))
 (defmacro rect-y (rects n)
@@ -977,10 +930,8 @@
   (plaid *display* *window* iterations num-rectangles))
 
 ;;;; Bball demo
-;;; 
-;;; Ported to CLX by Blaine Burks
-;;; 
 
+;;; Ported to CLX by Blaine Burks
 (defvar *ball-size-x* 36)
 (defvar *ball-size-y* 34)
 

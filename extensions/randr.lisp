@@ -22,9 +22,7 @@
 (export '(rr-query-version
           rr-get-screen-info
           rr-set-screen-config
-
           ;;  1.2
-
           rr-get-screen-size-range
           rr-set-screen-size
           rr-get-screen-resources
@@ -43,9 +41,7 @@
           rr-get-crtc-gamma-size
           rr-get-crtc-gamma
           rr-set-crtc-gamma
-
           ;;  1.3
-
           rr-get-screen-resources-current
           rr-set-crtc-transform
           rr-get-crtc-transform
@@ -53,16 +49,13 @@
           rr-set-panning
           rr-set-output-primary
           rr-get-output-primary
-
           ;;  1.4
-
           rr-get-providers
           rr-get-provider-info
           rr-set-provider-output-source
           rr-set-provider-offload-sink
           rr-list-provider-properties
           rr-select-input
-
           ;; mask related
           make-mode-flag-keys
           make-mode-flag-mask
@@ -70,7 +63,6 @@
           make-rr-select-keys
           make-rotation-keys
           make-rotation-mask
-
           ;; struct related
           rr-panning-top
           rr-panning-left
@@ -85,8 +77,7 @@
           rr-panning-border-bottom
           rr-panning-border-right
           rr-panning
-          make-rr-transform
-          ))
+          make-rr-transform))
 
 (pushnew :clx-ext-randr *features*)
 
@@ -232,8 +223,6 @@
   ;; (defun make-rotation-mask (key-list)
   ;;   (encode-mask +rotation-mask-vector+ key-list ))
 
-
-
 (defmacro define-mask-fns (name mask-size mask-vector mask-type)
   (let ((encode-fn (xintern 'make- name '-mask))
         (decode-fn (xintern 'make- name '-keys)))
@@ -243,8 +232,7 @@
        (defun ,decode-fn (bit-mask)
          (declare (type ,mask-size bit-mask))
          (declare (clx-values (clx-list ,mask-type)))
-         (decode-mask ,mask-vector bit-mask))
-       )))
+         (decode-mask ,mask-vector bit-mask)))))
 
 (define-mask-fns mode-flag card32 +mode-flag-mask-vector+ mode-flag-mask)
 (define-mask-fns rr-select card8 +rr-select-mask-vector+ rr-select-mask)
@@ -256,14 +244,12 @@
 ;; (defconstant  +RRTransformProjective	    (1L+ << 3))
 
 ;; types
-
 (deftype size-id () 'card16)
 (deftype rr-mode () '(or null resource-id))
 (deftype output () 'resource-id)
 (deftype connection () '(or +connected+ +disconnected+ +unknown-connection+))
 
 ;; structs
-
 (def-clx-class (screen-size (:constructor make-screen-size (width-in-pixels
                                                             height-in-pixels
                                                             width-in-mm
@@ -290,7 +276,6 @@
   (v-total  0 :type card16)
   (name-length  0 :type card16)
   (mode-flags  0 :type mode-flag-mask))
-
 
 (def-clx-class (rr-panning)
   (left 0 :type card16)
@@ -319,7 +304,6 @@
 
 ;; accessors
 ;; fricken macroexpansions !!! figure it out!!
-
 (define-accessor rr-transform (36)
   ((index) `(make-rr-transform :x (card32-get (index+ ,index 0))
                                :y (card32-get (index+ ,index 4))
@@ -361,7 +345,6 @@
 ;;                     ))
 
 ;; (defmacro pan-put ())
-
 (define-accessor rr-mode-info (32)
   ((index)
    `(make-rr-mode-info
@@ -395,9 +378,7 @@
      )))
 
 ;; x-events
-
 ;; test!!
-
 (declare-event :rr-screen-change-notify
   ((data (member8 +rotation-mask-vector+)))
   (card16 sequence)
@@ -432,11 +413,9 @@
   (card16 sequence)
   (window window)
   (card32 output atom timestamp)
-  (boolean state)
-  )
+  (boolean state))
 
 ;;; Helpers
-
 (declaim (ftype (function (card32 card32) (values boolean &optional))
                 rr-has-rates))
 (defun rr-has-rates (major minor)
@@ -444,7 +423,6 @@
       (and (= major 1) (>= minor 1))))
 
 ;;; Requests
-
 (declaim (ftype (function (display) (values card32 card32 &optional))
                 rr-query-version))
 (defun rr-query-version (display)
@@ -479,7 +457,10 @@ RR-QUERY-VERSION."
       (rr-query-version display)))
 
 (defun rr-set-screen-config (window timestamp conf-timestamp size-id rotation refresh)
-  "Sets the current screen to which the given window belongs.  Timestamps are obtained from rr-get-screen-info.  Rotation can be a list of rotation keys or a rotation mask.  Returns timestamp, config timestamp, the root window of the screen and sub-pixel order."
+  "Sets the current screen to which the given window belongs. Timestamps are
+obtained from rr-get-screen-info. Rotation can be a list of rotation keys or a
+rotation mask. Returns timestamp, config timestamp, the root window of the
+screen and sub-pixel order."
   (let ((display (window-display window))
         (rot-mask (if (consp rotation)
                       (make-rotation-mask rotation)
@@ -606,7 +587,6 @@ skips executing the RRQueryVersion request."
                                          :index rate-info-start))))))))
 
 ;; Version 1.2
-
 (defun rr-get-screen-size-range (window &key (result-type 'list))
 "Returns a sequence of minimum width, minimum height, max width, max height."
   (let ((display (window-display window)))
@@ -618,9 +598,7 @@ skips executing the RRQueryVersion request."
 
 
 ;; doesn't work, asynchronous match error. set screen config works fine.
-
 (defun rr-set-screen-size (window width height width-mm height-mm)
-  ""
   (let ((display (window-display window)))
     (declare (type display display)
              (type window window)
@@ -635,7 +613,6 @@ skips executing the RRQueryVersion request."
       (card32 height-mm))))
 
 (defun rr-get-screen-resources (window &key (result-type 'list))
-  ""
   (let ((display (window-display window)))
     (declare (type display display)
              (type window window))
@@ -657,10 +634,7 @@ skips executing the RRQueryVersion request."
          (loop :for i fixnum :from 1 :to num-modeinfos
                :for offset fixnum := mode-start :then (+ offset 32)
                :collect (rr-mode-info-get offset))
-         (string-get name-bytes name-start))
-        ))))
-
-
+         (string-get name-bytes name-start))))))
 
 (defun rr-get-output-info (display output config-timestamp
                            &key (result-type 'list))

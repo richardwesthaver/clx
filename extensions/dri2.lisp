@@ -74,23 +74,17 @@
   (cpp 0 :type card32)
   (flags 0 :type card32))
 
-
-
 ;; x requests
-
 (defun dri2-query-version (display)
-""
   (with-buffer-request-and-reply (display (dri2-opcode display) nil)
 				 ((data +dri2-query-version+)
 				  (card32 +dri-major+)
 				  (card32 +dri-minor+))
     (values
      (card32-get 8)
-     (card32-get 12))
-))
+     (card32-get 12))))
 
 (defun dri2-connect (window driver-type)
-  ""
   (let ((display (window-display window)))
     (with-buffer-request-and-reply (display (dri2-opcode display) nil)
 				   ((data +dri2-connect+)
@@ -104,7 +98,6 @@
 	 (string-get device-name-length device-start))))))
 
 (defun dri2-authenticate (window token)
-""
   (let ((display (window-display window)))
     (with-buffer-request-and-reply (display (dri2-opcode display) nil)
 				   ((data +dri2-authenticate+)
@@ -114,28 +107,24 @@
        (card32-get 8)))))
 
 (defun dri2-create-drawable (drawable)
-""
   (let ((display (drawable-display drawable)))
     (with-buffer-request-and-reply (display (dri2-opcode display) nil)
 				   ((data +dri2-create-drawable+))
       (values))))
 (defun dri2-destroy-drawable (drawable)
-""
   (let ((display (drawable-display drawable)))
     (with-buffer-request-and-reply (display (dri2-opcode display) nil)
 				   ()
       (values))))
 (defun dri2-get-buffers (drawable attachment-list)
-  ""
   (let* ((display (drawable-display drawable))
 	 (len (length attachment-list) )
-	 (seq (make-array len :initial-contents attachment-list))
-	)
+	 (seq (make-array len :initial-contents attachment-list)))
     (with-buffer-request-and-reply (display (dri2-opcode display) nil)
 				   ((data +dri2-get-buffers+)
 				    (drawable drawable)
 				    (card32 len)
-				    (( sequence :format card32) seq))
+				    ((sequence :format card32) seq))
       ;; (let ((num (card32-get 16)))
       ;; 	(values 
       ;; 	 (card32-get 8)
@@ -150,50 +139,43 @@
       (values
        (card32-get 16)
        (card32-get 12)
-       (card32-get 8))
-      )))
+       (card32-get 8)))))
+
 (defun dri2-copy-region (drawable)
-""
   (let ((display (drawable-display drawable)))
     (with-buffer-request-and-reply (display (dri2-opcode display) nil)
 				   ((data +dri2-copy-region+))
       (values))))
 
 (defun dri2-get-buffers-with-format (drawable)
-""
   (let ((display (drawable-display drawable)))
     (with-buffer-request-and-reply (display (dri2-opcode display) nil)
 				   ((data +dri2-get-buffers-with-format+))
       (values))))
 
 (defun dri2-swap-buffers (drawable)
-""
   (let ((display (drawable-display drawable)))
     (with-buffer-request-and-reply (display (dri2-opcode display) nil)
 				   ((data +dri2-swap-buffers+))
       (values))))
 (defun dri2-get-msc (drawable)
-""
   (let ((display (drawable-display drawable)))
     (with-buffer-request-and-reply (display (dri2-opcode display) nil)
 				   ((data +dri2-get-msc+))
       (values))))
 
 (defun dri2-wait-msc (drawable)
-""
   (let ((display (drawable-display drawable)))
     (with-buffer-request-and-reply (display (dri2-opcode display) nil)
 				   ((data +dri2-wait-msc+))
       (values))))
 
 (defun dri2-swap-interval (drawable)
-  ""
   (let ((display (drawable-display drawable)))
     (with-buffer-request (display (dri2-opcode display))
       (data +dri2-swap-interval+))))
 
 (defun dri2-get-param (drawable)
-""
   (let ((display (drawable-display drawable)))
     (with-buffer-request-and-reply (display (dri2-opcode display) nil)
 				   ((data +dri2-get-param+))

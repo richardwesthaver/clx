@@ -19,7 +19,6 @@
 
 ;;; Use xc/doc/hardcopy/Xext/shape.PS.gz obtainable from e.g.
 ;;  ftp://ftp.xfree86.org/pub/XFree86/current/untarred/xc/hardcopy/Xext/shape.PS.gz
-
 (in-package :xlib)
 
 (export '(shape-query-version
@@ -189,4 +188,4 @@
          (0 :unsorted)
          (1 :y-sorted)
          (2 :yx-sorted)
-         (3 :yx-banded) )))))
+         (3 :yx-banded))))))

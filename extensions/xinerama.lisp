@@ -11,7 +11,6 @@
 ;;;
 ;;; This is an implementation of the XINERAMA extension. It does not
 ;;; include the obsolete PanoramiX calls.
-
 (defpackage #:xlib/xinerama
   (:use "COMMON-LISP" "XLIB")
   (:nicknames "XINERAMA")
