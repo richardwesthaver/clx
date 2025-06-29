@@ -1,5 +1,6 @@
 (defpackage #:xlib/tests
-  (:use :cl)
+  (:shadowing-import-from :stumpwm :version :message)
+  (:use :cl :rt :stumpwm)
   (:export #:run-all-tests #:xlib-test #:xlib-all-tests))
 (in-package #:xlib/tests)
-(rt:defsuite :xlib)
+(defsuite :xlib)
