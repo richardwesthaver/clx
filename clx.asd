@@ -26,10 +26,6 @@
 (defclass clx-source-file (cl-source-file) ())
 (defclass xrender-source-file (clx-source-file) ())
 
-;;; CL-SOURCE-FILE, not CLX-SOURCE-FILE, so that we're not accused of
-;;; cheating by rebinding *DERIVE-FUNCTION-TYPES* :-)
-(defclass legacy-file (static-file) ())
-
 (defsystem #:clx
   :description "An implementation of the X Window System protocol in Lisp."
   :author "Texas Instruments Incorporated.
@@ -85,27 +81,9 @@ Independent FOSS developers"
    (:static-file "CHANGES")
    (:static-file "README.md")
    (:static-file "README-R5")
-   (:legacy-file "exclMakefile")
-   (:legacy-file "exclREADME")
-   (:legacy-file "exclcmac" :pathname "exclcmac.lisp")
-   (:legacy-file "excldepc" :pathname "excldep.c")
-   (:legacy-file "sockcl" :pathname "sockcl.lisp")
-   (:legacy-file "socket" :pathname "socket.c")
-   (:legacy-file "defsystem" :pathname "defsystem.lisp")
-   (:legacy-file "provide" :pathname "provide.lisp")
-   (:legacy-file "cmudep" :pathname "cmudep.lisp")
    (:module "manual"
 	    ;; TODO: teach asdf how to process texinfo files
-	    :components ((:static-file "clx.texinfo")))
-   (:module "debug"
-	    :default-component-class legacy-file
-	    :components
-	    ((:file "debug" :pathname "debug.lisp")
-	     (:file "describe" :pathname "describe.lisp")
-	     (:file "event-test" :pathname "event-test.lisp")
-	     (:file "keytrans" :pathname "keytrans.lisp")
-	     (:file "trace" :pathname "trace.lisp")
-	     (:file "util" :pathname "util.lisp")))))
+	    :components ((:static-file "clx.texinfo")))))
 
 (defsystem #:clx/demo
   :depends-on ("clx")
