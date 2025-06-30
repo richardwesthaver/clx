@@ -77,7 +77,8 @@ Independent FOSS developers"
              (:file "xc-misc")
              (:file "dri2")
              (:file "composite")
-             (:file "xkeyboard")))))
+             (:file "xkeyboard")
+             (:file "xembed")))))
 
 (defsystem #:clx/demo
   :depends-on ("clx")

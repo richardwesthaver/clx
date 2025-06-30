@@ -1,74 +1,71 @@
 (defpackage #:xlib/glx
   (:use :common-lisp :xlib)
-  (:import-from :xlib
-                "DEFINE-ACCESSOR"
-                "DEF-CLX-CLASS"
-                "DECLARE-EVENT"
-                "ALLOCATE-RESOURCE-ID"
-                "DEALLOCATE-RESOURCE-ID"
-                "PRINT-DISPLAY-NAME"
-                "WITH-BUFFER-REQUEST"
-                "WITH-BUFFER-REQUEST-AND-REPLY"
-                "READ-CARD32"
-                "WRITE-CARD32"
-                "CARD32-GET"
-                "CARD8-GET"
-                "SEQUENCE-GET"
-                "SEQUENCE-PUT"
-                "DATA"
+  (:import-from 
+   :xlib
+   "DEFINE-ACCESSOR"
+   "DEF-CLX-CLASS"
+   "DECLARE-EVENT"
+   "ALLOCATE-RESOURCE-ID"
+   "DEALLOCATE-RESOURCE-ID"
+   "PRINT-DISPLAY-NAME"
+   "WITH-BUFFER-REQUEST"
+   "WITH-BUFFER-REQUEST-AND-REPLY"
+   "READ-CARD32"
+   "WRITE-CARD32"
+   "CARD32-GET"
+   "CARD8-GET"
+   "SEQUENCE-GET"
+   "SEQUENCE-PUT"
+   "DATA"
 
-                ;; Types
-                "ARRAY-INDEX"
-                "BUFFER-BYTES"
+   ;; Types
+   "ARRAY-INDEX"
+   "BUFFER-BYTES"
 
-                "WITH-DISPLAY"
-                "BUFFER-FLUSH"
-                "BUFFER-WRITE"
-                "BUFFER-FORCE-OUTPUT"
-                "ASET-CARD8"
-                "ASET-CARD16"
-                "ASET-CARD32"
-                )
+   "WITH-DISPLAY"
+   "BUFFER-FLUSH"
+   "BUFFER-WRITE"
+   "BUFFER-FORCE-OUTPUT"
+   "ASET-CARD8"
+   "ASET-CARD16"
+   "ASET-CARD32")
   (:export ;; Constants
-           "+VENDOR+"
-           "+VERSION+"
-           "+EXTENSIONS+"
+   "+VENDOR+"
+   "+VERSION+"
+   "+EXTENSIONS+"
 
-           ;; Conditions
-           "BAD-CONTEXT"
-           "BAD-CONTEXT-STATE"
-           "BAD-DRAWABLE"
-           "BAD-PIXMAP"
-           "BAD-CONTEXT-TAG"
-           "BAD-CURRENT-WINDOW"
-           "BAD-RENDER-REQUEST"
-           "BAD-LARGE-REQUEST"
-           "UNSUPPORTED-PRIVATE-REQUEST"
-           "BAD-FB-CONFIG"
-           "BAD-PBUFFER"
-           "BAD-CURRENT-DRAWABLE"
-           "BAD-WINDOW"
+   ;; Conditions
+   "BAD-CONTEXT"
+   "BAD-CONTEXT-STATE"
+   "BAD-DRAWABLE"
+   "BAD-PIXMAP"
+   "BAD-CONTEXT-TAG"
+   "BAD-CURRENT-WINDOW"
+   "BAD-RENDER-REQUEST"
+   "BAD-LARGE-REQUEST"
+   "UNSUPPORTED-PRIVATE-REQUEST"
+   "BAD-FB-CONFIG"
+   "BAD-PBUFFER"
+   "BAD-CURRENT-DRAWABLE"
+   "BAD-WINDOW"
 
-           ;; Requests
-           "QUERY-VERSION"
-           "QUERY-SERVER-STRING"
-           "CREATE-CONTEXT"
-           "DESTROY-CONTEXT"
-           "IS-DIRECT"
-           "QUERY-CONTEXT"
-           "GET-DRAWABLE-ATTRIBUTES"
-           "MAKE-CURRENT"
-           ;;"GET-VISUAL-CONFIGS"
-           "CHOOSE-VISUAL"
-           "VISUAL-ATTRIBUTE"
-           "VISUAL-ID"
-           "RENDER"
-           "SWAP-BUFFERS"
-           "WAIT-GL"
-           "WAIT-X"
-           ))
-
-
+   ;; Requests
+   "QUERY-VERSION"
+   "QUERY-SERVER-STRING"
+   "CREATE-CONTEXT"
+   "DESTROY-CONTEXT"
+   "IS-DIRECT"
+   "QUERY-CONTEXT"
+   "GET-DRAWABLE-ATTRIBUTES"
+   "MAKE-CURRENT"
+   ;;"GET-VISUAL-CONFIGS"
+   "CHOOSE-VISUAL"
+   "VISUAL-ATTRIBUTE"
+   "VISUAL-ID"
+   "RENDER"
+   "SWAP-BUFFERS"
+   "WAIT-GL"
+   "WAIT-X"))
 (in-package #:xlib/glx)
 
 ;;; Generally don't want this declamation to have load-time effects
@@ -76,59 +73,51 @@
   (declaim (optimize (debug 3) (safety 3))))
 
 (define-extension "GLX"
-    :events (:glx-pbuffer-clobber)
-    :errors (bad-context
-             bad-context-state
-             bad-drawable
-             bad-pixmap
-             bad-context-tag
-             bad-current-window
-             bad-render-request
-             bad-large-request
-             unsupported-private-request
-             bad-fb-config
-             bad-pbuffer
-             bad-current-drawable
-             bad-window))
+  :events (:glx-pbuffer-clobber)
+  :errors (bad-context
+           bad-context-state
+           bad-drawable
+           bad-pixmap
+           bad-context-tag
+           bad-current-window
+           bad-render-request
+           bad-large-request
+           unsupported-private-request
+           bad-fb-config
+           bad-pbuffer
+           bad-current-drawable
+           bad-window))
 
-
 ;;; Opcodes.
-
 (eval-when (:compile-toplevel :load-toplevel :execute)
-(defconstant +render+ 1)
-(defconstant +create-context+ 3)
-(defconstant +destroy-context+ 4)
-(defconstant +make-current+ 5)
-(defconstant +is-direct+ 6)
-(defconstant +query-version+ 7)
-(defconstant +wait-gl+ 8)
-(defconstant +wait-x+ 9)
-(defconstant +copy-context+ 10)
-(defconstant +swap-buffers+ 11)
-(defconstant +get-visual-configs+ 14)
-(defconstant +destroy-glx-pixmap+ 15)
-(defconstant +query-server-string+ 19)
-(defconstant +client-info+ 20)
-(defconstant +get-fb-configs+ 21)
-(defconstant +query-context+ 25)
-(defconstant +get-drawable-attributes+ 29)
-)
+  (defconstant +render+ 1)
+  (defconstant +create-context+ 3)
+  (defconstant +destroy-context+ 4)
+  (defconstant +make-current+ 5)
+  (defconstant +is-direct+ 6)
+  (defconstant +query-version+ 7)
+  (defconstant +wait-gl+ 8)
+  (defconstant +wait-x+ 9)
+  (defconstant +copy-context+ 10)
+  (defconstant +swap-buffers+ 11)
+  (defconstant +get-visual-configs+ 14)
+  (defconstant +destroy-glx-pixmap+ 15)
+  (defconstant +query-server-string+ 19)
+  (defconstant +client-info+ 20)
+  (defconstant +get-fb-configs+ 21)
+  (defconstant +query-context+ 25)
+  (defconstant +get-drawable-attributes+ 29))
 
-
 ;;; Constants
-
 (eval-when (:compile-toplevel :load-toplevel :execute)
-(defconstant +vendor+ 1)
-(defconstant +version+ 2)
-(defconstant +extensions+ 3)
-)
+  (defconstant +vendor+ 1)
+  (defconstant +version+ 2)
+  (defconstant +extensions+ 3))
 
-
 ;;; Types
-
-;;; FIXME:
-;;; - Are all the 32-bit values unsigned?  Do we care?
-;;; - These are not used much, yet.
+;; FIXME:
+;; - Are all the 32-bit values unsigned?  Do we care?
+;; - These are not used much, yet.
 (progn
   (deftype attribute-pair ())
   (deftype bitfield () 'mask32)
@@ -192,13 +181,9 @@ property types and property values."
   (defun context-tag-get (index) (card32-get index))
   (defun context-tag-put (index thing) (card32-put index thing))
   (defun enum-get (index) (card32-get index))
-  (defun enum-put (index thing) (card32-put index thing))
-)
+  (defun enum-put (index thing) (card32-put index thing)))
 
-
 ;;; Structures
-
-
 (def-clx-class (context (:constructor %make-context)
                         (:print-function print-context)
                         (:copier nil))
@@ -218,7 +203,6 @@ property types and property values."
   ;; Index into RBUF where the next rendering command should be inserted.
   (index 8 :type array-index))
 
-
 (defun print-context (ctx stream depth)
   (declare (type context ctx)
            (ignore depth))
@@ -234,7 +218,6 @@ property types and property values."
   (id 0 :type resource-id)
   (attributes nil :type list))
 
-
 (defun print-visual (visual stream depth)
   (declare (type visual visual)
            (ignore depth))
@@ -244,15 +227,11 @@ property types and property values."
     (write-string " " stream)
     (princ (visual-attributes visual) stream)))
 
-
-
 ;;; Events.
-
 (defconstant +damaged+ #x8017)
 (defconstant +saved+ #x8018)
 (defconstant +window+ #x8019)
 (defconstant +pbuffer+ #x801a)
-
 
 (declare-event :glx-pbuffer-clobber
   (card16 sequence)
@@ -264,10 +243,7 @@ property types and property values."
   (card16 aux-buffer)
   (card16 x y width height count))
 
-
-
 ;;; Errors.
-
 (define-condition bad-context (request-error) ())
 (define-condition bad-context-state (request-error) ())
 (define-condition bad-drawable (request-error) ())
@@ -296,27 +272,22 @@ property types and property values."
 (define-error bad-current-drawable decode-core-error)
 (define-error bad-window decode-core-error)
 
-
-
 ;;; Requests.
-
-
 (defun query-version (display)
   (with-buffer-request-and-reply (display (extension-opcode display "GLX") nil)
-    ((data +query-version+)
-     (card32 1)
-     (card32 3))
+                                 ((data +query-version+)
+                                  (card32 1)
+                                  (card32 3))
     (values
      (card32-get 8)
      (card32-get 12))))
 
-
 (defun query-server-string (display screen name)
   "NAME is one of +VENDOR+, +VERSION+ or +EXTENSIONS+"
   (with-buffer-request-and-reply (display (extension-opcode display "GLX") nil)
-    ((data +query-server-string+)
-     (card32 (or (position screen (display-roots display) :test #'eq) 0))
-     (card32 name))
+                                 ((data +query-server-string+)
+                                  (card32 (or (position screen (display-roots display) :test #'eq) 0))
+                                  (card32 name))
     (let* ((length (card32-get 12))
            (bytes (sequence-get :format card8
                                 :result-type '(simple-array card8 (*))
@@ -326,13 +297,12 @@ property types and property values."
                (type fixnum length))
       (map-into (make-string (1- length)) #'code-char bytes))))
 
-
 (defun client-info (display)
   ;; TODO: This should be invoked automatically when using this
   ;; library in initialization stage.
-  ;; 
+
   ;; TODO: No extensions supported yet.
-  ;; 
+
   ;; *** Maybe the LENGTH field must be filled in some special way
   ;;     (similar to data)?
   (with-buffer-request (display (extension-opcode display "GLX"))
@@ -340,9 +310,7 @@ property types and property values."
     (card32 4) ; length of the request
     (card32 1) ; major
     (card32 3) ; minor
-    (card32 0) ; n
-    ))
-
+    (card32 0))) ; n
 
 ;;; XXX: This looks like an internal thing.  Should name appropriately.
 (defun make-context (display)
@@ -351,7 +319,6 @@ property types and property values."
           (allocate-resource-id display ctx 'context))
     ;; Prepare render request buffer.
     ctx))
-
 
 (defun create-context (screen visual
                        &optional
@@ -370,11 +337,8 @@ property types and property values."
       (boolean is-direct))
     ctx))
 
-
 ;;; TODO: Maybe make this var private to GLX-MAKE-CURRENT and GLX-GET-CURRENT-CONTEXT only?
-;;;
 (defvar *current-context* nil)
-
 
 (defun destroy-context (ctx)
   (let ((id (context-id ctx))
@@ -387,67 +351,61 @@ property types and property values."
     (when (eq ctx *current-context*)
       (setf *current-context* nil))))
 
-
 (defun is-direct (ctx)
   (let ((display (context-display ctx)))
     (with-buffer-request-and-reply (display (extension-opcode display "GLX") nil)
-        ((data +is-direct+)
-         (resource-id (context-id ctx)))
+                                   ((data +is-direct+)
+                                    (resource-id (context-id ctx)))
       (card8-get 8))))
-
 
 (defun query-context (ctx)
   ;; TODO: What are the attribute types?
   (let ((display (context-display ctx)))
     (with-buffer-request-and-reply (display (extension-opcode display "GLX") nil)
-        ((data +query-context+)
-         (resource-id (context-id ctx)))
+                                   ((data +query-context+)
+                                    (resource-id (context-id ctx)))
       (let ((num-attributes (card32-get 8)))
         ;; FIXME: Is this really so?
         (declare (type fixnum num-attributes))
         (loop
-           repeat num-attributes
-           for i fixnum upfrom 32 by 8
-           collecting (cons (card32-get i)
-                            (card32-get (+ i 4))))))))
-
+          repeat num-attributes
+          for i fixnum upfrom 32 by 8
+          collecting (cons (card32-get i)
+                           (card32-get (+ i 4))))))))
 
 (defun get-drawable-attributes (drawable)
   (let ((display (drawable-display drawable)))
     (with-buffer-request-and-reply (display (extension-opcode display "GLX") nil)
-        ((data +get-drawable-attributes+)
-         (drawable drawable))
+                                   ((data +get-drawable-attributes+)
+                                    (drawable drawable))
       (let ((num-attributes (card32-get 8)))
         ;; FIXME: Is this really so?
         (declare (type fixnum num-attributes))
         (loop
-           repeat num-attributes
-           for i fixnum upfrom 32 by 8
-           collecting (cons (card32-get i)
-                            (card32-get (+ i 4))))))))
-
+          repeat num-attributes
+          for i fixnum upfrom 32 by 8
+          collecting (cons (card32-get i)
+                           (card32-get (+ i 4))))))))
 
 ;;; TODO: What is the idea behind passing drawable to this function?
 ;;; Can a context be made current for different drawables at different
 ;;; times?  (Man page on glXMakeCurrent says that context's viewport
 ;;; is set to the size of drawable when creating; it does not change
 ;;; afterwards.)
-;;; 
 (defun make-current (drawable ctx)
   (let ((display (drawable-display drawable))
         (old-tag (if *current-context* (context-tag *current-context*) 0)))
     (with-buffer-request-and-reply (display (extension-opcode display "GLX") nil)
-        ((data +make-current+)
-         (resource-id (drawable-id drawable))
-         (resource-id (context-id ctx))
-         ;; *** CARD32 is really a CONTEXT-TAG
-         (card32 old-tag))
+                                   ((data +make-current+)
+                                    (resource-id (drawable-id drawable))
+                                    (resource-id (context-id ctx))
+                                    ;; *** CARD32 is really a CONTEXT-TAG
+                                    (card32 old-tag))
       (let ((new-tag (card32-get 8)))
         (setf (context-tag ctx) new-tag
               (context-drawable ctx) drawable
               (context-display ctx) display
               *current-context* ctx)))))
-
 
 ;;; FIXME: Decide how to represent and use these.
 (eval-when (:load-toplevel :compile-toplevel :execute)
@@ -472,14 +430,13 @@ property types and property values."
                              (:glx-level int32))))
                  `(progn
                     ,@(loop for (symbol type) in list
-                         collect `(setf (get ',symbol 'visual-config-property-type) ',type))
+                            collect `(setf (get ',symbol 'visual-config-property-type) ',type))
                     (defparameter *visual-config-properties*
                       (map 'vector #'car ',list))
                     (declaim (type simple-vector *visual-config-properties*))
                     (deftype visual-config-property ()
                       '(member ,@(mapcar #'car list)))))))
     (generate-config-properties)))
-
 
 (defun make-visual (attributes)
   (let ((id-cons (first attributes)))
@@ -489,7 +446,6 @@ property types and property values."
     (%make-visual :id (cdr id-cons)
                   :attributes (rest attributes))))
 
-
 (defun visual-attribute (visual attribute)
   (assert (or (numberp attribute)
               (find attribute *visual-config-properties*))
@@ -497,32 +453,30 @@ property types and property values."
           "~S is not a known GLX visual attribute." attribute)
   (cdr (assoc attribute (visual-attributes visual))))
 
-
 ;;; TODO: Make this return nice structured objects with field values of correct type.
 ;;; FIXME: Looks like every other result is corrupted.
 (defun get-visual-configs (screen)
   (let ((display (drawable-display (screen-root screen))))
     (with-buffer-request-and-reply (display (extension-opcode display "GLX") nil)
-      ((data +get-visual-configs+)
-       (card32 (or (position screen (display-roots display) :test #'eq) 0)))
+                                   ((data +get-visual-configs+)
+                                    (card32 (or (position screen (display-roots display) :test #'eq) 0)))
       (let* ((num-visuals (card32-get 8))
              (num-properties (card32-get 12))
              (num-ordered (length *visual-config-properties*)))
         ;; FIXME: Is this really so?
         (declare (type fixnum num-ordered num-visuals num-properties))
         (loop
-           with index fixnum = 28
-           repeat num-visuals
-           collecting (make-visual
-                       (nconc (when (<= num-ordered num-properties)
-                                (map 'list #'(lambda (property)
-                                               (cons property (card32-get (incf index 4))))
-                                     *visual-config-properties*))
-                              (when (< num-ordered num-properties)
-                                (loop repeat (/ (- num-properties num-ordered) 2)
-                                   collecting (cons (card32-get (incf index 4))
-                                                    (card32-get (incf index 4))))))))))))
-
+          with index fixnum = 28
+          repeat num-visuals
+          collecting (make-visual
+                      (nconc (when (<= num-ordered num-properties)
+                               (map 'list #'(lambda (property)
+                                              (cons property (card32-get (incf index 4))))
+                                    *visual-config-properties*))
+                             (when (< num-ordered num-properties)
+                               (loop repeat (/ (- num-properties num-ordered) 2)
+                                     collecting (cons (card32-get (incf index 4))
+                                                      (card32-get (incf index 4))))))))))))
 
 (defun choose-visual (screen attributes)
   "ATTRIBUTES is a list of desired attributes for a visual.  The elements may be
@@ -532,14 +486,13 @@ the attribute named attribute-name must satisfy the test when applied to the giv
 attribute's value in visual.
 Example: '(:glx-rgba (:glx-alpha-size 4) :glx-double-buffer (:glx-class 4 =)."
   ;; TODO: Add type checks
-  ;;
+
   ;; TODO: This function checks only supplied attributes; should check
   ;; all attributes, with default for boolean type being false, and
   ;; for number types zero.
-  ;; 
+
   ;; TODO: Make this smarter, like the docstring says, instead of
   ;; parrotting the inflexible C API.
-  ;; 
   (flet ((visual-matches-p (visual attributes)
            (dolist (attribute attributes t)
              (etypecase attribute
@@ -547,11 +500,11 @@ Example: '(:glx-rgba (:glx-alpha-size 4) :glx-double-buffer (:glx-class 4 =)."
                (cons (<= (second attribute) (visual-attribute visual (car attribute))))))))
     (let* ((visuals (get-visual-configs screen))
            (candidates (loop
-                          for visual in visuals
-                          when (visual-matches-p visual attributes)
-                          collect visual))
+                         for visual in visuals
+                         when (visual-matches-p visual attributes)
+                         collect visual))
            (result (first candidates)))
-    
+      
       (dolist (candidate (rest candidates))
         ;; Visuals with glx-class 3 (pseudo-color) and 4 (true-color)
         ;; are preferred over glx-class 2 (static-color) and 5 (direct-color).
@@ -560,7 +513,6 @@ Example: '(:glx-rgba (:glx-alpha-size 4) :glx-double-buffer (:glx-class 4 =)."
                     (= class 4))
             (setf result candidate))))
       result)))
-
 
 (defun render ()
   (declare (optimize (debug 3)))
@@ -588,7 +540,6 @@ Example: '(:glx-rgba (:glx-alpha-size 4) :glx-double-buffer (:glx-class 4 =)."
         (setf (context-index ctx) 8)))
     (values)))
 
-
 (defun swap-buffers ()
   (assert (context-p *current-context*)
           (*current-context*)
@@ -604,10 +555,9 @@ Example: '(:glx-rgba (:glx-alpha-size 4) :glx-double-buffer (:glx-class 4 =)."
       (resource-id (drawable-id (context-drawable ctx))))
     (display-force-output display)))
 
-
-;;; FIXME: These two are more complicated than sending messages.  As I
-;;; understand it, wait-gl should inhibit any X requests until all GL
-;;; requests are sent...
+;; FIXME: These two are more complicated than sending messages.  As I
+;; understand it, wait-gl should inhibit any X requests until all GL
+;; requests are sent...
 (defun wait-gl ()
   (assert (context-p *current-context*)
           (*current-context*)
@@ -618,7 +568,6 @@ Example: '(:glx-rgba (:glx-alpha-size 4) :glx-double-buffer (:glx-class 4 =)."
       (data +wait-gl+)
       ;; *** GLX_CONTEXT_TAG
       (card32 (context-tag ctx)))))
-
 
 (defun wait-x ()
   (assert (context-p *current-context*)
