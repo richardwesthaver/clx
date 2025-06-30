@@ -2106,7 +2106,7 @@
   (define-card32-abrev namedetail)
   (define-card32-abrev perclientflag))
 
-(import
+(shadowing-import
  '(xlib::keycode-get xlib::keymask-get 
    xlib::explicit-get xlib::behavior-get xlib::group-get xlib::butmask-get xlib::vmodmask-get))
 
