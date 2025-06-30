@@ -6,6 +6,7 @@
 (defpackage :xlib/xembed
   (:nicknames :xembed)
   (:shadowing-import-from :xlib :draw-line :array-index)
+  (:shadowing-import-from :asdf :version)
   (:use #:cl #:asdf #:xlib :std)
   (:shadow :xor)
   (:export #:dformat #:rformat #:curry #:move-next-to
