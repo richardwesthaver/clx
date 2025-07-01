@@ -4,7 +4,6 @@
 (proclaim '(optimize (speed 3) (safety 1) (space 1)
 		     (compilation-speed 0)))
 
-
 ;;; Hide CLOS from CLX, so objects stay implemented as structures.
 ;;;
 #||

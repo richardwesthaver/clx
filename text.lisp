@@ -17,7 +17,6 @@
 ;;; Texas Instruments Incorporated provides this software "as is" without
 ;;; express or implied warranty.
 ;;;
-
 (in-package :xlib)
 
 ;; Strings are broken up into chunks of this size

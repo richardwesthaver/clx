@@ -24,7 +24,6 @@
 (in-package :clx-system)  
 
 (defclass clx-source-file (cl-source-file) ())
-(defclass xrender-source-file (clx-source-file) ())
 
 (defsystem #:clx
   :description "An implementation of the X Window System protocol in Lisp."
@@ -65,7 +64,7 @@ Independent FOSS developers"
 	    ((:file "shape")
 	     (:file "big-requests")
 	     (:file "xvidmode")
-	     (:xrender-source-file "xrender")
+	     (:file "xrender")
              (:file "glx")
              (:file "gl" :depends-on ("glx"))
 	     (:file "dpms")
@@ -110,13 +109,6 @@ Independent FOSS developers"
      (:file "util")
      (:file "core-protocol" :depends-on ("package" "util"))))))
 
-(defmethod perform :around ((o compile-op) (f xrender-source-file))
-  ;; RENDER would appear to be an inherently slow protocol; further,
-  ;; it's not set in stone, and consequently we care less about speed
-  ;; than we do about correctness.
-  (handler-bind ((sb-ext:compiler-note #'muffle-warning))
-    (call-next-method)))
-
 (defmethod perform :around ((o compile-op) (f clx-source-file))
   ;; a variety of accessors, such as AREF-CARD32, are not
   ;; declared INLINE.  Without this (non-ANSI)
@@ -128,15 +120,5 @@ Independent FOSS developers"
   ;; use of this does not imply that applications using CLX
   ;; calls that expand into calls to these accessors will be
   ;; optimized in the same way).
-  (let ((sb-ext:*derive-function-types* t)
-        (sadx (find-symbol "STACK-ALLOCATE-DYNAMIC-EXTENT" :sb-c))
-        (sadx-var (find-symbol "*STACK-ALLOCATE-DYNAMIC-EXTENT*" :sb-ext)))
-    ;; deeply unportable stuff, this.  I will be shot.  We
-    ;; want to enable the dynamic-extent declarations in CLX.
-    (when (and sadx (sb-c::policy-quality-name-p sadx))
-      ;; no way of setting it back short of yet more yukky stuff
-      (proclaim `(optimize (,sadx 3))))
-    (if sadx-var
-        (progv (list sadx-var) (list t)
-          (call-next-method))
-        (call-next-method))))
+  (let ((sb-ext:*derive-function-types* t))
+    (call-next-method)))

@@ -492,22 +492,6 @@
   (declare (ignore whostate))
   (declare (type function predicate))
   (loop
-     (when (apply predicate predicate-args)
-       (return))
-     (yield)))
-
-(defun process-block (whostate predicate &rest predicate-args)
-  (declare (ignore whostate))
-  (declare (type function predicate))
-  (loop
-     (when (apply predicate predicate-args)
-       (return))
-    (yield)))
-
-(defun process-block (whostate predicate &rest predicate-args)
-  (declare (ignore whostate))
-  (declare (type function predicate))
-  (loop
    (when (apply predicate predicate-args)
      (return))
      (yield)))
@@ -544,7 +528,6 @@
                      (sb-thread:current-thread-id) )))))))
 
 ;;; PROCESS-WAKEUP: Check some other process' wait function.
-
 (declaim (inline process-wakeup))
 
 (defun process-wakeup (process)
@@ -553,16 +536,13 @@
 
 ;;; CURRENT-PROCESS: Return the current process object for input locking and
 ;;; for calling PROCESS-WAKEUP.
-
 (declaim (inline current-process))
 
 ;;; Default return NIL, which is acceptable even if there is a scheduler.
-
 (defun current-process ()
   sb-thread:*current-thread*)
 
 ;;; WITHOUT-INTERRUPTS -- provide for atomic operations.
-
 (defvar *without-interrupts-sic-lock*
   (sb-thread:make-mutex :name "lock simulating *without-interrupts*"))
 
@@ -571,10 +551,8 @@
      ,@body))
 
 ;;; CONDITIONAL-STORE:
-
 ;; This should use GET-SETF-METHOD to avoid evaluating subforms multiple times.
 ;; It doesn't because CLtL doesn't pass the environment to GET-SETF-METHOD.
-
 (defmacro conditional-store (place old-value new-value)
   (let ((ov (gensym)))
     `(let ((,ov ,old-value))
@@ -586,7 +564,6 @@
 ;;;	It prevents multiple mindless errors when the network craters.
 ;;;
 ;;;----------------------------------------------------------------------------
-
 (defmacro wrap-buf-output ((buffer) &body body)
   ;; Error recovery wrapper
   `(unless (buffer-dead ,buffer)
@@ -605,7 +582,6 @@
 
 ;;; OPEN-X-STREAM - create a stream for communicating to the appropriate X
 ;;; server
-
 (defun open-x-stream (host display protocol)
   (declare (ignore protocol)
            (type (integer 0) display))
@@ -627,7 +603,6 @@
 ;;; buffer.  This is called in read-input between requests, so that a process
 ;;; waiting for input is abortable when between requests.  Should return
 ;;; :TIMEOUT if it times out, NIL otherwise.
-
 (defun buffer-input-wait-default (display timeout)
   (declare (type display display)
            (type (or null number) timeout))
@@ -644,7 +619,6 @@
 ;;;----------------------------------------------------------------------------
 ;;; System dependent speed hacks
 ;;;----------------------------------------------------------------------------
-
 ;;
 ;; WITH-STACK-LIST is used by WITH-STATE as a memory saving feature.
 ;; If your lisp doesn't have stack-lists, and you're worried about
@@ -672,7 +646,6 @@
      ,@body))
 
 (declaim (inline buffer-replace))
-
 (defun buffer-replace (buf1 buf2 start1 end1 &optional (start2 0))
   (declare (type buffer-bytes buf1 buf2)
            (type array-index start1 end1 start2))
@@ -762,7 +735,6 @@
 ;;    Hack up KMP error signaling using zetalisp until the real thing comes
 ;;    along
 ;;-----------------------------------------------------------------------------
-
 (defun default-error-handler (display error-key &rest key-vals
                               &key asynchronous &allow-other-keys)
   (declare (type generalized-boolean asynchronous)
@@ -796,7 +768,6 @@
 ;;-----------------------------------------------------------------------------
 ;;  HOST hacking
 ;;-----------------------------------------------------------------------------
-
 (defun host-address (host &optional (family :internet))
   ;; Return a list whose car is the family keyword (:internet :DECnet :Chaos)
   ;; and cdr is a list of network address bytes.
@@ -817,7 +788,6 @@
 ;;; the specific code is built into a closure that is funcalled by the shared
 ;;; code.  If your compiler makes efficient use of closures then you probably
 ;;; want to make this expand to T, as it makes the code more compact.
-
 (defmacro use-closures () nil)
 
 ;;; fixme: remove no-op
@@ -828,9 +798,7 @@
 ;; Resource stuff
 ;;-----------------------------------------------------------------------------
 
-
 ;;; Utilities
-
 (defun getenv (name)
   (sb-ext:posix-getenv name))
 
@@ -845,13 +813,11 @@
 
 ;;; DEFAULT-RESOURCES-PATHNAME - The pathname of the resources file to load if
 ;;; a resource manager isn't running.
-
 (defun default-resources-pathname ()
   (homedir-file-pathname ".Xdefaults"))
 
 ;;; RESOURCES-PATHNAME - The pathname of the resources file to load after the
 ;;; defaults have been loaded.
-
 (defun resources-pathname ()
   (or (let ((string (getenv "XENVIRONMENT")))
         (and string
@@ -860,7 +826,6 @@
        (concatenate 'string ".Xdefaults-" (get-host-name)))))
 
 ;;; AUTHORITY-PATHNAME - The pathname of the authority file.
-
 (defun authority-pathname ()
   (or (let ((xauthority (getenv "XAUTHORITY")))
         (and xauthority
@@ -916,7 +881,6 @@ Returns a list of (host display-number screen protocol)."
 ;;-----------------------------------------------------------------------------
 ;; GC stuff
 ;;-----------------------------------------------------------------------------
-
 (defun gc-cleanup ()
   (declare (special *event-free-list*
                     *pending-command-free-list*
@@ -934,18 +898,16 @@ Returns a list of (host display-number screen protocol)."
 ;;-----------------------------------------------------------------------------
 ;; DEFAULT-KEYSYM-TRANSLATE
 ;;-----------------------------------------------------------------------------
+;; If object is a character, char-bits are set from state.
 
-;;; If object is a character, char-bits are set from state.
-;;;
-;;; [the following isn't implemented (should it be?)]
-;;; If object is a list, it is an alist with entries:
-;;; (base-char [modifiers] [mask-modifiers])
-;;; When MODIFIERS are specified, this character translation
-;;; will only take effect when the specified modifiers are pressed.
-;;; MASK-MODIFIERS can be used to specify a set of modifiers to ignore.
-;;; When MASK-MODIFIERS is missing, all other modifiers are ignored.
-;;; In ambiguous cases, the most specific translation is used.
-
+;; [the following isn't implemented (should it be?)]
+;; If object is a list, it is an alist with entries:
+;; (base-char [modifiers] [mask-modifiers])
+;; When MODIFIERS are specified, this character translation
+;; will only take effect when the specified modifiers are pressed.
+;; MASK-MODIFIERS can be used to specify a set of modifiers to ignore.
+;; When MASK-MODIFIERS is missing, all other modifiers are ignored.
+;; In ambiguous cases, the most specific translation is used.
 (defun default-keysym-translate (display state object)
   (declare (type display display)
            (type card16 state)
@@ -959,7 +921,6 @@ Returns a list of (host display-number screen protocol)."
 ;;-----------------------------------------------------------------------------
 
 ;;; Types
-
 (deftype pixarray-1-element-type ()
   'bit)
 
@@ -1008,10 +969,8 @@ Returns a list of (host display-number screen protocol)."
   'pixarray-1)
 
 ;;; WITH-UNDERLYING-SIMPLE-VECTOR
-
-;;; We do *NOT* support viewing an array as having a different element type.
-;;; Element-type is ignored.
-;;;
+;; We do *NOT* support viewing an array as having a different element type.
+;; Element-type is ignored.
 (defmacro with-underlying-simple-vector
     ((variable element-type pixarray) &body body)
   (declare (ignore element-type))
@@ -1023,7 +982,6 @@ Returns a list of (host display-number screen protocol)."
 ;;; These are used to read and write pixels from and to CARD8s.
 
 ;;; READ-IMAGE-LOAD-BYTE is used to extract 1 and 4 bit pixels from CARD8s.
-
 (defmacro read-image-load-byte (size position integer)
   (unless +image-bit-lsb-first-p+ (setq position (- 7 position)))
   `(the (unsigned-byte ,size)
@@ -1032,7 +990,6 @@ Returns a list of (host display-number screen protocol)."
 
 ;;; READ-IMAGE-ASSEMBLE-BYTES is used to build 16, 24 and 32 bit pixels from
 ;;; the appropriate number of CARD8s.
-
 (defmacro read-image-assemble-bytes (&rest bytes)
   (unless +image-byte-lsb-first-p+ (setq bytes (reverse bytes)))
   (let ((it (first bytes))
@@ -1046,7 +1003,6 @@ Returns a list of (host display-number screen protocol)."
 
 ;;; WRITE-IMAGE-LOAD-BYTE is used to extract a CARD8 from a 16, 24 or 32 bit
 ;;; pixel.
-
 (defmacro write-image-load-byte (position integer integer-size)
   integer-size
   (unless +image-byte-lsb-first-p+ (setq position (- integer-size 8 position)))
@@ -1056,7 +1012,6 @@ Returns a list of (host display-number screen protocol)."
 
 ;;; WRITE-IMAGE-ASSEMBLE-BYTES is used to build a CARD8 from 1 or 4 bit
 ;;; pixels.
-
 (defmacro write-image-assemble-bytes (&rest bytes)
   (unless +image-bit-lsb-first-p+ (setq bytes (reverse bytes)))
   (let ((size (floor 8 (length bytes)))
@@ -1081,7 +1036,6 @@ Returns a list of (host display-number screen protocol)."
 ;;; speeding them up while maintaining correctness is possible.
 
 ;;; FAST-READ-PIXARRAY - fill part of a pixarray from a buffer of card8s
-
 (defun fast-read-pixarray-24 (buffer-bbuf index array x y width height
                               padded-bytes-per-line bits-per-pixel)
   (declare (type buffer-bytes buffer-bbuf)
@@ -1179,7 +1133,6 @@ Returns a list of (host display-number screen protocol)."
   nil)
 
 ;;; FAST-WRITE-PIXARRAY - copy part of a pixarray into an array of CARD8s
-
 (defun fast-write-pixarray-24 (buffer-bbuf index array x y width height
                                padded-bytes-per-line bits-per-pixel)
   (declare (type buffer-bytes buffer-bbuf)
@@ -1241,7 +1194,6 @@ Returns a list of (host display-number screen protocol)."
   nil)
 
 ;;; FAST-COPY-PIXARRAY - copy part of a pixarray into another
-
 (defun fast-copy-pixarray (pixarray copy x y width height bits-per-pixel)
   (declare (type pixarray pixarray copy)
            (type card16 x y width height)

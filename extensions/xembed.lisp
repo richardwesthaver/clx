@@ -9,11 +9,12 @@
   (:shadowing-import-from :asdf :version)
   (:use #:cl #:asdf #:xlib :std)
   (:shadow :xor)
-  (:export #:dformat #:rformat #:curry #:move-next-to
-	   #:window-resize #:window-parent #:handler-pos #:handler-vector #:combine-handlers
-	   #:decode-xembed-message-type  #:update-timestamp  #:*timestamp*
-	   #:create-socket #:destroy-socket #:client #:embed #:socket-activate #:socket-resize
-	   #:socket-list-handler-vector))
+  (:export #:dformat #:rformat #:move-next-to
+	   #:window-resize #:window-parent
+	   #:decode-xembed-message-type
+	   #:create-socket #:destroy-socket 
+           #:embed 
+           #:socket-activate #:socket-resize))
 
 (in-package :xlib/xembed)
 (define-extension "XEMBED")

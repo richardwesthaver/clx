@@ -14,8 +14,6 @@
 ;;;
 ;;; Texas Instruments Incorporated provides this software "as is" without
 ;;; express or implied warranty.
-;;;
-
 (in-package :xlib)
 
 (defun create-window (&key

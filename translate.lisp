@@ -14,8 +14,6 @@
 ;;;
 ;;; Texas Instruments Incorporated provides this software "as is" without
 ;;; express or implied warranty.
-;;;
-
 (in-package :xlib)
 
 (defvar *keysym-sets* nil) ;; Alist of (name first-keysym last-keysym)

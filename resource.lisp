@@ -16,13 +16,9 @@
 ;;;
 ;;; Texas Instruments Incorporated provides this software "as is" without
 ;;; express or implied warranty.
-;;;
-
 (in-package :xlib)
-
 ;; The C version of this uses a 64 entry hash table at each entry.
 ;; Small hash tables lose in Lisp, so we do linear searches on lists.
-
 (defstruct (resource-database (:copier nil) (:predicate nil)
 			      (:print-function print-resource-database)
 			      (:constructor make-resource-database-internal)

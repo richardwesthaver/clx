@@ -17,7 +17,6 @@
 ;;; Texas Instruments Incorporated provides this software "as is" without
 ;;; express or implied warranty.
 ;;;
-
 (in-package :xlib)
 
 (defun wm-name (window)
@@ -39,7 +38,7 @@
   (declare (type window window))
   (declare (clx-values string))
   (get-property window :WM_ICON_NAME :type :STRING
-                :result-type 'string :transform #'card8->char))
+                                     :result-type 'string :transform #'card8->char))
 
 (defsetf wm-icon-name (window) (name)
   `(set-string-property ,window :WM_ICON_NAME ,name))
@@ -48,7 +47,7 @@
   (declare (type window window))
   (declare (clx-values string))
   (get-property window :WM_CLIENT_MACHINE :type :STRING
-                :result-type 'string :transform #'card8->char))
+                                          :result-type 'string :transform #'card8->char))
 
 (defsetf wm-client-machine (window) (name)
   `(set-string-property ,window :WM_CLIENT_MACHINE ,name))
@@ -88,7 +87,7 @@
   (declare (type window window))
   (declare (clx-values list))
   (do* ((command-string (get-property window :WM_COMMAND :type :STRING
-                                      :result-type '(vector card8)))
+                                                         :result-type '(vector card8)))
         (command nil)
         (start 0 (1+ end))
         (end 0)
@@ -454,13 +453,13 @@
 
 (defun wm-colormap-windows (window)
   (values (get-property window :WM_COLORMAP_WINDOWS :type :WINDOW
-                               :transform #'(lambda (id)
-                                              (lookup-window (window-display window) id)))))
+                                                    :transform #'(lambda (id)
+                                                                   (lookup-window (window-display window) id)))))
 
 (defsetf wm-colormap-windows set-wm-colormap-windows)
 (defun set-wm-colormap-windows (window colormap-windows)
   (change-property window :WM_COLORMAP_WINDOWS colormap-windows :WINDOW 32
-                  :transform #'window-id)
+                          :transform #'window-id)
   colormap-windows)
 
 ;;-----------------------------------------------------------------------------
@@ -480,19 +479,19 @@
 ;; Set-WM-Properties
 
 (defun set-wm-properties (window &rest options &key
-                                                 name icon-name resource-name resource-class command
-                                                 client-machine hints normal-hints zoom-hints
-                                                 ;; the following are used for wm-normal-hints
-                                                 (user-specified-position-p nil usppp)
-                                                 (user-specified-size-p nil usspp)
-                                                 (program-specified-position-p nil psppp)
-                                                 (program-specified-size-p nil psspp)
-                                                 x y width height min-width min-height max-width max-height
-                                                 width-inc height-inc min-aspect max-aspect
-                                                 base-width base-height win-gravity
-                                                 ;; the following are used for wm-hints
-                                                 input initial-state icon-pixmap icon-window
-                                                 icon-x icon-y icon-mask window-group)
+                                               name icon-name resource-name resource-class command
+                                               client-machine hints normal-hints zoom-hints
+                                               ;; the following are used for wm-normal-hints
+                                               (user-specified-position-p nil usppp)
+                                               (user-specified-size-p nil usspp)
+                                               (program-specified-position-p nil psppp)
+                                               (program-specified-size-p nil psspp)
+                                               x y width height min-width min-height max-width max-height
+                                               width-inc height-inc min-aspect max-aspect
+                                               base-width base-height win-gravity
+                                               ;; the following are used for wm-hints
+                                               input initial-state icon-pixmap icon-window
+                                               icon-x icon-y icon-mask window-group)
   ;; Set properties for WINDOW.
   (declare (arglist window &rest options &key
                     name icon-name resource-name resource-class command
@@ -595,7 +594,7 @@
   (let ((root (screen-root screen)))
     (declare (type window root))
     (send-event root :client-message '(:substructure-redirect :substructure-notify)
-                :window window :format 32 :type :WM_CHANGE_STATE :data (list 3))))
+                     :window window :format 32 :type :WM_CHANGE_STATE :data (list 3))))
 
 (defun withdraw-window (window screen)
   (declare (type window window)
@@ -604,7 +603,7 @@
   (let ((root (screen-root screen)))
     (declare (type window root))
     (send-event root :unmap-notify '(:substructure-redirect :substructure-notify)
-                :window window :event-window root :configure-p nil)))
+                     :window window :event-window root :configure-p nil)))
 
 
 ;;-----------------------------------------------------------------------------
@@ -647,7 +646,7 @@
 (defun set-rgb-colormaps (window property maps)
   (declare (type window window)
            (type (member :RGB_DEFAULT_MAP :RGB_BEST_MAP :RGB_RED_MAP
-                         :RGB_GREEN_MAP :RGB_BLUE_MAP)
+                                          :RGB_GREEN_MAP :RGB_BLUE_MAP)
                  property)
            (type list maps))
   (let ((prop (make-array (* 10 (length maps)) :element-type 'card32))
@@ -689,7 +688,7 @@
 (defun get-standard-colormap (window property)
   (declare (type window window)
            (type (member :RGB_DEFAULT_MAP :RGB_BEST_MAP :RGB_RED_MAP
-                         :RGB_GREEN_MAP :RGB_BLUE_MAP)
+                                          :RGB_GREEN_MAP :RGB_BLUE_MAP)
                  property))
   (declare (clx-values colormap base-pixel max-color mult-color))
   (let ((prop (get-property window property :type :RGB_COLOR_MAP :result-type 'vector)))
@@ -708,7 +707,7 @@
 (defun set-standard-colormap (window property colormap base-pixel max-color mult-color)
   (declare (type window window)
            (type (member :RGB_DEFAULT_MAP :RGB_BEST_MAP :RGB_RED_MAP
-                         :RGB_GREEN_MAP :RGB_BLUE_MAP)
+                                          :RGB_GREEN_MAP :RGB_BLUE_MAP)
                  property)
            (type colormap colormap)
            (type pixel base-pixel)
@@ -727,7 +726,7 @@
 ;; Cut-Buffers
 
 (defun cut-buffer (display &key (buffer 0) (type :STRING) (result-type 'string)
-                             (transform #'card8->char) (start 0) end)
+                                (transform #'card8->char) (start 0) end)
   ;; Return the contents of cut-buffer BUFFER
   (declare (type display display)
            (type (integer 0 7) buffer)
@@ -746,7 +745,7 @@
 
 (defun (setf cut-buffer)
     (data display &key (buffer 0) (type :STRING) (format 8)
-                    (start 0) end (transform #'char->card8))
+                       (start 0) end (transform #'char->card8))
   (declare (type sequence data)
            (type display display)
            (type (integer 0 7) buffer)

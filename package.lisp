@@ -12,14 +12,12 @@
 ;;; written prior permission.
 
 ;;; The ANSI Common Lisp way
-
-(common-lisp:in-package :common-lisp-user)
+(in-package :cl-user)
 
 (defpackage #:xlib
-  (:use common-lisp)
-  (:size 3000)
-  (:shadow defconstant)
-  (:use sb-bsd-sockets)
+  (:use :cl)
+  (:shadow :defconstant)
+  (:use :sb-bsd-sockets)
   (:export
     *version* access-control access-error access-hosts
     activate-screen-saver add-access-host add-resource add-to-save-set
