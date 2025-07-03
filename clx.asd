@@ -99,15 +99,32 @@ Independent FOSS developers"
 	     (:file "image")
 	     (:file "trapezoid" :depends-on ("zoid"))))))
 
+(asdf:defsystem #:clx/truetype
+  :serial t
+  :description "clx-truetype is pure common lisp solution for antialiased TrueType font rendering using CLX and XRender extension."
+  :author "Michael Filonenko <filonenko.mikhail@gmail.com>"
+  :license "MIT"
+  :version "0.1"
+  :depends-on 
+  (#:clx 
+   #:std
+   #:dat
+   #:cl-vectors
+   #:cl-paths-ttf ; from cl-vectors
+   #:cacle
+   #:cl-aa)
+  :components ((:file "truetype")))
+
 (defsystem #:clx/tests
-  :depends-on ("clx" "rt")
+  :depends-on ("clx" "clx/truetype" "rt")
   :perform (test-op (o s) (uiop:symbol-call :rt :do-tests :xlib))
   :components
   ((:module "tests"
     :components
     ((:file "package")
      (:file "util")
-     (:file "core-protocol" :depends-on ("package" "util"))))))
+     (:file "core-protocol" :depends-on ("package" "util"))
+     (:file "truetype" :depends-on ("package"))))))
 
 (defmethod perform :around ((o compile-op) (f clx-source-file))
   ;; a variety of accessors, such as AREF-CARD32, are not
