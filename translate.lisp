@@ -270,10 +270,8 @@
   (defconstant left-hyper-keysym (keysym 255 237))
   (defconstant right-hyper-keysym (keysym 255 238)))
 
-
 ;;-----------------------------------------------------------------------------
 ;; Keysym mapping functions
-
 (defun display-keyboard-mapping (display)
   (declare (type display display))
   (declare (clx-values (simple-array keysym (display-max-keycode keysyms-per-keycode))))

@@ -363,7 +363,7 @@
   (or (not (null (buffer-dead buffer)))
       (wrap-buf-input (buffer)
 	(funcall (buffer-listen-function buffer) buffer))))
-
+
 ;;; Reading sequences of strings
 
 ;;; a list of pascal-strings with card8 lengths, no padding in between

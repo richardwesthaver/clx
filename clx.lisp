@@ -823,11 +823,9 @@
   (make-mumble-equal gcontext)
   (make-mumble-equal colormap)
   (make-mumble-equal drawable))
-
-;;;
+
 ;;; Event-mask encode/decode functions
 ;;;    Converts from keyword-lists to integer and back
-;;;
 (defun encode-mask (key-vector key-list key-type)
   ;; KEY-VECTOR is a vector containg bit-position keywords.  The
   ;; position of the keyword in the vector indicates its bit position

@@ -642,7 +642,6 @@
 			  reply-next reply-buffer)
 	(unless (display-new-events display)
 	  (setf (display-new-events display) new-event))))))
-
 
 (defmacro define-event (name code)
   `(eval-when (:compile-toplevel :load-toplevel :execute)
@@ -652,7 +651,6 @@
 ;; Event names.  Used in "type" field in XEvent structures.  Not to be
 ;; confused with event masks above.  They start from 2 because 0 and 1
 ;; are reserved in the protocol for errors and replies. */
-
 (define-event :key-press 2)
 (define-event :key-release 3)
 (define-event :button-press 4)
@@ -687,7 +685,6 @@
 (define-event :client-message 33)
 (define-event :mapping-notify 34)
 
-
 (defmacro declare-event (event-codes &body declares &environment env)
   ;; Used to indicate the keyword arguments for handler functions in
   ;; process-event and event-case.
@@ -989,11 +986,7 @@
   (card8 start) ;; first key-code
   (card8 count))
 
-
-;;
 ;; EVENT-LOOP
-;;
-
 (defun event-loop-setup (display)
   (declare (type display display)
 	   (clx-values progv-vars progv-vals
@@ -1217,11 +1210,8 @@
   (setf (elt handlers (position event-key *event-key-vector* :test #'eq)) handler))
 
 (defsetf event-handler set-event-handler)
-
-;;
-;; EVENT-CASE
-;; 
 
+;; EVENT-CASE
 (defmacro event-case ((&rest args) &body clauses)
   ;; If force-output-p is true, first invokes display-force-output.  Executes the
   ;; matching clause for each queued event until a clause returns non-nil, and that
@@ -1441,11 +1431,9 @@
 		       (push `((,(car keys)) . ,clause) clauses))))))
 	 ,@body))))
 
-
 ;;;-----------------------------------------------------------------------------
 ;;; Error Handling
 ;;;-----------------------------------------------------------------------------
-
 (eval-when (:compile-toplevel :load-toplevel :execute)
 (defparameter
   *xerror-vector*

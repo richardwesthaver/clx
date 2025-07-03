@@ -318,10 +318,7 @@
 	  (return-from visual-info visual-info)))))
   (error "Visual info not found for id #x~x in display ~s." visual-id display))
 
-
-;;
 ;; Display functions
-;;
 (defmacro with-event-queue ((display &key timeout inline)
 			    &body body &environment env)
   ;; exclusive access to event queue

@@ -275,9 +275,8 @@
 
     ;; Make menu visible
     (MAP-WINDOW menu-window)))
-
-;;; Demo functions
 
+;;; Demo functions
 (defun just-say-lisp (&optional (font-name "fixed"))
   (let* ((display   (open-default-display))
          (screen    (first (DISPLAY-ROOTS display)))

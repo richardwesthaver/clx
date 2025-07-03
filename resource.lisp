@@ -135,10 +135,8 @@
 	  (string= (the string (symbol-name (the symbol a)))
 		   (the string (symbol-name (the symbol b)))))))))
 
-
 ;;;-----------------------------------------------------------------------------
 ;;; Add/delete resource
-
 (defun add-resource (database name-list value)
   ;; name-list is a list of either strings or symbols. If a symbol, 
   ;; case-insensitive comparisons will be used, if a string,
@@ -282,10 +280,8 @@
 	       (return result))
 	     )))))
 
-
 ;;;-----------------------------------------------------------------------------
 ;;; Get-resource with search-table
-
 (defun get-search-resource (table name class)
   ;; (get-search-resource (get-search-table database full-name full-class) 
   ;;                      value-name value-class)
@@ -392,10 +388,8 @@
 	  (get-tables-lookup loose class names classes))
 	))))
 
-
 ;;;-----------------------------------------------------------------------------
 ;;; Utility functions
-
 (defun map-resource (database function &rest args)
   ;; Call FUNCTION on each resource in DATABASE.
   ;; FUNCTION is called with arguments (name-list value . args)

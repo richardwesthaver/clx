@@ -53,10 +53,7 @@
       (when ctx (xlib/glx:destroy-context ctx))
       (close-display display))))
 
-
 ;;; Tests
-
-
 (defun no-floats (display window)
   (declare (ignore display window))
   (color-3s #x7fff #x7fff 0)
@@ -68,7 +65,6 @@
   (end)
   (xlib/glx:swap-buffers)
   (sleep 5))
-
 
 (defun anim (display window)
   (declare (ignore display window))
@@ -133,12 +129,9 @@
   
   (sleep 3))
 
-
 ;;; glxgears
-
 (defconstant +pi+ (coerce pi 'single-float))
 (declaim (type single-float +pi+))
-
 
 (defun gear (inner-radius outer-radius width teeth tooth-depth)
   (let ((r0 inner-radius)

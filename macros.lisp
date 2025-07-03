@@ -436,11 +436,8 @@
   ((index value format) (declare (ignore index))
    `(client-message-event-put-sequence ,format ,value)))
 
-
-;;;
 ;;; Compound accessors
 ;;;    Accessors that take other accessors as parameters
-;;;
 (define-accessor code (0)
   ((index) (declare (ignore index)) '(read-card8 0))
   ((index value) (declare (ignore index)) `(write-card8 0 ,value))
@@ -599,10 +596,7 @@
   ((index statement) (declare (ignore index)) statement)
   ((index statement) (declare (ignore index)) statement))
 
-
-                                        ;
-                                        ; Wrapper macros, for use around the above
-                                        ;
+;; Wrapper macros, for use around the above
 
 ;;; type-check was here, and has been moved up
 
@@ -816,11 +810,7 @@
   `(setf ,accessor (encode-type ,type ,value)))
 (defsetf decode-type set-decode-type)
 
-
-;;;
 ;;; Request codes
-;;;
-
 (defconstant +x-createwindow+                  1)
 (defconstant +x-changewindowattributes+        2)
 (defconstant +x-getwindowattributes+           3)

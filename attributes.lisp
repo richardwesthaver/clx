@@ -133,8 +133,6 @@
       (put-drawable-geometry-changes (car state) entry)
       (deallocate-gcontext-state entry))))
 
-
-
 (defun change-window-attribute (window number value)
   ;; Called from window attribute SETF's to alter an attribute value
   ;; number is the change-attributes request mask bit number
@@ -546,11 +544,9 @@
   (with-attributes (window :sizes 8)
     (member8-get 26 :unmapped :unviewable :viewable)))
 
-
 ;;;-----------------------------------------------------------------------------
 ;;; Group G: (for GetGeometry)
 ;;;-----------------------------------------------------------------------------
-
 (defun drawable-root (drawable)
   (declare (type drawable drawable))
   (declare (clx-values window))

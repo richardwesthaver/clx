@@ -206,10 +206,9 @@
     (when blue-mask (setf (image-blue-mask image) blue-mask))
     (when green-mask (setf (image-green-mask image) green-mask))
     image))
-
+
 ;;;-----------------------------------------------------------------------------
 ;;; Swapping stuff
-
 (defun image-noswap
        (src dest srcoff destoff srclen srcinc destinc height lsb-first-p)
   (declare (type buffer-bytes src dest)
@@ -785,10 +784,8 @@
 	       (32 'image-swap-four-bytes)))
 	   from-byte-lsb-first-p))))
 
-
 ;;;-----------------------------------------------------------------------------
 ;;; GET-IMAGE
-
 (defun read-pixarray-1 (buffer-bbuf index array x y width height  
 			padded-bytes-per-line bits-per-pixel)
   (declare (type buffer-bytes buffer-bbuf)
@@ -1398,10 +1395,8 @@
 		      (visual-info-blue-mask visual-info))))
 	    (values image visual-info)))))))
 
-
 ;;;-----------------------------------------------------------------------------
 ;;; PUT-IMAGE
-
 (defun write-pixarray-1 (buffer-bbuf index array x y width height
 			 padded-bytes-per-line bits-per-pixel)
   (declare (type buffer-bytes buffer-bbuf)
@@ -2089,10 +2084,9 @@
 		  ;; Be sure the request is padded to a multiple of 4 bytes
 		  (buffer-pad-request display (index- (index* request-words 4) request-bytes))
 		  )))))))))
-
+
 ;;;-----------------------------------------------------------------------------
 ;;; COPY-IMAGE
-
 (defun xy-format-image-x->image-x (image x y width height)
   (declare (type image-x image)
 	   (type card16 x y width height)
@@ -2402,11 +2396,8 @@
 	(setf (image-y-hot copy) (index- (image-y-hot image) y)))
       copy)))
 
-
 ;;;-----------------------------------------------------------------------------
 ;;; Image I/O functions
-
-
 (defun read-bitmap-file (pathname)
   ;; Creates an image from a C include file in standard X11 format
   (declare (type (or pathname string stream) pathname))

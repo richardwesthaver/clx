@@ -1155,10 +1155,7 @@
 
 (in-package #:xlib/gl)
 
-
-
 ;;; Opcodes.
-
 (eval-when (:compile-toplevel :load-toplevel :execute)
 (defconstant +get-string+       129)
 (defconstant +new-list+         101)
@@ -1169,18 +1166,14 @@
 (defconstant +enable+           139)
 (defconstant +flush+            142)
 
-
-
 ;;; Constants.
 ;;; Shamelessly taken from CL-SDL.
 
 ;; Boolean
-
 (defconstant +false+                            #x0) 
 (defconstant +true+                             #x1) 
 
 ;; Types
-
 (defconstant +byte+                          #x1400) 
 (defconstant +unsigned-byte+                 #x1401) 
 (defconstant +short+                         #x1402) 
@@ -2086,13 +2079,9 @@
 (defconstant +reflection-map-nv+             #x8512) 
 (defconstant +ext-texture-env-add+                1) 
 (defconstant +mesa-window-pos+                    1) 
-(defconstant +mesa-resize-buffers+                1)
-)
+(defconstant +mesa-resize-buffers+                1))
 
-
-
 ;;; Utility stuff
-
 (deftype bool () 'card8)
 (deftype float32 () 'single-float)
 (deftype float64 () 'double-float)
@@ -3485,14 +3474,10 @@
 (define-rendering-command vertex-4s 76
   ((x y z w)    int16))
 
-
 (define-rendering-command viewport 191
   ((x y width height) int32))
 
-
 ;;; Potentially lerge rendering commands.
-
-
 #-(and)
 (define-large-rendering-command call-lists 2
   (n            int32)
@@ -3500,10 +3485,7 @@
   (type         card32)
   (lists        (list type n)))
 
-
-
 ;;; Requests for GL non-rendering commands.
-
 (defun new-list (list mode)
   (assert (context-p *current-context*)
           (*current-context*)

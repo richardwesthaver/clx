@@ -421,7 +421,7 @@
 		    (setq descent (max descent (aref char-infos (index+ 4 n)))))
 		  ))))
 	  )))))
-
+
 ;;-----------------------------------------------------------------------------
 
 ;; This controls the element size of the dst buffer given to translate.  If
@@ -913,9 +913,7 @@
 	(values (if (index= chunk length) nil new-start)
 		(or translated-width width))))))
 
-
 ;;-----------------------------------------------------------------------------
-
 (defun display-keycode-range (display)
   (declare (type display display))
   (declare (clx-values min max))
@@ -926,7 +924,6 @@
 ;; generalized-boolean instead (true for success)?  Alternatively, should the
 ;; pointer-mapping setf be changed to set-pointer-mapping with a (member
 ;; :success :busy) result?
-
 (defun set-modifier-mapping (display &key shift lock control mod1 mod2 mod3 mod4 mod5)
   ;; Setf ought to allow multiple values.
   (declare (type display display)
