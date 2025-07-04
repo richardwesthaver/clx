@@ -39,7 +39,7 @@ Glyphs information is obtained by DAT/TTF. Font rasterization is made by CL-VECT
 (defun make-font-cache (font dpi-cache-size string-cache-size inner-provider)
   (flet ((outer-provider (dpi-cons)
            (values
-            (cacle:make-cache
+            (obj:make-cache
              string-cache-size
              (lambda (string)
                (values
@@ -48,14 +48,14 @@ Glyphs information is obtained by DAT/TTF. Font rasterization is made by CL-VECT
              :test #'equal
              :policy :lfu)
             1)))
-    (cacle:make-cache
+    (obj:make-cache
      dpi-cache-size
      #'outer-provider
      :test #'equal
      :policy :lfu)))
 
 (defun font-cache-fetch (cache dpi string)
-  (cacle:cache-fetch (cacle:cache-fetch cache dpi) string))
+  (obj:get-val (obj:get-val cache dpi) string))
 
 (defmethod initialize-instance :after
     ((font font) &key (dpi-cache-size 10) (string-cache-size 1000) &allow-other-keys)
@@ -587,8 +587,7 @@ If @var{gcontext} has background color, text line bounding box will be filled wi
       (xlib:free-pixmap alpha-pixmap)
       nil)))
 
-;;; Test utils
-
+;;; utils
 (defun trgrey (i)
   "Visualize alpha mask using graphic characters"
   (cond

@@ -19,7 +19,6 @@
 ;;;
 ;;; Franz Incorporated provides this software "as is" without express
 ;;; or implied warranty.
-
 (defpackage :clx-system (:use :cl :asdf))
 (in-package :clx-system)  
 
@@ -32,7 +31,7 @@ Franz Inc, Berkeley, Ca.
 Independent FOSS developers"
   :maintainer "sharplispers"
   :license "MIT"
-  :depends-on (sb-bsd-sockets std)
+  :depends-on (:sb-bsd-sockets :std)
   :version "0.7.6"
   :serial t
   :default-component-class clx-source-file
@@ -107,11 +106,10 @@ Independent FOSS developers"
   :version "0.1"
   :depends-on 
   (#:clx 
-   #:std
+   #:obj
    #:dat
    #:cl-vectors
    #:cl-paths-ttf ; from cl-vectors
-   #:cacle
    #:cl-aa)
   :components ((:file "truetype")))
 
