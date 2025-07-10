@@ -1,27 +1,23 @@
-;;; -*- Mode: LISP; Syntax: Common-lisp; Package: XLIB; Base: 10; Lowercase: Yes -*-
+;;; display.lisp
 
 ;;; This file contains definitions for the DISPLAY object for Common-Lisp X windows version 11
 
-;;;
 ;;;			 TEXAS INSTRUMENTS INCORPORATED
 ;;;				  P.O. BOX 2909
 ;;;			       AUSTIN, TEXAS 78769
-;;;
+
 ;;; Copyright (C) 1987 Texas Instruments Incorporated.
-;;;
+
 ;;; Permission is granted to any individual or institution to use, copy, modify,
 ;;; and distribute this software, provided that this complete copyright and
 ;;; permission notice is maintained, intact, in all copies and supporting
 ;;; documentation.
-;;;
+
 ;;; Texas Instruments Incorporated provides this software "as is" without
 ;;; express or implied warranty.
-;;;
-
 (in-package :xlib)
 
 ;;; Authorizaton
-
 (defparameter *known-authorizations* '("MIT-MAGIC-COOKIE-1"))
 
 ;;; X11 Authorization: to prevent malicious users from snooping on a
@@ -40,7 +36,6 @@
 ;;; * Hannu Rummukainen
 ;;; * Scott Fahlman
 ;;; * Copyright (C) 2022 Massimo Zaniboni <mzan@dokmelody.org>
-
 (defun read-xauth-entry (stream)
   (labels ((read-short (stream &optional (eof-errorp t))
              (let ((high-byte (read-byte stream eof-errorp)))
@@ -151,9 +146,7 @@
 		 ,@(and inline `(:inline ,inline)))
      ,@body))
 
-;;
 ;; Resource id management
-;;
 (defun initialize-resource-allocator (display)
   ;; Find the resource-id-byte (appropriate for LDB & DPB) from the resource-id-mask
   (let ((id-mask (display-resource-id-mask display)))

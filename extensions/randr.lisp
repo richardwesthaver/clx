@@ -1,22 +1,20 @@
-;;; -*- Mode: Lisp; Syntax: Common-Lisp; Package: XLIB; -*-
+;;; randr.lisp
 ;;; ---------------------------------------------------------------------------
 ;;;     Title: RandR Extension
 ;;;   Created: 2014-11-17
 ;;;    Author: Johannes Martinez <johannes.martinez@gmail.com>
 ;;; ---------------------------------------------------------------------------
-;;;
+
 ;;; (c) copyright 2014 by Johannes Martinez
-;;;
+
 ;;; Permission is granted to any individual or institution to use,
 ;;; copy, modify, and distribute this software, provided that this
 ;;; complete copyright and permission notice is maintained, intact, in
 ;;; all copies and supporting documentation.
-;;;
+
 ;;; This program is distributed in the hope that it will be useful,
 ;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-;;;
-
 (in-package :xlib)
 
 (export '(rr-query-version
@@ -93,13 +91,11 @@
 (defun randr-opcode (display)
   (extension-opcode display "RANDR"))
 
-
 (defconstant +rr-major+			1)
 (defconstant +rr-minor+			4)
 
 (defconstant  +rr-QueryVersion+                 0)
-  ;; we skip 1 to make old clients fail pretty immediately */
-
+;; we skip 1 to make old clients fail pretty immediately */
 
 (defconstant  +rr-SetScreenConfig+              2)
 (defconstant  +rr-OldScreenChangeSelectInput+	3) ;; 3 used to be ScreenChangeSelectInput; deprecated */
@@ -107,8 +103,7 @@
 (defconstant  +rr-SelectInput+                  4)
 (defconstant  +rr-GetScreenInfo+                5)
 
-  ;; * V1.2 additions */
-
+;; * V1.2 additions */
 (defconstant  +rr-GetScreenSizeRange+           6)
 (defconstant  +rr-SetScreenSize+                7)
 (defconstant  +rr-GetScreenResources+           8)
@@ -129,8 +124,7 @@
 (defconstant  +rr-GetCrtcGamma+	    23)
 (defconstant  +rr-SetCrtcGamma+	    24)
 
-  ;; /* V1.3 additions */
-
+;; /* V1.3 additions */
 (defconstant  +rr-GetScreenResourcesCurrent+	25)
 (defconstant  +rr-SetCrtcTransform+	    26)
 (defconstant  +rr-GetCrtcTransform+	    27)
@@ -139,9 +133,7 @@
 (defconstant  +rr-SetOutputPrimary+	    30)
 (defconstant  +rr-GetOutputPrimary+	    31)
 
-  ;; 1.4 additions
-
-
+;; 1.4 additions
 (defconstant  +rr-GetProviders+	      32)
 (defconstant  +rr-GetProviderInfo+	      33)
 (defconstant  +rr-SetProviderOffloadSink+    34)
@@ -154,17 +146,13 @@
 (defconstant  +rr-GetProviderProperty+	      41)
 
 ;;; status returns
-
-
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defconstant +rr-config-status+ '#(:success :invalid-config-time :invalid-time :failed))
   (defconstant +rr-connection+ '#(:connected :disconnected :unknown-connection)))
 
 ;;; mask-vectors and types
 
-  ;; Rotation
-
-
+;; Rotation
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defconstant +rotation-mask-vector+
     '#(:rotate-0 :rotate-90 :rotate-180 :rotate-270 :reflect-x :reflect-y)))
@@ -175,9 +163,7 @@
 (deftype rotation-mask ()
   '(or mask16 (clx-list rotation-mask-class)))
 
-  ;; Select
-
-
+;; Select
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defconstant +rr-select-mask-vector+
     '#(:screen-change-notify-mask :crtc-change-notify-mask :output-change-notify-mask :output-property-notify-mask)))
@@ -188,8 +174,7 @@
 (deftype rr-select-mask ()
   '(or mask8 (clx-list rr-select-mask-class)))
 
-  ;; Mode-flag
-
+;; Mode-flag
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defconstant +mode-flag-mask-vector+
     '#(:hsync-positive :hsync-negative :vsync-positive :vsync-negative :interlace :double-scan :csync
@@ -203,25 +188,23 @@
 (deftype mode-flag-mask ()
   '(or mask32 (clx-list mode-flag-mask-class)))
 
-  ;; temporarily here since not in xrender.lisp
-
-
+;; temporarily here since not in xrender.lisp
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defconstant +render-subpixel-order+
     '#(:unknown :horizontal-RGB :horizontal-BGR :vertical-RGB :vertical-BGR :none)))
 
-  ;; mask encode-decode functions
+;; mask encode-decode functions
 
-  ;; (defun make-mode-flag-mask (key-list)
-  ;;   (encode-mask +mode-flag-mask-vector+ key-list 'mode-flag-mask))
+;; (defun make-mode-flag-mask (key-list)
+;;   (encode-mask +mode-flag-mask-vector+ key-list 'mode-flag-mask))
 
-  ;; (defun make-mode-flag-keys (mode-flag-mask)
-  ;;   (declare (type mask32 mode-flag-mask))
-  ;;   (declare (clx-values (clx-list mode-flag-mask)))
-  ;;   (decode-mask +mode-flag-mask-vector+ mode-flag-mask))
+;; (defun make-mode-flag-keys (mode-flag-mask)
+;;   (declare (type mask32 mode-flag-mask))
+;;   (declare (clx-values (clx-list mode-flag-mask)))
+;;   (decode-mask +mode-flag-mask-vector+ mode-flag-mask))
 
-  ;; (defun make-rotation-mask (key-list)
-  ;;   (encode-mask +rotation-mask-vector+ key-list ))
+;; (defun make-rotation-mask (key-list)
+;;   (encode-mask +rotation-mask-vector+ key-list ))
 
 (defmacro define-mask-fns (name mask-size mask-vector mask-type)
   (let ((encode-fn (xintern 'make- name '-mask))
@@ -363,19 +346,19 @@
      (card32-get (+ ,index 28))))
   ((index thing)
    `(progn (card32-put ,index (rr-mode-info-id ,thing))
-     (card16-put (index+ ,index 4) (rr-mode-info-width ,thing))
-     (card16-put (index+ ,index 6) (rr-mode-info-height ,thing))
-     (card32-put (index+ ,index 8) (rr-mode-info-dot-clock ,thing))
-     (card16-put (index+ ,index 12) (rr-mode-info-h-sync-start ,thing))
-     (card16-put (index+ ,index 14) (rr-mode-info-h-sync-end ,thing))
-     (card16-put (index+ ,index 16) (rr-mode-info-h-sync-total ,thing))
-     (card16-put (index+ ,index 18) (rr-mode-info-h-sync-skew ,thing))
-     (card16-put (index+ ,index 20) (rr-mode-info-v-sync-start ,thing))
-     (card16-put (index+ ,index 22) (rr-mode-info-v-sync-end ,thing))
-     (card16-put (index+ ,index 24) (rr-mode-info-v-total ,thing))
-     (card16-put (index+ ,index 26) (rr-mode-info-name-length ,thing))
-     (card32-put (index+ ,index 28) (rr-mode-info-mode-flags ,thing))
-     )))
+           (card16-put (index+ ,index 4) (rr-mode-info-width ,thing))
+           (card16-put (index+ ,index 6) (rr-mode-info-height ,thing))
+           (card32-put (index+ ,index 8) (rr-mode-info-dot-clock ,thing))
+           (card16-put (index+ ,index 12) (rr-mode-info-h-sync-start ,thing))
+           (card16-put (index+ ,index 14) (rr-mode-info-h-sync-end ,thing))
+           (card16-put (index+ ,index 16) (rr-mode-info-h-sync-total ,thing))
+           (card16-put (index+ ,index 18) (rr-mode-info-h-sync-skew ,thing))
+           (card16-put (index+ ,index 20) (rr-mode-info-v-sync-start ,thing))
+           (card16-put (index+ ,index 22) (rr-mode-info-v-sync-end ,thing))
+           (card16-put (index+ ,index 24) (rr-mode-info-v-total ,thing))
+           (card16-put (index+ ,index 26) (rr-mode-info-name-length ,thing))
+           (card32-put (index+ ,index 28) (rr-mode-info-mode-flags ,thing))
+           )))
 
 ;; x-events
 ;; test!!
@@ -383,9 +366,9 @@
   ((data (member8 +rotation-mask-vector+)))
   (card16 sequence)
   (card32 timestamp config-timestamp)
-;  (card32 config-timestamp)
+                                        ;  (card32 config-timestamp)
   (window root-window request-window)
- ; (window request-window)
+                                        ; (window request-window)
   (card16 size-id sub-pixel-order width height width-in-mm height-in-mm))
 
 (declare-event :rr-crtc-change-notify
@@ -439,7 +422,7 @@ values consisting of the server's major and minor protocol versions."
 
 ;; Unexported
 (declaim (ftype (function (display (or null card32) (or null card32))
-                          (values card32 card32 &optional))
+                    (values card32 card32 &optional))
                 rr-maybe-query-version))
 (defun rr-maybe-query-version (display major minor)
   "Return MAJOR and MINOR as multiple values, substituting 0 for NIL,
@@ -487,7 +470,7 @@ screen and sub-pixel order."
        ))))
 
 (defun rr-select-input (window enable)
-"Enables event reception for given window.  Enable may be a select-mask or list of select-keys "
+  "Enables event reception for given window.  Enable may be a select-mask or list of select-keys "
   (let ((display (window-display window))
         (select-mask (if (consp enable) (make-rr-select-mask enable) enable)))
     (declare (type display display)
@@ -503,16 +486,16 @@ screen and sub-pixel order."
                                   (:major (or null card32))
                                   (:minor (or null card32))
                                   (:result-type t))
-                          (values (clx-list rotation-mask-class)
-                                  window
-                                  timestamp
-                                  timestamp
-                                  size-id
-                                  (clx-list rotation-mask-class)
-                                  (clx-list screen-size)
-                                  (or null card16)
-                                  (clx-sequence card16)
-                                  &optional))
+                    (values (clx-list rotation-mask-class)
+                            window
+                            timestamp
+                            timestamp
+                            size-id
+                            (clx-list rotation-mask-class)
+                            (clx-list screen-size)
+                            (or null card16)
+                            (clx-sequence card16)
+                            &optional))
                 rr-get-screen-info))
 (defun rr-get-screen-info (window &key major minor (result-type 'list))
   "Execute the RRGetScreenInfo request and return its result as multiple
@@ -588,13 +571,13 @@ skips executing the RRQueryVersion request."
 
 ;; Version 1.2
 (defun rr-get-screen-size-range (window &key (result-type 'list))
-"Returns a sequence of minimum width, minimum height, max width, max height."
+  "Returns a sequence of minimum width, minimum height, max width, max height."
   (let ((display (window-display window)))
-   (with-buffer-request-and-reply (display (randr-opcode display) nil :sizes (16))
-                                  ((data +rr-getscreensizerange+)
-                                   (window window))
-     (values
-      (sequence-get :format card16 :length 4 :index 8 :result-type result-type)))))
+    (with-buffer-request-and-reply (display (randr-opcode display) nil :sizes (16))
+                                   ((data +rr-getscreensizerange+)
+                                    (window window))
+      (values
+       (sequence-get :format card16 :length 4 :index 8 :result-type result-type)))))
 
 
 ;; doesn't work, asynchronous match error. set screen config works fine.
@@ -658,36 +641,36 @@ values consisting of:
                                   (card32 output)
                                   (card32 config-timestamp))
     (let* ((num-crtcs (card16-get 26))
-          (num-modes (card16-get 28))
-          (num-clones (card16-get 32))
-          (name-length (card16-get 34))
-          (crtc-start 36)
-          (mode-start (index+ crtc-start (index* num-crtcs 4)))
-          (clone-start (index+ mode-start (index* num-modes 4)))
-          (name-start (index+ clone-start (index* num-clones 4))))
+           (num-modes (card16-get 28))
+           (num-clones (card16-get 32))
+           (name-length (card16-get 34))
+           (crtc-start 36)
+           (mode-start (index+ crtc-start (index* num-crtcs 4)))
+           (clone-start (index+ mode-start (index* num-modes 4)))
+           (name-start (index+ clone-start (index* num-clones 4))))
       (values
-        (member8-vector-get 1 +rr-config-status+)       ; Config Status
-        (card32-get 8)                                  ; Timestamp
-        (card32-get 12)                                 ; Current CRTC
-        (card32-get 16)                                 ; Width in mm
-        (card32-get 20)                                 ; Height in mm
-        (member8-vector-get 24 +rr-connection+)         ; Connection Status
-        (member8-vector-get 25 +render-subpixel-order+) ; Subpixel-order
-        (sequence-get :result-type result-type          ; Sequence of CRTCs
-                      :length num-crtcs
-                      :index crtc-start)
-        (card16-get 30)                                 ; Preferred modes
-        (sequence-get :result-type result-type          ; Possible modes
-                      :length num-modes
-                      :index mode-start)
-        (sequence-get :result-type result-type          ; Clones
-                      :length num-clones
-                      :index clone-start)
-        (string-get name-length name-start)             ; Name
-        ))))
+       (member8-vector-get 1 +rr-config-status+)       ; Config Status
+       (card32-get 8)                                  ; Timestamp
+       (card32-get 12)                                 ; Current CRTC
+       (card32-get 16)                                 ; Width in mm
+       (card32-get 20)                                 ; Height in mm
+       (member8-vector-get 24 +rr-connection+)         ; Connection Status
+       (member8-vector-get 25 +render-subpixel-order+) ; Subpixel-order
+       (sequence-get :result-type result-type          ; Sequence of CRTCs
+                     :length num-crtcs
+                     :index crtc-start)
+       (card16-get 30)                                 ; Preferred modes
+       (sequence-get :result-type result-type          ; Possible modes
+                     :length num-modes
+                     :index mode-start)
+       (sequence-get :result-type result-type          ; Clones
+                     :length num-clones
+                     :index clone-start)
+       (string-get name-length name-start)             ; Name
+       ))))
 
 (defun rr-list-output-properties (display output &key (result-type 'list))
-"Returns a list of atom properties for given display. ?keep it simple and return id's or atom-names?"
+  "Returns a list of atom properties for given display. ?keep it simple and return id's or atom-names?"
   (declare (type display display)
            (type card32 output))
   (with-buffer-request-and-reply (display (randr-opcode display) nil :sizes (8 16 32))
@@ -698,7 +681,7 @@ values consisting of:
        (sequence-get :format card32 :result-type result-type :length num-atoms :index +replysize+ :transform #'(lambda (id) (atom-name display id)))))))
 
 (defun rr-query-output-property (display output atom &key (result-type 'list))
-"Querys the current properties of an atom.  Atom may be referenced by either id or keyword"
+  "Querys the current properties of an atom.  Atom may be referenced by either id or keyword"
   (let ((atom (if (typep atom 'keyword) (find-atom display atom) atom)))
     (declare (type display display)
              (type card32 atom))
@@ -730,7 +713,7 @@ values consisting of:
 
 ;; FIXME asynchronous match error
 (defun rr-change-output-property (display output atom mode data &key (atom-type 0))
-"Mode may be 0-replace 1-prepend 2-append. atom-type is obtained by calling rr-get-output-property "
+  "Mode may be 0-replace 1-prepend 2-append. atom-type is obtained by calling rr-get-output-property "
   (let ((atom (if (typep atom 'keyword) (find-atom display atom) atom))
         (data-length (length data))
         (seq (coerce data 'vector))
@@ -807,24 +790,24 @@ values consisting of:
        ))))
 
 (defun rr-destroy-mode (display mode)
-""
- (with-buffer-request (display (randr-opcode display))
-   (data +rr-destroymode+)
-   (card32 mode)))
+  ""
+  (with-buffer-request (display (randr-opcode display))
+    (data +rr-destroymode+)
+    (card32 mode)))
 
 (defun rr-add-output-mode (display output mode)
-""
- (with-buffer-request (display (randr-opcode display))
-   (data +rr-addoutputmode+)
-   (card32 output)
-   (card32 mode)))
+  ""
+  (with-buffer-request (display (randr-opcode display))
+    (data +rr-addoutputmode+)
+    (card32 output)
+    (card32 mode)))
 
 (defun rr-delete-output-mode (display output mode)
-""
- (with-buffer-request (display (randr-opcode display))
-   (data +rr-deleteoutputmode+)
-   (card32 output)
-   (card32 mode)))
+  ""
+  (with-buffer-request (display (randr-opcode display))
+    (data +rr-deleteoutputmode+)
+    (card32 output)
+    (card32 mode)))
 
 (defun rr-get-crtc-info (display crtc config-timestamp &key (result-type 'list))
   ""
@@ -849,7 +832,7 @@ values consisting of:
        (sequence-get :result-type result-type :index pos-start :length pos-outputs)))))
 
 (defun rr-set-crtc-config (display crtc timestamp config-timestamp x y mode rotation output-list)
-"Rotation can be a rotation mask or list of rotation keys."
+  "Rotation can be a rotation mask or list of rotation keys."
   (let ((rot-mask (if (consp rotation) (make-rotation-mask rotation) rotation))
         (seq (coerce output-list 'vector)))
     (with-buffer-request-and-reply (display (randr-opcode display) nil :sizes (8 16 32))
@@ -869,7 +852,7 @@ values consisting of:
        ))))
 
 (defun rr-get-crtc-gamma-size (display crtc)
-"Used to determine length of gamma ramps to submit in set-crtc-gamma"
+  "Used to determine length of gamma ramps to submit in set-crtc-gamma"
   (with-buffer-request-and-reply (display (randr-opcode display) nil :sizes (8 16 32))
                                  ((data +rr-getcrtcgammasize+)
                                   (card32 crtc))
@@ -882,8 +865,8 @@ values consisting of:
                                  ((data +rr-getcrtcgamma+)
                                   (card32 crtc))
     (let* ((size (card16-get 8))
-          (green-start (index+ +replysize+ (index* 2 size)))
-          (blue-start (index+ green-start (index* 2 size))))
+           (green-start (index+ +replysize+ (index* 2 size)))
+           (blue-start (index+ green-start (index* 2 size))))
       (values
        (sequence-get :format card16 :length size :index +replysize+ :result-type result-type)
        (sequence-get :format card16 :length size :index green-start :result-type result-type)
@@ -907,13 +890,13 @@ values consisting of:
 ;; version 1.3
 
 
- (defun rr-get-screen-resources-current (window &key (result-type 'list))
-   "Unlike RRGetScreenResources, this merely returns the current configuration, and does not poll for hardware changes."
-   (let ((display (window-display window)))
-     (with-buffer-request-and-reply (display (randr-opcode display) nil :sizes (8 16 32))
-                                    ((data +rr-getscreenresourcescurrent+)
-                                     (window window))
-       (let* ((num-crtcs (card16-get 16))
+(defun rr-get-screen-resources-current (window &key (result-type 'list))
+  "Unlike RRGetScreenResources, this merely returns the current configuration, and does not poll for hardware changes."
+  (let ((display (window-display window)))
+    (with-buffer-request-and-reply (display (randr-opcode display) nil :sizes (8 16 32))
+                                   ((data +rr-getscreenresourcescurrent+)
+                                    (window window))
+      (let* ((num-crtcs (card16-get 16))
              (num-outputs (card16-get 18))
              (output-start (index+ +replysize+ (index* num-crtcs 4)))
              (num-modeinfos (card16-get 20))
@@ -954,8 +937,6 @@ values consisting of:
 
 ;;       ;((sequence :format card32) seq)
 ;;       )))
-
-
 (defun rr-get-crtc-transform (display crtc &key (result-type 'list))
   ""
   (with-buffer-request-and-reply (display (randr-opcode display) nil :sizes (8 16 32))
@@ -974,14 +955,14 @@ values consisting of:
       (declare (type card16 pend-name cur-name))
       (values
        (rr-transform-get 8)
-       ;(sequence-get :result-type result-type :length 9 :index 8)
+                                        ;(sequence-get :result-type result-type :length 9 :index 8)
        (card8-get 44)
        (sequence-get :result-type result-type :length 9 :index 48)
        (string-get pend-name 96)
        (sequence-get :result-type result-type :length pend-num-params :index pad-pend-start)
        (string-get cur-name cur-name-start)
        (sequence-get :result-type result-type :length cur-num-params :index cur-param-start )
-  ))))
+       ))))
 
 
 ;; (defun rr-get-panning (display crtc)
@@ -1036,20 +1017,20 @@ values consisting of:
 
 
 (defun rr-get-providers (window)
-""
+  ""
   (let ((display (window-display window)))
-      (with-buffer-request-and-reply (display (randr-opcode display) nil :sizes (8 16 32))
-                                     ((data +rr-getproviders+)
-                                      (window window))
-        (values
-         (card32-get 8)  ; timestamp
-         (card16-get 12) ; num providers
-        ; (string-get 1256 14) ; checking if this is supposed to return anything besides just num
-        ; (sequence-get :index 46 :length (card16-get 12) :format card8 :result-type 'list )
-         ))))
+    (with-buffer-request-and-reply (display (randr-opcode display) nil :sizes (8 16 32))
+                                   ((data +rr-getproviders+)
+                                    (window window))
+      (values
+       (card32-get 8)  ; timestamp
+       (card16-get 12) ; num providers
+                                        ; (string-get 1256 14) ; checking if this is supposed to return anything besides just num
+                                        ; (sequence-get :index 46 :length (card16-get 12) :format card8 :result-type 'list )
+       ))))
 
 (defun rr-get-provider-info (display provider config-timestamp)
-""
+  ""
   (with-buffer-request-and-reply (display (randr-opcode display) nil :sizes (8 16 32))
                                  ((data +rr-getproviderinfo+)
                                   (card32 provider)
@@ -1079,7 +1060,7 @@ values consisting of:
 
 
 (defun rr-list-provider-properties (display provider)
-""
+  ""
   (with-buffer-request-and-reply (display (randr-opcode display) nil :sizes (8 16 32))
                                  ((data +rr-listproviderproperties+)
                                   (card32 provider))

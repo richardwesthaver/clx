@@ -1,30 +1,27 @@
-;;; -*- Mode: LISP; Syntax: Common-lisp; Package: XLIB; Base: 10; Lowercase: Yes -*-
+;;; input.lisp --- Definitions for the DISPLAY object
 
-;;; This file contains definitions for the DISPLAY object for Common-Lisp X windows version 11
+;; This file contains definitions for the DISPLAY object for Common-Lisp X
+;; windows version 11
 
-;;;
-;;;			 TEXAS INSTRUMENTS INCORPORATED
-;;;				  P.O. BOX 2909
-;;;			       AUSTIN, TEXAS 78769
-;;;
-;;; Copyright (C) 1987 Texas Instruments Incorporated.
-;;;
-;;; Permission is granted to any individual or institution to use, copy, modify,
-;;; and distribute this software, provided that this complete copyright and
-;;; permission notice is maintained, intact, in all copies and supporting
-;;; documentation.
-;;;
-;;; Texas Instruments Incorporated provides this software "as is" without
-;;; express or implied warranty.
-;;;
+;;			 TEXAS INSTRUMENTS INCORPORATED
+;;				  P.O. BOX 2909
+;;			       AUSTIN, TEXAS 78769
 
-;;;
-;;; Change history:
-;;;
-;;;  Date	Author	Description
-;;; -------------------------------------------------------------------------------------
-;;; 12/10/87	LGO	Created
+;; Copyright (C) 1987 Texas Instruments Incorporated.
 
+;; Permission is granted to any individual or institution to use, copy, modify,
+;; and distribute this software, provided that this complete copyright and
+;; permission notice is maintained, intact, in all copies and supporting
+;; documentation.
+
+;; Texas Instruments Incorporated provides this software "as is" without
+;; express or implied warranty.
+
+;; Change history:
+;;
+;;  Date	Author	Description
+;; -------------------------------------------------------------------------------------
+;; 12/10/87	LGO	Created
 (in-package :xlib)
 
 ;; Event Resource
@@ -54,29 +51,27 @@
 
 ;; Extensions are handled as follows:
 ;; DEFINITION:	Use DEFINE-EXTENSION
-;;
+
 ;; CODE:	Use EXTENSION-CODE to get the X11 opcode for an extension.
 ;;		This looks up the code on the display-extension-alist.
-;;
+
 ;; EVENTS:	Use DECLARE-EVENT to define events. This calls ALLOCATE-EXTENSION-EVENT-CODE
 ;;		at LOAD time to define an internal event-code number
 ;;		(stored in the 'event-code property of the event-name)
 ;;		used to index the following vectors:
 ;;		*event-key-vector* 	Used for getting the event-key
 ;;		*event-macro-vector*	Used for getting the event-parameter getting macros
-;;
+
 ;;		The GET-INTERNAL-EVENT-CODE function can be called at runtime to convert
 ;;		a server event-code into an internal event-code used to index the following
 ;;		vectors:
 ;;		*event-handler-vector*	Used for getting the event-handler function
 ;;		*event-send-vector*	Used for getting the event-sending function
-;;
+
 ;;		The GET-EXTERNAL-EVENT-CODE function can be called at runtime to convert
 ;;		internal event-codes to external (server) codes.
-;;
-;; ERRORS:	Use DEFINE-ERROR to define new error decodings.
-;;
 
+;; ERRORS:	Use DEFINE-ERROR to define new error decodings.
 
 ;; Any event-code greater than 34 is for an extension
 (defparameter *first-extension-event-code* 35)
@@ -112,7 +107,7 @@
     (dolist (extension *extensions* nil)
       (when (member key (second extension))
         (return t)))))
-    
+
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defun allocate-extension-event-code (name)
     ;; Allocate an event-code for an extension.  This is executed at
@@ -143,16 +138,16 @@
   (setq code (logand #x7f code))
   (if (< code *first-extension-event-code*)
       code
-    (let* ((code-offset (- code *first-extension-event-code*))
-	   (event-extensions (display-event-extensions display))
-	   (code (if (< code-offset (length event-extensions))
-		     (aref event-extensions code-offset)
-		   0)))
-      (declare (type card8 code-offset code))
-      (when (zerop code)
-	(x-cerror "Ignore the event"
-		  'unimplemented-event :event-code code :display display))
-      code)))
+      (let* ((code-offset (- code *first-extension-event-code*))
+	     (event-extensions (display-event-extensions display))
+	     (code (if (< code-offset (length event-extensions))
+		       (aref event-extensions code-offset)
+		       0)))
+        (declare (type card8 code-offset code))
+        (when (zerop code)
+	  (x-cerror "Ignore the event"
+		    'unimplemented-event :event-code code :display display))
+        code)))
 
 (defun get-external-event-code (display event)
   ;; Given an X11 event name, return the event-code
@@ -200,7 +195,7 @@
 		(declare (type card8 max-event))
 		(when (>= max-event (length event-extensions))
 		  (let ((new-extensions (make-array (+ max-event 16) :element-type 'card8
-						    :initial-element 0)))
+						                     :initial-element 0)))
 		    (declare (type vector new-extensions))
 		    (replace new-extensions event-extensions)
 		    (setq event-extensions new-extensions))))
@@ -212,10 +207,7 @@
     (setf (display-event-extensions display) event-extensions)
     (setf (display-extension-alist display) extension-alist)))
 
-;;
 ;; Reply handlers
-;;
-
 (defvar *pending-command-free-list* nil)
 
 (defun start-pending-command (display)
@@ -251,7 +243,7 @@
 	(declare (type (or null reply-buffer) reply-buffer))
 	(if reply-buffer
 	    (deallocate-reply-buffer reply-buffer)
-	  (return nil)))))
+	    (return nil)))))
   ;; Clear pointers to help the Garbage Collector
   (setf (pending-command-process pending-command) nil)
   ;; Deallocate this pending-command
@@ -259,19 +251,17 @@
 			pending-command-next pending-command)
   nil)
 
-;;;
-
 (defvar *reply-buffer-free-lists* (make-array 32 :initial-element nil))
 
 (defun allocate-reply-buffer (size)
   (declare (type array-index size))
   (if (index<= size +replysize+)
       (allocate-event)
-    (let ((index (integer-length (index1- size))))
-      (declare (type array-index index))
-      (or (threaded-atomic-pop (svref *reply-buffer-free-lists* index)
-			       reply-next reply-buffer)
-	  (make-reply-buffer (index-ash 1 index))))))
+      (let ((index (integer-length (index1- size))))
+        (declare (type array-index index))
+        (or (threaded-atomic-pop (svref *reply-buffer-free-lists* index)
+			         reply-next reply-buffer)
+	    (make-reply-buffer (index-ash 1 index))))))
 
 (defun deallocate-reply-buffer (reply-buffer)
   (declare (type reply-buffer reply-buffer))
@@ -279,45 +269,43 @@
     (declare (type array-index size))
     (if (index<= size +replysize+)
 	(deallocate-event reply-buffer)
-      (let ((index (integer-length (index1- size))))
-	(declare (type array-index index))
-	(threaded-atomic-push reply-buffer (svref *reply-buffer-free-lists* index)
-			      reply-next reply-buffer)))))
-
-;;;
+        (let ((index (integer-length (index1- size))))
+	  (declare (type array-index index))
+	  (threaded-atomic-push reply-buffer (svref *reply-buffer-free-lists* index)
+			        reply-next reply-buffer)))))
 
 (defun read-error-input (display sequence reply-buffer token)
   (declare (type display display)
 	   (type reply-buffer reply-buffer)
 	   (type card16 sequence))
   (tagbody
-    start
-       (with-event-queue-internal (display)
-	 (let ((command 
-		 ;; Find any pending command with this sequence number.
-		 (threaded-dolist (pending-command (display-pending-commands display)
-						   pending-command-next pending-command)
-		   (when (= (pending-command-sequence pending-command) sequence)
-		     (return pending-command)))))
-	   (declare (type (or null pending-command) command))
-	   (cond ((not (null command))
-		  ;; Give this reply to the pending command
-		  (threaded-nconc reply-buffer (pending-command-reply-buffer command)
-				  reply-next reply-buffer)
-		  (process-wakeup (pending-command-process command)))
-		 ((member :immediately (display-report-asynchronous-errors display))
-		  ;; No pending command and we should report the error immediately
-		  (go report-error))
-		 (t
-		  ;; No pending command found, count this as an asynchronous error
-		  (threaded-nconc reply-buffer (display-asynchronous-errors display)
-				  reply-next reply-buffer)))))
-       (return-from read-error-input nil)
-    report-error
-       (note-input-complete display token)
-       (apply #'report-error display
-	      (prog1 (make-error display reply-buffer t)
-		     (deallocate-event reply-buffer)))))
+   start
+     (with-event-queue-internal (display)
+       (let ((command 
+	       ;; Find any pending command with this sequence number.
+	       (threaded-dolist (pending-command (display-pending-commands display)
+						 pending-command-next pending-command)
+		 (when (= (pending-command-sequence pending-command) sequence)
+		   (return pending-command)))))
+	 (declare (type (or null pending-command) command))
+	 (cond ((not (null command))
+		;; Give this reply to the pending command
+		(threaded-nconc reply-buffer (pending-command-reply-buffer command)
+				reply-next reply-buffer)
+		(process-wakeup (pending-command-process command)))
+	       ((member :immediately (display-report-asynchronous-errors display))
+		;; No pending command and we should report the error immediately
+		(go report-error))
+	       (t
+		;; No pending command found, count this as an asynchronous error
+		(threaded-nconc reply-buffer (display-asynchronous-errors display)
+				reply-next reply-buffer)))))
+     (return-from read-error-input nil)
+   report-error
+     (note-input-complete display token)
+     (apply #'report-error display
+	    (prog1 (make-error display reply-buffer t)
+	      (deallocate-event reply-buffer)))))
 
 (defun read-reply-input (display sequence length reply-buffer)
   (declare (type display display)
@@ -325,36 +313,36 @@
 	   (type card16 sequence)
 	   (type array-index length))
   (unwind-protect 
-      (progn
-	(when (index< +replysize+ length)
-	  (let ((repbuf nil))
-	    (declare (type (or null reply-buffer) repbuf))
-	    (unwind-protect
-		(progn
-		  (setq repbuf (allocate-reply-buffer length))
-		  (buffer-replace (reply-ibuf8 repbuf) (reply-ibuf8 reply-buffer)
-				  0 +replysize+)
-		  (deallocate-event (shiftf reply-buffer repbuf nil)))
-	      (when repbuf
-		(deallocate-reply-buffer repbuf))))
-	  (when (buffer-input display (reply-ibuf8 reply-buffer) +replysize+ length)
-	    (return-from read-reply-input t))
-	  (setf (reply-data-size reply-buffer) length))
-	(with-event-queue-internal (display)
-	  ;; Find any pending command with this sequence number.
-	  (let ((command 
-		  (threaded-dolist (pending-command (display-pending-commands display)
-						    pending-command-next pending-command)
-		    (when (= (pending-command-sequence pending-command) sequence)
-		      (return pending-command)))))
-	    (declare (type (or null pending-command) command))
-	    (when command 
-	      ;; Give this reply to the pending command
-	      (threaded-nconc (shiftf reply-buffer nil)
-			      (pending-command-reply-buffer command)
-			      reply-next reply-buffer)
-	      (process-wakeup (pending-command-process command)))))
-	nil)
+       (progn
+	 (when (index< +replysize+ length)
+	   (let ((repbuf nil))
+	     (declare (type (or null reply-buffer) repbuf))
+	     (unwind-protect
+		  (progn
+		    (setq repbuf (allocate-reply-buffer length))
+		    (buffer-replace (reply-ibuf8 repbuf) (reply-ibuf8 reply-buffer)
+				    0 +replysize+)
+		    (deallocate-event (shiftf reply-buffer repbuf nil)))
+	       (when repbuf
+		 (deallocate-reply-buffer repbuf))))
+	   (when (buffer-input display (reply-ibuf8 reply-buffer) +replysize+ length)
+	     (return-from read-reply-input t))
+	   (setf (reply-data-size reply-buffer) length))
+	 (with-event-queue-internal (display)
+	   ;; Find any pending command with this sequence number.
+	   (let ((command 
+		   (threaded-dolist (pending-command (display-pending-commands display)
+						     pending-command-next pending-command)
+		     (when (= (pending-command-sequence pending-command) sequence)
+		       (return pending-command)))))
+	     (declare (type (or null pending-command) command))
+	     (when command 
+	       ;; Give this reply to the pending command
+	       (threaded-nconc (shiftf reply-buffer nil)
+			       (pending-command-reply-buffer command)
+			       reply-next reply-buffer)
+	       (process-wakeup (pending-command-process command)))))
+	 nil)
     (when reply-buffer
       (deallocate-reply-buffer reply-buffer))))
 
@@ -395,77 +383,77 @@
 	(token (or (current-process) (cons nil nil))))
     (declare (type (or null reply-buffer) reply-buffer))
     (unwind-protect 
-	(tagbody
+	 (tagbody
 	  loop
-	     (when (display-dead display)
-	       (x-error 'closed-display :display display))
-	     (when (apply predicate predicate-args)
-	       (return-from read-input nil))
-	     ;; Check and see if we have to force output
-	     (when (and force-output-p
-			(or (and (not (eq (display-input-in-progress display) token))
-				 (not (conditional-store
-					(display-input-in-progress display) nil token)))
-			    (null (buffer-listen display))))
-	       (go force-output))
-	   ;; Ensure that only one process is reading input.
-	   (unless (or (eq (display-input-in-progress display) token)
-		       (conditional-store (display-input-in-progress display) nil token))
-	     (if (eql timeout 0)
-		 (return-from read-input :timeout)
-		 (apply #'process-block "CLX Input Lock"
-			#'(lambda (display predicate &rest predicate-args)
-			    (declare (type display display)
-				     (dynamic-extent predicate-args)
-				     (type function predicate)
-				     (dynamic-extent predicate))
-			    (or (apply predicate predicate-args)
-				(null (display-input-in-progress display))
-				(not (null (display-dead display)))))
-			display predicate predicate-args))
-	       (go loop))
-	     ;; Now start gobbling.
-	     (setq reply-buffer (allocate-event))
-	     (with-buffer-input (reply-buffer :sizes (8 16 32))
-	       (let ((type 0))
-		 (declare (type card8 type))
-		 ;; Wait for input before we disallow aborts.
-		 (unless (eql timeout 0)
-		   (let ((eof-p (buffer-input-wait display timeout)))
-		     (when eof-p (return-from read-input eof-p))))
-		 (without-aborts
-		   (let ((eof-p (buffer-input display buffer-bbuf 0 +replysize+
-					      (if force-output-p 0 timeout))))
-		     (when eof-p
-		       (when (eq eof-p :timeout)
-			 (if force-output-p
-			     (go force-output)
-			   (return-from read-input :timeout)))
-		       (setf (display-dead display) t)
-		       (return-from read-input eof-p)))
-		   (setf (reply-data-size reply-buffer) +replysize+)
-		   (when (= (the card8 (setq type (read-card8 0))) 1)
-		     ;; Normal replies can be longer than +replysize+, so we
-		     ;; have to handle them while aborts are still disallowed.
-		     (let ((value
-			     (read-reply-input
-			       display (read-card16 2)
-			       (index+ +replysize+ (index* (read-card32 4) 4))
-			       (shiftf reply-buffer nil))))
-		       (when value
-			 (return-from read-input value))
-		       (go loop))))
-		 (if (zerop type)
-		     (read-error-input
-		       display (read-card16 2) (shiftf reply-buffer nil) token)
-		   (read-event-input
+	    (when (display-dead display)
+	      (x-error 'closed-display :display display))
+	    (when (apply predicate predicate-args)
+	      (return-from read-input nil))
+	    ;; Check and see if we have to force output
+	    (when (and force-output-p
+		       (or (and (not (eq (display-input-in-progress display) token))
+				(not (conditional-store
+				      (display-input-in-progress display) nil token)))
+			   (null (buffer-listen display))))
+	      (go force-output))
+	    ;; Ensure that only one process is reading input.
+	    (unless (or (eq (display-input-in-progress display) token)
+		        (conditional-store (display-input-in-progress display) nil token))
+	      (if (eql timeout 0)
+		  (return-from read-input :timeout)
+		  (apply #'process-block "CLX Input Lock"
+			 #'(lambda (display predicate &rest predicate-args)
+			     (declare (type display display)
+				      (dynamic-extent predicate-args)
+				      (type function predicate)
+				      (dynamic-extent predicate))
+			     (or (apply predicate predicate-args)
+				 (null (display-input-in-progress display))
+				 (not (null (display-dead display)))))
+			 display predicate predicate-args))
+	      (go loop))
+	    ;; Now start gobbling.
+	    (setq reply-buffer (allocate-event))
+	    (with-buffer-input (reply-buffer :sizes (8 16 32))
+	      (let ((type 0))
+		(declare (type card8 type))
+		;; Wait for input before we disallow aborts.
+		(unless (eql timeout 0)
+		  (let ((eof-p (buffer-input-wait display timeout)))
+		    (when eof-p (return-from read-input eof-p))))
+		(without-aborts
+		  (let ((eof-p (buffer-input display buffer-bbuf 0 +replysize+
+					     (if force-output-p 0 timeout))))
+		    (when eof-p
+		      (when (eq eof-p :timeout)
+			(if force-output-p
+			    (go force-output)
+			    (return-from read-input :timeout)))
+		      (setf (display-dead display) t)
+		      (return-from read-input eof-p)))
+		  (setf (reply-data-size reply-buffer) +replysize+)
+		  (when (= (the card8 (setq type (read-card8 0))) 1)
+		    ;; Normal replies can be longer than +replysize+, so we
+		    ;; have to handle them while aborts are still disallowed.
+		    (let ((value
+			    (read-reply-input
+			     display (read-card16 2)
+			     (index+ +replysize+ (index* (read-card32 4) 4))
+			     (shiftf reply-buffer nil))))
+		      (when value
+			(return-from read-input value))
+		      (go loop))))
+		(if (zerop type)
+		    (read-error-input
+		     display (read-card16 2) (shiftf reply-buffer nil) token)
+		    (read-event-input
 		     display (read-card8 0) (shiftf reply-buffer nil)))))
-	     (go loop)
+	    (go loop)
 	  force-output 
-	     (note-input-complete display token)
-	     (display-force-output display)
-	     (setq force-output-p nil)
-	     (go loop))
+	    (note-input-complete display token)
+	    (display-force-output display)
+	    (setq force-output-p nil)
+	    (go loop))
       (when (not (null reply-buffer))
 	(deallocate-reply-buffer reply-buffer))
       (note-input-complete display token))))
@@ -475,17 +463,17 @@
 	     (member mode (display-report-asynchronous-errors display)))
     (let ((aborted t))
       (unwind-protect 
-	  (loop
-	    (let ((error
-		    (with-event-queue-internal (display)
-		      (threaded-pop (display-asynchronous-errors display)
-				    reply-next reply-buffer))))
-	      (declare (type (or null reply-buffer) error))
-	      (if error
-		  (apply #'report-error display
-			 (prog1 (make-error display error t)
-				(deallocate-event error)))
-		(return (setq aborted nil)))))
+	   (loop
+	     (let ((error
+		     (with-event-queue-internal (display)
+		       (threaded-pop (display-asynchronous-errors display)
+				     reply-next reply-buffer))))
+	       (declare (type (or null reply-buffer) error))
+	       (if error
+		   (apply #'report-error display
+			  (prog1 (make-error display error t)
+			    (deallocate-event error)))
+		   (return (setq aborted nil)))))
 	;; If we get aborted out of this, deallocate all outstanding asynchronous
 	;; errors.
 	(when aborted 
@@ -497,7 +485,7 @@
 		(declare (type (or null reply-buffer) reply-buffer))
 		(if reply-buffer
 		    (deallocate-event reply-buffer)
-		  (return nil))))))))))
+		    (return nil))))))))))
 
 (defun wait-for-event (display timeout force-output-p)
   (declare (type display display)
@@ -506,10 +494,10 @@
   (let ((event-process-p (not (eql timeout 0))))
     (declare (type generalized-boolean event-process-p))
     (unwind-protect
-	(loop
-	  (when event-process-p
-	    (conditional-store (display-event-process display) nil (current-process)))
-	  (let ((eof (read-input
+	 (loop
+	   (when event-process-p
+	     (conditional-store (display-event-process display) nil (current-process)))
+	   (let ((eof (read-input
 		       display timeout force-output-p 
 		       #'(lambda (display)
 			   (declare (type display display))
@@ -519,12 +507,12 @@
 					    (display-report-asynchronous-errors display))
 				    t)))
 		       display)))
-	    (when eof (return eof)))
-	  ;; Report asynchronous errors here if the user wants us to.
-	  (when event-process-p
-	    (report-asynchronous-errors display :before-event-handling))
-	  (when (not (null (display-new-events display)))
-	    (return nil)))
+	     (when eof (return eof)))
+	   ;; Report asynchronous errors here if the user wants us to.
+	   (when event-process-p
+	     (report-asynchronous-errors display :before-event-handling))
+	   (when (not (null (display-new-events display)))
+	     (return nil)))
       (when (and event-process-p
 		 (eq (display-event-process display) (current-process)))
 	(setf (display-event-process display) nil)))))
@@ -549,11 +537,10 @@
 	(ecase (read-card8 0)
 	  (0 (apply #'report-error display
 		    (prog1 (make-error display reply-buffer nil)
-			   (deallocate-reply-buffer reply-buffer))))
+		      (deallocate-reply-buffer reply-buffer))))
 	  (1 (return reply-buffer)))))))
 
 ;;;
-
 (defun event-listen (display &optional (timeout 0))
   (declare (type display display)
 	   (type (or null number) timeout)
@@ -566,23 +553,23 @@
 			     (symbol-value current-event-symbol)))
 	 (queue (if current-event
 		    (reply-next (the reply-buffer current-event))
-		  (display-event-queue-head display))))
+		    (display-event-queue-head display))))
     (declare (type symbol current-event-symbol)
 	     (type (or null reply-buffer) current-event queue))
     (if queue
 	(values
-	  (with-event-queue-internal (display :timeout timeout)
-	    (threaded-length queue reply-next reply-buffer))
-	  nil)
-      (with-event-queue (display :timeout timeout :inline t)
-	(let ((eof-or-timeout (wait-for-event display timeout nil)))
-	  (if eof-or-timeout
-	      (values nil eof-or-timeout)
-	    (values 
-	      (with-event-queue-internal (display :timeout timeout)
-		(threaded-length (display-new-events display)
-				 reply-next reply-buffer))
-	      nil)))))))
+	 (with-event-queue-internal (display :timeout timeout)
+	   (threaded-length queue reply-next reply-buffer))
+	 nil)
+        (with-event-queue (display :timeout timeout :inline t)
+	  (let ((eof-or-timeout (wait-for-event display timeout nil)))
+	    (if eof-or-timeout
+	        (values nil eof-or-timeout)
+	        (values 
+	         (with-event-queue-internal (display :timeout timeout)
+		   (threaded-length (display-new-events display)
+				    reply-next reply-buffer))
+	         nil)))))))
 
 (defun queue-event (display event-key &rest args &key append-p send-event-p &allow-other-keys)
   ;; The event is put at the head of the queue if append-p is nil, else the tail.
@@ -616,11 +603,11 @@
     (with-event-queue (display)
       (if append-p
 	  (enqueue-event event display)
-	(with-event-queue-internal (display)
-	  (threaded-requeue event
-			    (display-event-queue-head display)
-			    (display-event-queue-tail display)
-			    reply-next reply-buffer))))))
+	  (with-event-queue-internal (display)
+	    (threaded-requeue event
+			      (display-event-queue-head display)
+			      (display-event-queue-tail display)
+			      reply-next reply-buffer))))))
 
 (defun enqueue-event (new-event display)
   (declare (type reply-buffer new-event)
@@ -633,15 +620,15 @@
 	     (type (or null keyword) event-key))
     (if (null event-key)
 	(unwind-protect
-	    (cerror "Ignore this event" "No handler for ~s event" event-key)
+	     (cerror "Ignore this event" "No handler for ~s event" event-key)
 	  (deallocate-event new-event))
-      (with-event-queue-internal (display)
-	(threaded-enqueue new-event
-			  (display-event-queue-head display)
-			  (display-event-queue-tail display)
-			  reply-next reply-buffer)
-	(unless (display-new-events display)
-	  (setf (display-new-events display) new-event))))))
+        (with-event-queue-internal (display)
+	  (threaded-enqueue new-event
+			    (display-event-queue-head display)
+			    (display-event-queue-tail display)
+			    reply-next reply-buffer)
+	  (unless (display-new-events display)
+	    (setf (display-new-events display) new-event))))))
 
 (defmacro define-event (name code)
   `(eval-when (:compile-toplevel :load-toplevel :execute)
@@ -710,32 +697,32 @@
 	 (put-function (xintern name '-event-put)))
     (multiple-value-bind (get-code get-index get-sizes)
 	(get-put-items
-	  2 declares nil
-	  #'(lambda (type index item args)
-	      (flet ((event-get (type index item args)
-		       (unless (member type '(pad8 pad16))
-			 `(,(kintern item)
-			   (,(getify type) ,index ,@args)))))
-		(if (atom item)
-		    (event-get type index item args)
-		  (mapcan #'(lambda (item)
-			      (event-get type index item args))
-			  item)))))
+	 2 declares nil
+	 #'(lambda (type index item args)
+	     (flet ((event-get (type index item args)
+		      (unless (member type '(pad8 pad16))
+			`(,(kintern item)
+			  (,(getify type) ,index ,@args)))))
+	       (if (atom item)
+		   (event-get type index item args)
+		   (mapcan #'(lambda (item)
+			       (event-get type index item args))
+			   item)))))
       (declare (ignore get-index))
       (multiple-value-bind (put-code put-index put-sizes)
 	  (get-put-items
-	    2 declares t
-	    #'(lambda (type index item args)
-		(unless (member type '(pad8 pad16))
-		  (if (atom item)
-		      (progn
-			(push item keywords)
-			`((,(putify type) ,index ,item ,@args)))
-		    (let ((names (mapcar #'(lambda (name) (kintern name))
-					 item)))
-		      (setq keywords (append item keywords))
-		      `((,(putify type) ,index
-			 (check-consistency ',names ,@item) ,@args)))))))
+	   2 declares t
+	   #'(lambda (type index item args)
+	       (unless (member type '(pad8 pad16))
+		 (if (atom item)
+		     (progn
+		       (push item keywords)
+		       `((,(putify type) ,index ,item ,@args)))
+		     (let ((names (mapcar #'(lambda (name) (kintern name))
+					  item)))
+		       (setq keywords (append item keywords))
+		       `((,(putify type) ,index
+			  (check-consistency ',names ,@item) ,@args)))))))
 	(declare (ignore put-index))
 	`(within-definition (,name declare-event)
 	   (defun ,get-macro (display event-key variable)
@@ -766,14 +753,14 @@
 			,@get-code)))
 
 	   (defun ,put-function (display &key ,@(setq keywords (nreverse keywords))
-				 &allow-other-keys)
+				         &allow-other-keys)
 	     (declare (type display display))
 	     ,(when (member 'sequence keywords)
 		`(unless sequence (setq sequence (display-request-number display))))
 	     (with-buffer-output (display :sizes ,put-sizes
 					  :index (index+ (buffer-boffset display) 12))
 	       ,@put-code))
-       
+           
 	   ,@(mapcar #'(lambda (name)
 			 (allocate-extension-event-code name)
 			 `(let ((event-code (or (get ',name 'event-code)
@@ -796,7 +783,7 @@
 	  (when (and arg (not (eq arg value)))
 	    (x-error 'inconsistent-parameters
 		     :parameters (mapcan #'list names args)))
-	(setq value arg)))
+	  (setq value arg)))
     value))
 
 (declare-event (:key-press :key-release :button-press :button-release)
@@ -809,8 +796,7 @@
   ((or null window) child)
   (int16 root-x root-y x y)
   (card16 state)
-  (boolean same-screen-p)
-  )
+  (boolean same-screen-p))
 
 (declare-event :motion-notify
   ((data boolean) hint-p)
@@ -836,7 +822,7 @@
 
 (declare-event (:focus-in :focus-out)
   ((data (member8 :ancestor :virtual :inferior :nonlinear :nonlinear-virtual
-		  :pointer :pointer-root :none))
+		            :pointer :pointer-root :none))
    kind)
   (card16 sequence)
   (window (window event-window))
@@ -948,24 +934,21 @@
   (card16 sequence)
   ((or null card32) time)
   (window (window event-window)) 
-  (keyword selection) ;; keyword
-  )
+  (keyword selection)) ; keyword
 
 (declare-event :selection-request
   (card16 sequence)
   ((or null card32) time)
   (window (window event-window) requestor)
   (keyword selection target)
-  ((or null keyword) property)
-  )
+  ((or null keyword) property))
 
 (declare-event :selection-notify
   (card16 sequence)
   ((or null card32) time)
   (window (window event-window))
   (keyword selection target)
-  ((or null keyword) property)
-  )
+  ((or null keyword) property))
 
 (declare-event :colormap-notify
   (card16 sequence)
@@ -990,26 +973,26 @@
 (defun event-loop-setup (display)
   (declare (type display display)
 	   (clx-values progv-vars progv-vals
-		   current-event-symbol current-event-discarded-p-symbol))
+		       current-event-symbol current-event-discarded-p-symbol))
   (let* ((progv-vars (display-current-event-symbol display))
 	 (current-event-symbol (first progv-vars))
 	 (current-event-discarded-p-symbol (second progv-vars)))
     (declare (type list progv-vars)
 	     (type symbol current-event-symbol current-event-discarded-p-symbol))
     (values
-      progv-vars 
-      (list (if (boundp current-event-symbol)
-		;; The current event is already bound, so bind it to the next
-		;; event.
-		(let ((event (symbol-value current-event-symbol)))
-		  (declare (type (or null reply-buffer) event))
-		  (and event (reply-next (the reply-buffer event))))
-	      ;; The current event isn't bound, so bind it to the head of the
-	      ;; event queue.
-	      (display-event-queue-head display))
-	    nil)
-      current-event-symbol
-      current-event-discarded-p-symbol)))
+     progv-vars 
+     (list (if (boundp current-event-symbol)
+	       ;; The current event is already bound, so bind it to the next
+	       ;; event.
+	       (let ((event (symbol-value current-event-symbol)))
+		 (declare (type (or null reply-buffer) event))
+		 (and event (reply-next (the reply-buffer event))))
+	       ;; The current event isn't bound, so bind it to the head of the
+	       ;; event queue.
+	       (display-event-queue-head display))
+	   nil)
+     current-event-symbol
+     current-event-discarded-p-symbol)))
 
 (defun event-loop-step-before (display timeout force-output-p current-event-symbol)
   (declare (type display display)
@@ -1059,8 +1042,8 @@
       next)))
 
 (defun event-loop-step-after
-       (display event discard-p current-event-symbol current-event-discarded-p-symbol
-	&optional aborted)
+    (display event discard-p current-event-symbol current-event-discarded-p-symbol
+     &optional aborted)
   (declare (type display display)
 	   (type reply-buffer event)
 	   (type generalized-boolean discard-p aborted)
@@ -1097,21 +1080,21 @@
 	   (loop
 	     (multiple-value-bind (.event. .eof-or-timeout.)
 		 (event-loop-step-before
-		   .display. .timeout. .force-output-p.
-		   .current-event-symbol.)
+		  .display. .timeout. .force-output-p.
+		  .current-event-symbol.)
 	       (declare (type (or null reply-buffer) .event.))
 	       (when (null .event.) (return (values nil .eof-or-timeout.)))
 	       (let ((.aborted. t))
 		 (unwind-protect 
-		     (progn
-		       (let ((,event .event.))
-			 (declare (type reply-buffer ,event))
-			 ,@body)
-		       (setq .aborted. nil))
+		      (progn
+		        (let ((,event .event.))
+			  (declare (type reply-buffer ,event))
+			  ,@body)
+		        (setq .aborted. nil))
 		   (event-loop-step-after
-		     .display. .event. .discard-p.
-		     .current-event-symbol. .current-event-discarded-p-symbol.
-		     .aborted.))))))))))
+		    .display. .event. .discard-p.
+		    .current-event-symbol. .current-event-discarded-p-symbol.
+		    .aborted.))))))))))
 
 (defun discard-current-event (display)
   ;; Discard the current event for DISPLAY.
@@ -1139,9 +1122,7 @@
       ;; Return whether the event queue is empty
       (not (null (reply-next (the reply-buffer event)))))))
 
-;;
 ;; PROCESS-EVENT
-;;
 (defun process-event (display &key handler timeout peek-p discard-p (force-output-p t))
   ;; If force-output-p is true, first invokes display-force-output.  Invokes handler
   ;; on each queued event until handler returns non-nil, and that returned object is
@@ -1181,12 +1162,12 @@
                     (unless peek-p
                       (discard-current-event display))
                     (return result)))
-              (cerror "Ignore this event"
-                      "No handler for ~s event"
-                      (svref *event-key-vector* event-code))))
-        (cerror "Ignore this event"
-                "Server Error: event with unknown event code ~d received."
-                event-code)))))
+                (cerror "Ignore this event"
+                        "No handler for ~s event"
+                        (svref *event-key-vector* event-code))))
+          (cerror "Ignore this event"
+                  "Server Error: event with unknown event code ~d received."
+                  event-code)))))
 
 (defun make-event-handlers (&key (type 'vector) default)
   (declare (type t type)			;Sequence type specifier
@@ -1194,7 +1175,7 @@
 	   (clx-values sequence))			;Default handler for initial content
   ;; Makes a handler sequence suitable for process-event
   (make-sequence type +max-events+ :initial-element default))
-   
+
 (defun event-handler (handlers event-key)
   (declare (type sequence handlers)
 	   (type event-key event-key)
@@ -1231,18 +1212,15 @@
   ;; as for keyword args in a lambda lists.  If no t/otherwise clause appears, it is
   ;; equivalent to having one that returns nil.
   (declare (arglist (display &key timeout peek-p discard-p (force-output-p t))
-		   (event-or-events ((&rest args) |...|) &body body) |...|))
+		    (event-or-events ((&rest args) |...|) &body body) |...|))
   ;; Event-case is just event-cond with the whole body in the test-form
   `(event-cond ,args
-	       ,@(mapcar
-		   #'(lambda (clause)
-		       `(,(car clause) ,(cadr clause) (progn ,@(cddr clause))))
-		   clauses)))
+     ,@(mapcar
+	#'(lambda (clause)
+	    `(,(car clause) ,(cadr clause) (progn ,@(cddr clause))))
+	clauses)))
 
-;;
 ;; EVENT-COND
-;; 
-
 (defmacro event-cond ((display &key timeout peek-p discard-p (force-output-p t))
 		      &body clauses)
   ;; The clauses of event-cond are of the form:
@@ -1285,7 +1263,7 @@
   ;;			elapsed.
   ;;
   (declare (arglist (display &key timeout peek-p discard-p force-output-p)
-		   (event-or-events (&rest args) test-form &body body) |...|))
+		    (event-or-events (&rest args) test-form &body body) |...|))
   (let ((event (gensym))
 	(disp (gensym))
 	(peek (gensym)))
@@ -1304,10 +1282,10 @@
 
 (defun universal-event-get-macro (display event-key variable)
   (getf
-    `(:display (the display ,display) :event-key (the keyword ,event-key) :event-code
-	       (the card8 (logand 127 (read-card8 0))) :send-event-p
-	       (logbitp 7 (read-card8 0)))
-    variable))
+   `(:display (the display ,display) :event-key (the keyword ,event-key) :event-code
+	      (the card8 (logand 127 (read-card8 0))) :send-event-p
+	      (logbitp 7 (read-card8 0)))
+   variable))
 
 (defmacro event-dispatch ((display event peek-p) &body clauses)
   ;; Helper macro for event-case
@@ -1319,52 +1297,52 @@
        (let ((,event-key (svref *event-key-vector* (event-code ,event))))
 	 (case ,event-key
 	   ,@(mapcar
-	       #'(lambda (clause)		; Translate event-cond clause to case clause
-		   (let* ((events (first clause))
-			  (arglist (second clause))
-			  (test-form (third clause))
-			  (body-forms (cdddr clause)))
-		     (flet ((event-clause (display peek-p first-form rest-of-forms)
-			      (if rest-of-forms
-				  `(when ,first-form
-				     (unless ,peek-p (discard-current-event ,display))
-				     (return (progn ,@rest-of-forms)))
-				;; No body forms, return the result of the test form
-				(let ((result (gensym)))
-				  `(let ((,result ,first-form))
-				     (when ,result
-				       (unless ,peek-p (discard-current-event ,display))
-				       (return ,result)))))))
+	      #'(lambda (clause)		; Translate event-cond clause to case clause
+		  (let* ((events (first clause))
+			 (arglist (second clause))
+			 (test-form (third clause))
+			 (body-forms (cdddr clause)))
+		    (flet ((event-clause (display peek-p first-form rest-of-forms)
+			     (if rest-of-forms
+				 `(when ,first-form
+				    (unless ,peek-p (discard-current-event ,display))
+				    (return (progn ,@rest-of-forms)))
+				 ;; No body forms, return the result of the test form
+				 (let ((result (gensym)))
+				   `(let ((,result ,first-form))
+				      (when ,result
+				        (unless ,peek-p (discard-current-event ,display))
+				        (return ,result)))))))
 
-		       (if (member events '(otherwise t))
-			   ;; code for OTHERWISE clause.
-			   ;; Find all events NOT used by other clauses
-			   (let ((keys (do ((i 0 (1+ i))
-					    (key nil)
-					    (result nil))
-					   ((>= i +max-events+) result)
-					 (setq key (svref *event-key-vector* i))
-					 (when (and key (zerop (aref all-events i)))
-					   (push key result)))))
-			     `(otherwise
-				(binding-event-values
+		      (if (member events '(otherwise t))
+			  ;; code for OTHERWISE clause.
+			  ;; Find all events NOT used by other clauses
+			  (let ((keys (do ((i 0 (1+ i))
+					   (key nil)
+					   (result nil))
+					  ((>= i +max-events+) result)
+					(setq key (svref *event-key-vector* i))
+					(when (and key (zerop (aref all-events i)))
+					  (push key result)))))
+			    `(otherwise
+			      (binding-event-values
 				  (,display ,event-key ,(or keys :universal) ,@arglist)
-				  ,(event-clause display peek-p test-form body-forms))))
+				,(event-clause display peek-p test-form body-forms))))
 
-			 ;; Code for normal clauses
-			 (let (true-events) ;; canonicalize event-names
-			   (if (consp events)
-			       (progn
-				 (setq true-events (mapcar #'canonicalize-event-name events))
-				 (dolist (event true-events)
-				   (setf (aref all-events (get-event-code event)) 1)))
-			     (setf true-events (canonicalize-event-name events)
-				   (aref all-events (get-event-code true-events)) 1))
-			   `(,true-events
-			     (binding-event-values
-			       (,display ,event-key ,true-events ,@arglist)
-			       ,(event-clause display peek-p test-form body-forms))))))))
-	       clauses))))))
+			  ;; Code for normal clauses
+			  (let (true-events) ;; canonicalize event-names
+			    (if (consp events)
+			        (progn
+				  (setq true-events (mapcar #'canonicalize-event-name events))
+				  (dolist (event true-events)
+				    (setf (aref all-events (get-event-code event)) 1)))
+			        (setf true-events (canonicalize-event-name events)
+				      (aref all-events (get-event-code true-events)) 1))
+			    `(,true-events
+			      (binding-event-values
+			          (,display ,event-key ,true-events ,@arglist)
+			        ,(event-clause display peek-p test-form body-forms))))))))
+	      clauses))))))
 
 (defmacro binding-event-values ((display event-key event-keys &rest value-list) &body body)
   ;; Execute BODY with the variables in VALUE-LIST bound to components of the
@@ -1392,14 +1370,14 @@
 				 (var-key (car var)) key))
 	      (if (setq temp (member code (cdr var) :key #'cdr :test #'equal))
 		  (push key (caar temp))
-		(push `((,key) . ,code) (cdr var)))))))
+		  (push `((,key) . ,code) (cdr var)))))))
       ;; Bind all the values
       `(let ,(mapcar #'(lambda (var)
 			 (if (cddr var) ;; if more than one binding form
 			     (progn (setq multiple-p t)
 				    (var-symbol (car var)))
-			   (list (var-symbol (car var)) (cdadr var))))
-		     vars)
+			     (list (var-symbol (car var)) (cdadr var))))
+	      vars)
 	 ;; When some values come from different places, generate code to set them
 	 ,(when multiple-p
 	    `(case ,event-key
@@ -1423,41 +1401,38 @@
 						  :test #'equal))
 			       (setq clause
 				     (nconc clause `((setq ,(car var) ,(second (car temp))))))
-			     (push `(setq ,(car var) ,(cdr events)) clause))))))
+			       (push `(setq ,(car var) ,(cdr events)) clause))))))
 		   ;; Merge bindings for (car keys) with other bindings
 		   (when clause
 		     (if (setq temp (member clause clauses :key #'cdr :test #'equal))
 			 (push (car keys) (caar temp))
-		       (push `((,(car keys)) . ,clause) clauses))))))
+		         (push `((,(car keys)) . ,clause) clauses))))))
 	 ,@body))))
 
-;;;-----------------------------------------------------------------------------
 ;;; Error Handling
-;;;-----------------------------------------------------------------------------
 (eval-when (:compile-toplevel :load-toplevel :execute)
-(defparameter
-  *xerror-vector*
-  '#(unknown-error
-     request-error				; 1  bad request code
-     value-error				; 2  integer parameter out of range
-     window-error				; 3  parameter not a Window
-     pixmap-error				; 4  parameter not a Pixmap
-     atom-error					; 5  parameter not an Atom
-     cursor-error				; 6  parameter not a Cursor
-     font-error					; 7  parameter not a Font
-     match-error				; 8  parameter mismatch
-     drawable-error				; 9  parameter not a Pixmap or Window
-     access-error				; 10 attempt to access private resource"
-     alloc-error				; 11 insufficient resources
-     colormap-error				; 12 no such colormap
-     gcontext-error				; 13 parameter not a GContext
-     id-choice-error				; 14 invalid resource ID for this connection
-     name-error					; 15 font or color name does not exist
-     length-error				; 16 request length incorrect;
-						;    internal Xlib error
-     implementation-error			; 17 server is defective
-     ))
-)
+  (defparameter
+      *xerror-vector*
+    '#(unknown-error
+       request-error				; 1  bad request code
+       value-error				; 2  integer parameter out of range
+       window-error				; 3  parameter not a Window
+       pixmap-error				; 4  parameter not a Pixmap
+       atom-error					; 5  parameter not an Atom
+       cursor-error				; 6  parameter not a Cursor
+       font-error					; 7  parameter not a Font
+       match-error				; 8  parameter mismatch
+       drawable-error				; 9  parameter not a Pixmap or Window
+       access-error				; 10 attempt to access private resource"
+       alloc-error				; 11 insufficient resources
+       colormap-error				; 12 no such colormap
+       gcontext-error				; 13 parameter not a GContext
+       id-choice-error				; 14 invalid resource ID for this connection
+       name-error					; 15 font or color name does not exist
+       length-error				; 16 request length incorrect;
+                                        ;    internal Xlib error
+       implementation-error			; 17 server is defective
+       )))
 
 (defun make-error (display event asynchronous)
   (declare (type display display)
@@ -1500,15 +1475,15 @@
 	 (handler-function
 	   (if (type? handler 'sequence)
 	       (elt handler error-code)
-	     handler)))
+	       handler)))
     (apply handler-function display error-key params)))
 
 (defun request-name (code &optional display)
   (if (< code (length *request-names*))
       (svref *request-names* code)
-    (dolist (extension (and display (display-extension-alist display)) "unknown")
-      (when (= code (second extension))
-	(return (first extension))))))
+      (dolist (extension (and display (display-extension-alist display)) "unknown")
+        (when (= code (second extension))
+	  (return (first extension))))))
 
 (defun report-request-error (condition stream)
   (let ((error-key (request-error-error-key condition))
@@ -1537,16 +1512,16 @@
 (define-condition resource-error (request-error)
   ((resource-id :reader resource-error-resource-id :initarg :resource-id))
   (:report
-    (lambda (condition stream)
-      (report-request-error condition stream)
-      (format stream " ID #x~x" (resource-error-resource-id condition)))))  
+   (lambda (condition stream)
+     (report-request-error condition stream)
+     (format stream " ID #x~x" (resource-error-resource-id condition)))))  
 
 (define-condition unknown-error (request-error)
   ((error-code :reader unknown-error-error-code :initarg :error-code))
   (:report
-    (lambda (condition stream)
-      (report-request-error condition stream)
-      (format stream " Error Code ~d." (unknown-error-error-code condition)))))
+   (lambda (condition stream)
+     (report-request-error condition stream)
+     (format stream " Error Code ~d." (unknown-error-error-code condition)))))
 
 (define-condition access-error (request-error) ())
 
@@ -1555,9 +1530,9 @@
 (define-condition atom-error (request-error)
   ((atom-id :reader atom-error-atom-id :initarg :atom-id))
   (:report
-    (lambda (condition stream)
-      (report-request-error condition stream)
-      (format stream " Atom-ID #x~x" (atom-error-atom-id condition)))))
+   (lambda (condition stream)
+     (report-request-error condition stream)
+     (format stream " Atom-ID #x~x" (atom-error-atom-id condition)))))
 
 (define-condition colormap-error (resource-error) ())
 
@@ -1584,32 +1559,30 @@
 (define-condition value-error (request-error)
   ((value :reader value-error-value :initarg :value))
   (:report
-    (lambda (condition stream)
-      (report-request-error condition stream)
-      (format stream " Value ~d." (value-error-value condition)))))
+   (lambda (condition stream)
+     (report-request-error condition stream)
+     (format stream " Value ~d." (value-error-value condition)))))
 
 (define-condition window-error (resource-error)())
 
 (define-condition implementation-error (request-error) ())
 
-;;-----------------------------------------------------------------------------
 ;; Internal error conditions signaled by CLX
-
 (define-condition x-type-error (type-error x-error)
   ((type-string :reader x-type-error-type-string :initarg :type-string))
   (:report
-    (lambda (condition stream)
-      (format stream "~s isn't a ~a"
-	      (type-error-datum condition)
-	      (or (x-type-error-type-string condition)
-		  (type-error-expected-type condition))))))
+   (lambda (condition stream)
+     (format stream "~s isn't a ~a"
+	     (type-error-datum condition)
+	     (or (x-type-error-type-string condition)
+		 (type-error-expected-type condition))))))
 
 (define-condition closed-display (x-error)
   ((display :reader closed-display-display :initarg :display))
   (:report
-    (lambda (condition stream)
-      (format stream "Attempt to use closed display ~s"
-	      (closed-display-display condition)))))
+   (lambda (condition stream)
+     (format stream "Attempt to use closed display ~s"
+	     (closed-display-display condition)))))
 
 (define-condition lookup-error (x-error)
   ((id :reader lookup-error-id :initarg :id)
@@ -1617,12 +1590,12 @@
    (type :reader lookup-error-type :initarg :type)
    (object :reader lookup-error-object :initarg :object))
   (:report
-    (lambda (condition stream)
-      (format stream "ID ~d from display ~s should have been a ~s, but was ~s"
-	      (lookup-error-id condition)
-	      (lookup-error-display condition)
-	      (lookup-error-type condition)
-	      (lookup-error-object condition)))))  
+   (lambda (condition stream)
+     (format stream "ID ~d from display ~s should have been a ~s, but was ~s"
+	     (lookup-error-id condition)
+	     (lookup-error-display condition)
+	     (lookup-error-type condition)
+	     (lookup-error-object condition)))))  
 
 (define-condition connection-failure (x-error)
   ((major-version :reader connection-failure-major-version :initarg :major-version)
@@ -1631,44 +1604,44 @@
    (display :reader connection-failure-display :initarg :display)
    (reason :reader connection-failure-reason :initarg :reason))
   (:report
-    (lambda (condition stream)
-      (format stream "Connection failure to X~d.~d server ~a display ~d: ~a"
-	      (connection-failure-major-version condition)
-	      (connection-failure-minor-version condition)
-	      (connection-failure-host condition)
-	      (connection-failure-display condition)
-	      (connection-failure-reason condition)))))
-  
+   (lambda (condition stream)
+     (format stream "Connection failure to X~d.~d server ~a display ~d: ~a"
+	     (connection-failure-major-version condition)
+	     (connection-failure-minor-version condition)
+	     (connection-failure-host condition)
+	     (connection-failure-display condition)
+	     (connection-failure-reason condition)))))
+
 (define-condition reply-length-error (x-error)
   ((reply-length :reader reply-length-error-reply-length :initarg :reply-length)
    (expected-length :reader reply-length-error-expected-length :initarg :expected-length)
    (display :reader reply-length-error-display :initarg :display))
   (:report
-    (lambda (condition stream)
-      (format stream "Reply length was ~d when ~d words were expected for display ~s"
-	      (reply-length-error-reply-length condition)
-	      (reply-length-error-expected-length condition)
-	      (reply-length-error-display condition)))))  
+   (lambda (condition stream)
+     (format stream "Reply length was ~d when ~d words were expected for display ~s"
+	     (reply-length-error-reply-length condition)
+	     (reply-length-error-expected-length condition)
+	     (reply-length-error-display condition)))))  
 
 (define-condition reply-timeout (x-error)
   ((timeout :reader reply-timeout-timeout :initarg :timeout)
    (display :reader reply-timeout-display :initarg :display))
   (:report
-    (lambda (condition stream)
-      (format stream "Timeout after waiting ~d seconds for a reply for display ~s"
-	      (reply-timeout-timeout condition)
-	      (reply-timeout-display condition)))))  
+   (lambda (condition stream)
+     (format stream "Timeout after waiting ~d seconds for a reply for display ~s"
+	     (reply-timeout-timeout condition)
+	     (reply-timeout-display condition)))))  
 
 (define-condition sequence-error (x-error)
   ((display :reader sequence-error-display :initarg :display)
    (req-sequence :reader sequence-error-req-sequence :initarg :req-sequence)
    (msg-sequence :reader sequence-error-msg-sequence :initarg :msg-sequence))
   (:report
-    (lambda (condition stream)
-      (format stream "Reply out of sequence for display ~s.~%  Expected ~d, Got ~d"
-	      (sequence-error-display condition)
-	      (sequence-error-req-sequence condition)
-	      (sequence-error-msg-sequence condition)))))  
+   (lambda (condition stream)
+     (format stream "Reply out of sequence for display ~s.~%  Expected ~d, Got ~d"
+	     (sequence-error-display condition)
+	     (sequence-error-req-sequence condition)
+	     (sequence-error-msg-sequence condition)))))  
 
 (define-condition unexpected-reply (x-error)
   ((display :reader unexpected-reply-display :initarg :display)
@@ -1676,78 +1649,78 @@
    (req-sequence :reader unexpected-reply-req-sequence :initarg :req-sequence)
    (length :reader unexpected-reply-length :initarg :length))
   (:report
-    (lambda (condition stream)
-      (format stream "Display ~s received a server reply when none was expected.~@
+   (lambda (condition stream)
+     (format stream "Display ~s received a server reply when none was expected.~@
 		      Last request sequence ~d Reply Sequence ~d Reply Length ~d bytes."
-	      (unexpected-reply-display condition)
-	      (unexpected-reply-req-sequence condition)
-	      (unexpected-reply-msg-sequence condition)
-	      (unexpected-reply-length condition)))))
+	     (unexpected-reply-display condition)
+	     (unexpected-reply-req-sequence condition)
+	     (unexpected-reply-msg-sequence condition)
+	     (unexpected-reply-length condition)))))
 
 (define-condition missing-parameter (x-error)
   ((parameter :reader missing-parameter-parameter :initarg :parameter))
   (:report
-    (lambda (condition stream)
-      (let ((parm (missing-parameter-parameter condition)))
-	(if (consp parm)
-	    (format stream "One or more of the required parameters ~a is missing."
-		    parm)
-	  (format stream "Required parameter ~a is missing or null." parm))))))
+   (lambda (condition stream)
+     (let ((parm (missing-parameter-parameter condition)))
+       (if (consp parm)
+	   (format stream "One or more of the required parameters ~a is missing."
+		   parm)
+	   (format stream "Required parameter ~a is missing or null." parm))))))
 
 ;; This can be signalled anywhere a pseudo font access fails.
 (define-condition invalid-font (x-error)
   ((font :reader invalid-font-font :initarg :font))
   (:report
-    (lambda (condition stream)
-      (format stream "Can't access font ~s" (invalid-font-font condition)))))
+   (lambda (condition stream)
+     (format stream "Can't access font ~s" (invalid-font-font condition)))))
 
 (define-condition device-busy (x-error)
   ((display :reader device-busy-display :initarg :display))
   (:report
-    (lambda (condition stream)
-      (format stream "Device busy for display ~s"
-	      (device-busy-display condition)))))
+   (lambda (condition stream)
+     (format stream "Device busy for display ~s"
+	     (device-busy-display condition)))))
 
 (define-condition unimplemented-event (x-error)
   ((display :reader unimplemented-event-display :initarg :display)
    (event-code :reader unimplemented-event-event-code :initarg :event-code))
   (:report
-    (lambda (condition stream)
-      (format stream "Event code ~d not implemented for display ~s"
-	      (unimplemented-event-event-code condition)
-	      (unimplemented-event-display condition)))))
+   (lambda (condition stream)
+     (format stream "Event code ~d not implemented for display ~s"
+	     (unimplemented-event-event-code condition)
+	     (unimplemented-event-display condition)))))
 
 (define-condition undefined-event (x-error)
   ((display :reader undefined-event-display :initarg :display)
    (event-name :reader undefined-event-event-name :initarg :event-name))
   (:report
-    (lambda (condition stream)
-      (format stream "Event code ~d undefined for display ~s"
-	      (undefined-event-event-name condition)
-	      (undefined-event-display condition)))))
+   (lambda (condition stream)
+     (format stream "Event code ~d undefined for display ~s"
+	     (undefined-event-event-name condition)
+	     (undefined-event-display condition)))))
 
 (define-condition absent-extension (x-error)
   ((name :reader absent-extension-name :initarg :name)
    (display :reader absent-extension-display :initarg :display))
   (:report
-    (lambda (condition stream)
-      (format stream "Extension ~a isn't defined for display ~s"
-	      (absent-extension-name condition)
-	      (absent-extension-display condition)))))
+   (lambda (condition stream)
+     (format stream "Extension ~a isn't defined for display ~s"
+	     (absent-extension-name condition)
+	     (absent-extension-display condition)))))
 
 (define-condition inconsistent-parameters (x-error)
   ((parameters :reader inconsistent-parameters-parameters :initarg :parameters))
   (:report
-    (lambda (condition stream)
-      (format stream "inconsistent-parameters:~{ ~s~}"
-	      (inconsistent-parameters-parameters condition)))))
+   (lambda (condition stream)
+     (format stream "inconsistent-parameters:~{ ~s~}"
+	     (inconsistent-parameters-parameters condition)))))
 
 (define-condition resource-ids-exhausted (x-error)
   ()
   (:report
-    (lambda (condition stream)
-      (declare (ignore condition))
-      (format stream "All X resource IDs are in use."))))
+   (lambda (condition stream)
+     (declare (ignore condition))
+     (format stream "All X resource IDs are in use."))))
 
 (defun get-error-key (display error-code)
   (declare (type display display)
@@ -1755,18 +1728,18 @@
   ;; Return the error-key associated with error-code
   (if (< error-code (length *xerror-vector*))
       (svref *xerror-vector* error-code)
-    ;; Search the extensions for the error
-    (dolist (entry (display-extension-alist display) 'unknown-error)
-      (let* ((event-name (first entry))
-	     (first-error (fourth entry))
-	     (errors (third (assoc event-name *extensions*))))
-	(declare (type keyword event-name)
-		 (type array-index first-error)
-		 (type list errors))
-	(when (and errors
-		   (index<= first-error error-code
-			    (index+ first-error (index- (length errors) 1))))
-	  (return (nth (index- error-code first-error) errors)))))))
+      ;; Search the extensions for the error
+      (dolist (entry (display-extension-alist display) 'unknown-error)
+        (let* ((event-name (first entry))
+	       (first-error (fourth entry))
+	       (errors (third (assoc event-name *extensions*))))
+	  (declare (type keyword event-name)
+		   (type array-index first-error)
+		   (type list errors))
+	  (when (and errors
+		     (index<= first-error error-code
+			      (index+ first-error (index- (length errors) 1))))
+	    (return (nth (index- error-code first-error) errors)))))))
 
 (defmacro define-error (error-key function)
   ;; Associate a function with ERROR-KEY which will be called with
@@ -1818,45 +1791,29 @@
   (decode-core-error display event :resource-id))
 
 (define-error unknown-error
-  (lambda (display event)
-    (list* :error-code (aref (reply-ibuf8 event) 1)
-	   (decode-core-error display event))))
+    (lambda (display event)
+      (list* :error-code (aref (reply-ibuf8 event) 1)
+	     (decode-core-error display event))))
 
 (define-error request-error decode-core-error)		; 1  bad request code
-
 (define-error value-error				; 2  integer parameter out of range
-  (lambda (display event)
-    (decode-core-error display event :value)))
-
+    (lambda (display event)
+      (decode-core-error display event :value)))
 (define-error window-error decode-resource-error)	; 3  parameter not a Window
-
 (define-error pixmap-error decode-resource-error)	; 4  parameter not a Pixmap
-
 (define-error atom-error				; 5  parameter not an Atom
-  (lambda (display event)
-    (decode-core-error display event :atom-id)))
-
+    (lambda (display event)
+      (decode-core-error display event :atom-id)))
 (define-error cursor-error decode-resource-error)	; 6  parameter not a Cursor
-
 (define-error font-error decode-resource-error)		; 7  parameter not a Font
-
 (define-error match-error decode-core-error)		; 8  parameter mismatch
-
 (define-error drawable-error decode-resource-error)	; 9  parameter not a Pixmap or Window
-
 (define-error access-error decode-core-error)		; 10 attempt to access private resource"
-
 (define-error alloc-error decode-core-error)		; 11 insufficient resources
-
 (define-error colormap-error decode-resource-error)	; 12 no such colormap
-
 (define-error gcontext-error decode-resource-error)	; 13 parameter not a GContext
-
 (define-error id-choice-error decode-resource-error)	; 14 invalid resource ID for this connection
-
 (define-error name-error decode-core-error)		; 15 font or color name does not exist
-
 (define-error length-error decode-core-error)		; 16 request length incorrect;
-							;    internal Xlib error
-
+;; internal Xlib error
 (define-error implementation-error decode-core-error)	; 17 server is defective

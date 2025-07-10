@@ -1,29 +1,27 @@
-;;; -*- Mode: LISP; Syntax: Common-lisp; Package: XLIB; Base: 10; Lowercase: Yes -*-
+;;; macros.lisp
 
-;;;
-;;;                      TEXAS INSTRUMENTS INCORPORATED
-;;;                               P.O. BOX 2909
-;;;                            AUSTIN, TEXAS 78769
-;;;
-;;; Copyright (C) 1987 Texas Instruments Incorporated.
-;;;
-;;; Permission is granted to any individual or institution to use, copy, modify,
-;;; and distribute this software, provided that this complete copyright and
-;;; permission notice is maintained, intact, in all copies and supporting
-;;; documentation.
-;;;
-;;; Texas Instruments Incorporated provides this software "as is" without
-;;; express or implied warranty.
-;;;
+;;                      TEXAS INSTRUMENTS INCORPORATED
+;;                               P.O. BOX 2909
+;;                            AUSTIN, TEXAS 78769
 
-;;; CLX basically implements a very low overhead remote procedure call
-;;; to the server.  This file contains macros which generate the code
-;;; for both the client AND the server, given a specification of the
-;;; interface. This was done to eliminate errors that may occur because
-;;; the client and server code get/put bytes in different places, and
-;;; it makes it easier to extend the protocol.
+;; Copyright (C) 1987 Texas Instruments Incorporated.
 
-;;; This is built on top of BUFFER
+;; Permission is granted to any individual or institution to use, copy,
+;; modify, and distribute this software, provided that this complete copyright
+;; and permission notice is maintained, intact, in all copies and supporting
+;; documentation.
+
+;; Texas Instruments Incorporated provides this software "as is" without
+;; express or implied warranty.
+
+;; CLX basically implements a very low overhead remote procedure call to the
+;; server.  This file contains macros which generate the code for both the
+;; client AND the server, given a specification of the interface. This was
+;; done to eliminate errors that may occur because the client and server code
+;; get/put bytes in different places, and it makes it easier to extend the
+;; protocol.
+
+;; This is built on top of BUFFER
 (in-package :xlib)
 
 (defmacro type-check (value type)
@@ -32,10 +30,10 @@
     `(unless (type? ,value ,type)
        (x-type-error ,value ,type))))
 
-;;; This variable is used by the required-arg macro just to satisfy compilers.
+;; This variable is used by the required-arg macro just to satisfy compilers.
 (defvar *required-arg-dummy*)
 
-;;; An error signalling macro use to specify that keyword arguments are required.
+;; An error signalling macro use to specify that keyword arguments are required.
 (defmacro required-arg (name)
   `(progn (x-error 'missing-parameter :parameter ',name)
           *required-arg-dummy*))
@@ -48,8 +46,8 @@
   ;; Round up to the next 16 bit boundary
   `(the array-index (logand (index+ ,index 1) -2)))
 
-;; Data-type accessor functions
-;;
+;;; Data-type accessor functions
+
 ;;   These functions translate between lisp data-types and the byte,
 ;;   half-word or word that gets transmitted across the client/server
 ;;   connection
@@ -73,7 +71,7 @@
   (defun putify (name &optional predicate-p)
     (xintern name '-put (if predicate-p '-predicating "")))
 
-;;; Use &body so zmacs indents properly
+  ;; Use &body so zmacs indents properly
   (defmacro define-accessor (name (width) &body get-put-macros)
     ;; The first body form defines the get macro
     ;; The second body form defines the put macro
@@ -97,8 +95,7 @@
              (when predicating-put
                `((setf (get ',name 'predicating-put) t)
                  (defmacro ,(putify name t) ,(car predicating-put)
-                   ,@(cdr predicating-put))))))))
-  ) ;; End eval-when
+                   ,@(cdr predicating-put))))))))) ;; End eval-when
 
 (define-accessor card32 (32)
   ((index) `(read-card32 ,index))
@@ -437,7 +434,7 @@
    `(client-message-event-put-sequence ,format ,value)))
 
 ;;; Compound accessors
-;;;    Accessors that take other accessors as parameters
+;; Accessors that take other accessors as parameters
 (define-accessor code (0)
   ((index) (declare (ignore index)) '(read-card8 0))
   ((index value) (declare (ignore index)) `(write-card8 0 ,value))
@@ -474,9 +471,7 @@
                   `(,(putify stuff) 1 ,thing)))
        `(and (type? ,thing 'card8) (write-card8 1 ,thing)))))
 
-;;
 ;; the OR type
-;;
 (define-accessor or (32)
   ;; Select from among two types (NULL/MEMBER and something else).
   ((index &rest type-list)
@@ -525,12 +520,10 @@
           (,(putify type-name (get type-name 'predicating-put)) ,index ,value ,@args))
         result)))))
 
-;;
 ;; the MASK type...
 ;;     is used to specify a subset of a collection of "optional" arguments.
 ;;     A mask type consists of a 32 bit mask word followed by a word for each one-bit
 ;;     in the mask.  The MASK type is ALWAYS the LAST item in a request.
-;;
 (setf (get 'mask 'byte-width) nil)
 
 (defun mask-get (index type-values body-function)
@@ -563,7 +556,6 @@
       ,@(cdr result))))
 
 ;; MASK-PUT
-
 (defun mask-put (index type-values body-function)
   (declare (type function body-function)
            (dynamic-extent body-function))
@@ -599,7 +591,6 @@
 ;; Wrapper macros, for use around the above
 
 ;;; type-check was here, and has been moved up
-
 (defmacro check-put (index value type &rest args &environment env)
   (let* ((var (if (or (symbolp value) (constantp value)) value '.value.))
          (body
@@ -933,7 +924,6 @@
 (defconstant +x-nooperation+                  127)
 
 ;;; Some macros for threaded lists
-
 (defmacro threaded-atomic-push (item list next type)
   (let ((x (gensym))
         (y (gensym)))

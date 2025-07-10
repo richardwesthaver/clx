@@ -1,20 +1,18 @@
-;;; -*- Mode: LISP; Syntax: Common-lisp; Package: XLIB; Base: 10; Lowercase: Yes -*-
+;;; clx.lisp
 
-;;;
 ;;;			 TEXAS INSTRUMENTS INCORPORATED
 ;;;				  P.O. BOX 2909
 ;;;			       AUSTIN, TEXAS 78769
-;;;
+
 ;;; Copyright (C) 1987 Texas Instruments Incorporated.
-;;;
+
 ;;; Permission is granted to any individual or institution to use, copy, modify,
 ;;; and distribute this software, provided that this complete copyright and
 ;;; permission notice is maintained, intact, in all copies and supporting
 ;;; documentation.
-;;;
+
 ;;; Texas Instruments Incorporated provides this software "as is" without
 ;;; express or implied warranty.
-;;;
 
 ;; Primary Interface Author:
 ;;	Robert W. Scheifler
@@ -47,9 +45,8 @@
 ;;	Chris Lindblad, MIT
 ;;	Robert Scheifler, MIT
 
-;;;
 ;;; Change history:
-;;;
+
 ;;;  Date	Author		Description
 ;;; -------------------------------------------------------------------------------------
 ;;; 04/07/87	R.Scheifler	Created code stubs
@@ -77,7 +74,6 @@
 ;;; progress.  Bug reports should be addressed to bug-clx@expo.lcs.mit.edu.
 
 ;; Note: all of the following is in the package XLIB.
-
 (in-package :xlib)
 
 (pushnew :clx *features*)
@@ -92,27 +88,28 @@
 
 (defparameter *x-tcp-port* 6000) ;; add display number
 
-;; Note: if you have read the Version 11 protocol document or C Xlib manual, most of
-;; the relationships should be fairly obvious.  We have no intention of writing yet
-;; another moby document for this interface.
+;; Note: if you have read the Version 11 protocol document or C Xlib manual,
+;; most of the relationships should be fairly obvious.  We have no intention
+;; of writing yet another moby document for this interface.
 
-;; Types employed: display, window, pixmap, cursor, font, gcontext, colormap, color.
-;; These types are defined solely by a functional interface; we do not specify
-;; whether they are implemented as structures or flavors or ...  Although functions
-;; below are written using DEFUN, this is not an implementation requirement (although
-;; it is a requirement that they be functions as opposed to macros or special forms).
-;; It is unclear whether with-slots in the Common Lisp Object System must work on
-;; them.
+;; Types employed: display, window, pixmap, cursor, font, gcontext, colormap,
+;; color.  These types are defined solely by a functional interface; we do not
+;; specify whether they are implemented as structures or flavors or ...
+;; Although functions below are written using DEFUN, this is not an
+;; implementation requirement (although it is a requirement that they be
+;; functions as opposed to macros or special forms).  It is unclear whether
+;; with-slots in the Common Lisp Object System must work on them.
 
-;; Windows, pixmaps, cursors, fonts, gcontexts, and colormaps are all represented as
-;; compound objects, rather than as integer resource-ids.  This allows applications
-;; to deal with multiple displays without having an explicit display argument in the
-;; most common functions.  Every function uses the display object indicated by the
-;; first argument that is or contains a display; it is an error if arguments contain
-;; different displays, and predictable results are not guaranteed.
+;; Windows, pixmaps, cursors, fonts, gcontexts, and colormaps are all
+;; represented as compound objects, rather than as integer resource-ids.  This
+;; allows applications to deal with multiple displays without having an
+;; explicit display argument in the most common functions.  Every function
+;; uses the display object indicated by the first argument that is or contains
+;; a display; it is an error if arguments contain different displays, and
+;; predictable results are not guaranteed.
 
-;; Each of window, pixmap, cursor, font, gcontext, and colormap have the following
-;; five functions:
+;; Each of window, pixmap, cursor, font, gcontext, and colormap have the
+;; following five functions:
 
 ;(defun make-<mumble> (display resource-id)
 ;  ;; This function should almost never be called by applications, except in handling
@@ -160,12 +157,10 @@
 
 ; Note that we are explicitly using a different rgb representation than what
 ; is actually transmitted in the protocol.
-
 (deftype rgb-val () '(real 0 1))
 
 ; Note that we are explicitly using a different angle representation than what
 ; is actually transmitted in the protocol.
-
 (deftype angle () '(real #.(* -2 pi) #.(* 2 pi)))
 
 (deftype mask32 () 'card32)
@@ -184,7 +179,6 @@
 ; The intention is that IHS and YIQ and CYM interfaces will also exist.
 ; Note that we are explicitly using a different spectrum representation
 ; than what is actually transmitted in the protocol.
-
 (def-clx-class (color (:constructor make-color-internal (red green blue))
 		      (:copier nil) (:print-function print-color))
   (red 0.0 :type rgb-val)

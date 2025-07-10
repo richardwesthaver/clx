@@ -1,14 +1,14 @@
-;;; -*- Mode: Lisp -*-
-;;;
+;;; xinerama.lisp
+
 ;;; Copyright (C) 2008, Julian Stecklina
-;;;
+
 ;;;   ((
 ;;;    ))     This file is COFFEEWARE. As long as you retain this notice
 ;;;  |   |o)  you can do whatever you want with this code. If you think,
 ;;;  |___|jgs it's worth it, you may buy the author a coffee in return.
-;;;
+
 ;;; Description:
-;;;
+
 ;;; This is an implementation of the XINERAMA extension. It does not
 ;;; include the obsolete PanoramiX calls.
 (defpackage #:xlib/xinerama
@@ -88,5 +88,3 @@
                                       :width (card16-get (+ index 4))
                                       :height (card16-get (+ index 6)))
                   (incf index 8))))))
-
-;;; EOF

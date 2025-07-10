@@ -1,61 +1,54 @@
-;;; -*- Mode: LISP; Syntax: Common-lisp; Package: XLIB; Base: 10; Lowercase: Yes -*-
+;;; buffer.lisp --- Buffers
 
-;;; This file contains definitions for the BUFFER object for Common-Lisp X
-;;; windows version 11
+;; This file contains definitions for the BUFFER object for Common-Lisp X
+;; windows version 11
 
-;;;
 ;;;			 TEXAS INSTRUMENTS INCORPORATED
 ;;;				  P.O. BOX 2909
 ;;;			       AUSTIN, TEXAS 78769
-;;;
+
 ;;; Copyright (C) 1987 Texas Instruments Incorporated.
-;;;
-;;; Permission is granted to any individual or institution to use, copy, modify,
-;;; and distribute this software, provided that this complete copyright and
-;;; permission notice is maintained, intact, in all copies and supporting
-;;; documentation.
-;;;
+
+;;; Permission is granted to any individual or institution to use, copy,
+;;; modify, and distribute this software, provided that this complete
+;;; copyright and permission notice is maintained, intact, in all copies and
+;;; supporting documentation.
+
 ;;; Texas Instruments Incorporated provides this software "as is" without
 ;;; express or implied warranty.
-;;;
 
 ;; A few notes:
-;;
-;;  1. The BUFFER implements a two-way buffered byte / half-word
-;;     / word stream.  Hooks are left for implementing this with a
-;;     shared memory buffer, or with effenciency hooks to the network
-;;     code.
-;;
-;;  2. The BUFFER object uses overlapping displaced arrays for
-;;     inserting and removing bytes half-words and words.
-;;
-;;  3. The BYTE component of these arrays is written to a STREAM
-;;     associated with the BUFFER.  The stream has its own buffer.
-;;     This may be made more efficient by using the Zetalisp
-;;     :Send-Output-Buffer operation.
-;;
-;;  4. The BUFFER object is INCLUDED in the DISPLAY object.
-;;     This was done to reduce access time when sending requests,
-;;     while maintaing some code modularity.
-;;     Several buffer functions are duplicated (with-buffer,
-;;     buffer-force-output, close-buffer) to keep the naming
-;;     conventions consistent.
-;;
-;;  5. A nother layer of software is built on top of this for generating
-;;     both client and server interface routines, given a specification
-;;     of the protocol. (see the INTERFACE file)
-;;
-;;  6. Care is taken to leave the buffer pointer (buffer-bbuf) set to
-;;     a point after a complete request.  This is to ensure that a partial
-;;     request won't be left after aborts (e.g. control-abort on a lispm).
 
+;;  1. The BUFFER implements a two-way buffered byte / half-word / word
+;;     stream.  Hooks are left for implementing this with a shared memory
+;;     buffer, or with efficiency hooks to the network code.
+
+;;  2. The BUFFER object uses overlapping displaced arrays for inserting and
+;;     removing bytes half-words and words.
+
+;;  3. The BYTE component of these arrays is written to a STREAM associated
+;;     with the BUFFER.  The stream has its own buffer.  This may be made more
+;;     efficient by using the Zetalisp :Send-Output-Buffer operation.
+
+;;  4. The BUFFER object is INCLUDED in the DISPLAY object.  This was done to
+;;     reduce access time when sending requests, while maintaing some code
+;;     modularity.  Several buffer functions are duplicated (with-buffer,
+;;     buffer-force-output, close-buffer) to keep the naming conventions
+;;     consistent.
+
+;;  5. Another layer of software is built on top of this for generating both
+;;     client and server interface routines, given a specification of the
+;;     protocol. (see the INTERFACE file)
+
+;;  6. Care is taken to leave the buffer pointer (buffer-bbuf) set to a point
+;;     after a complete request.  This is to ensure that a partial request
+;;     won't be left after aborts (e.g. control-abort on a lispm).
 (in-package :xlib)
 
 (defconstant +requestsize+ 160) ;; Max request size (excluding variable length requests)
 
-;;; This is here instead of in bufmac so that with-display can be
-;;; compiled without macros and bufmac being loaded.
-
+;; This is here instead of in bufmac so that with-display can be compiled
+;; without macros and bufmac being loaded.
 (defmacro with-buffer ((buffer &key timeout inline)
 		       &body body &environment env)
   ;; This macro is for use in a multi-process environment.  It provides
@@ -93,9 +86,8 @@
   (with-buffer (buffer :timeout timeout :inline t)
     (funcall function)))
 
-;;; The following are here instead of in bufmac so that event-case can
-;;; be compiled without macros and bufmac being loaded.
-
+;; The following are here instead of in bufmac so that event-case can be
+;; compiled without macros and bufmac being loaded.
 (defmacro read-card8 (byte-index)
   `(aref-card8 buffer-bbuf (index+ buffer-boffset ,byte-index)))
 
@@ -255,10 +247,7 @@
       (when reply-buffer (deallocate-reply-buffer reply-buffer))
       (when pending-command (stop-pending-command display pending-command)))))
 
-;;
 ;; Buffer stream operations
-;;
-
 (defun buffer-write (vector buffer start end)
   ;; Write out VECTOR from START to END into BUFFER
   ;; Internal function, MUST BE CALLED FROM WITHIN WITH-BUFFER
@@ -414,7 +403,6 @@
   card8->char read-sequence-card8)
 
 ;;; Reading sequences of card8's
-
 (defmacro define-list-readers ((name tname) type size step reader)
   `(progn 
     (defun ,name (reply-buffer nitems data start index)
@@ -534,7 +522,6 @@
   card8->int8 read-sequence-card8)
 
 ;;; Reading sequences of card16's
-
 (define-list-readers (read-list-card16 read-list-card16-with-transform) card16
   16 2 read-card16)
 
@@ -675,7 +662,6 @@
   card32->int32 read-sequence-card32)
 
 ;;; Writing sequences of chars
-
 (defmacro define-transformed-sequence-writer (name fromtype transformer writer)
   (let ((ntrans (gensym)))
     `(defun ,name (buffer boffset data &optional (start 0) (end (length data)) transform)
@@ -695,7 +681,6 @@
   char->card8 write-sequence-card8)
 
 ;;; Writing sequences of card8's
-
 (defmacro define-list-writers ((name tname) type step writer)
   `(progn
     (defun ,name (buffer boffset data start end)
@@ -1007,7 +992,6 @@
   (write-vector-int16 write-vector-int16-with-transform))
 
 ;;; Writing sequences of card32's
-
 (define-list-writers (write-list-card32 write-list-card32-with-transform) card32
   4 write-card32)
 
@@ -1144,7 +1128,6 @@
 	(setq byte (the card8 (logior (the card8 (ash byte 1)) (aref map bit))))))))
 
 ;;; Writing sequences of char2b's
-
 (define-list-writers (write-list-char2b write-list-char2b-with-transform) card16
   2 write-char2b)
 

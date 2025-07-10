@@ -1,8 +1,10 @@
+;;; core-protocol.lisp
 (in-package :xlib/tests)
 (use-package :rt)
 (in-suite :xlib)
+
 ;;; Manual notes:
-;;;
+
 ;;; - xlib:display-error-handler documentation has broken reference "See
 ;;;   <undefined> [Errors], page <undefined>";
 

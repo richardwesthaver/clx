@@ -1,7 +1,8 @@
 ;;; truetype.lisp
 (defpackage #:clx/truetype
   (:nicknames #:xft)
-  (:use #:cl :std :dat/ttf)
+  (:use #:cl #:std #:dat/ttf #:obj/cache)
+  (:import-from :obj/db :get-val)
   (:export
    :drawable-screen
    :font-ascent
@@ -39,7 +40,7 @@ Glyphs information is obtained by DAT/TTF. Font rasterization is made by CL-VECT
 (defun make-font-cache (font dpi-cache-size string-cache-size inner-provider)
   (flet ((outer-provider (dpi-cons)
            (values
-            (obj:make-cache
+            (make-cache
              string-cache-size
              (lambda (string)
                (values
@@ -48,14 +49,14 @@ Glyphs information is obtained by DAT/TTF. Font rasterization is made by CL-VECT
              :test #'equal
              :policy :lfu)
             1)))
-    (obj:make-cache
+    (make-cache
      dpi-cache-size
      #'outer-provider
      :test #'equal
      :policy :lfu)))
 
 (defun font-cache-fetch (cache dpi string)
-  (obj:get-val (obj:get-val cache dpi) string))
+  (get-val (get-val cache dpi) string))
 
 (defmethod initialize-instance :after
     ((font font) &key (dpi-cache-size 10) (string-cache-size 1000) &allow-other-keys)

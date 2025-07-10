@@ -1,9 +1,6 @@
 (in-package #:xlib/tests)
 
-;;; -----------------
 ;;; Custom assertions
-;;; -----------------
-
 (defmacro test-required-params (function-form &rest required-params)
   "Asserts that the function throws missing-parameter errors when any required parameter is missing."
   (labels ((make-pairs (lst)
@@ -28,10 +25,7 @@
               `(rt:signals xlib:missing-parameter
                  (,@(std:ensure-list function-form) ,@param-list))))))
 
-;;; -------
 ;;; Helpers
-;;; -------
-
 (defmacro with-default-display (display &body body)
   `(let ((,display (xlib:open-default-display)))
      (unwind-protect

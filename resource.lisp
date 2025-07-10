@@ -1,19 +1,18 @@
-;;; -*- Mode:Common-Lisp; Package:XLIB; Syntax:COMMON-LISP; Base:10; Lowercase:T -*-
+;;; resource.lisp
 
 ;; RESOURCE - Lisp version of XLIB's Xrm resource manager
 
-;;;
 ;;;			 TEXAS INSTRUMENTS INCORPORATED
 ;;;				  P.O. BOX 2909
 ;;;			       AUSTIN, TEXAS 78769
-;;;
+
 ;;; Copyright (C) 1987 Texas Instruments Incorporated.
-;;;
+
 ;;; Permission is granted to any individual or institution to use, copy, modify,
 ;;; and distribute this software, provided that this complete copyright and
 ;;; permission notice is maintained, intact, in all copies and supporting
 ;;; documentation.
-;;;
+
 ;;; Texas Instruments Incorporated provides this software "as is" without
 ;;; express or implied warranty.
 (in-package :xlib)
@@ -40,7 +39,6 @@
 
 ;; The value slot of the top-level resource-database structure is used for a
 ;; time-stamp.
-
 (defun make-resource-database ()
   ;; Make a resource-database with initial timestamp of 0
   (make-resource-database-internal :name "Top-Level" :value 0))
@@ -87,10 +85,8 @@
 	    (format t "  duplicate at ~s" db))))
       )))
 
-;;
 ;; If this is true, resource symbols will be compared in a case-insensitive
 ;; manner, and converting a resource string to a keyword will uppercaseify it.
-;;
 (defparameter *uppercase-resource-symbols* nil)
 
 (defun resource-key (stringable)
@@ -135,7 +131,6 @@
 	  (string= (the string (symbol-name (the symbol a)))
 		   (the string (symbol-name (the symbol b)))))))))
 
-;;;-----------------------------------------------------------------------------
 ;;; Add/delete resource
 (defun add-resource (database name-list value)
   ;; name-list is a list of either strings or symbols. If a symbol, 
@@ -216,9 +211,7 @@
 	    (return-from delete-resource-internal t)))
 	(setq loose-p nil)))))
 
-;;;-----------------------------------------------------------------------------
 ;;; Get Resource
-
 (defun get-resource (database value-name value-class full-name full-class)
   ;; Return the value of the resource in DATABASE whose partial name
   ;; most closely matches (append full-name (list value-name)) and
@@ -248,8 +241,7 @@
 				 (cdr names) (cdr classes))))
 	  (declare (type (or null resource-database) result))
 	  (when result
-	    (return result)
-	    ))))))
+	    (return result)))))))
 
 (defun get-entry (tight loose names classes &aux result)
   (declare (type list tight loose names classes))
@@ -277,10 +269,8 @@
 	     (when (and (not (stringable-equal name class))
 			(setq result
 			      (get-entry-lookup loose class names classes)))
-	       (return result))
-	     )))))
+	       (return result)))))))
 
-;;;-----------------------------------------------------------------------------
 ;;; Get-resource with search-table
 (defun get-search-resource (table name class)
   ;; (get-search-resource (get-search-table database full-name full-class) 
@@ -326,11 +316,10 @@
 
       ;; Pick up bindings of the form (* name). These are the elements of
       ;; top-level loose without further tight/loose databases.
-      ;;
+
       ;; (Hack: these bindings belong in ANY search table, so recomputing them
       ;; is a drag.  True fix involves redesigning entire lookup
       ;; data-structure/algorithm.)
-      ;;
       (let ((universal-bindings
 	      (remove nil loose :test-not #'eq
 		      :key #'(lambda (database)
@@ -385,10 +374,8 @@
 	      class (car classes))
 	(get-tables-lookup loose name names classes)
 	(unless (stringable-equal name class)
-	  (get-tables-lookup loose class names classes))
-	))))
+	  (get-tables-lookup loose class names classes))))))
 
-;;;-----------------------------------------------------------------------------
 ;;; Utility functions
 (defun map-resource (database function &rest args)
   ;; Call FUNCTION on each resource in DATABASE.

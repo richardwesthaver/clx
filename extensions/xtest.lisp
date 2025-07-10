@@ -1,15 +1,14 @@
 ;;; -*- Mode: Lisp; Syntax: Common-Lisp; -*-
-;;;
+
 ;;; Implementation of the XTest extension as described by
 ;;; http://www.x.org/docs/Xext/xtest.pdf
-;;;
+
 ;;; Written by Lionel Flandrin <lionel.flandrin@gmail.com> in july
 ;;; 2008 and placed in the public domain.
-;;;
+
 ;;; TODO:
 ;;; * Implement XTestSetVisualIDOfVisual and XTestDiscard
 ;;; * Add the missing (declare (type ...
-
 (defpackage #:xlib/xtest
   (:use :common-lisp :xlib)
   (:import-from :xlib
@@ -34,7 +33,6 @@
    ;; Constants
    #:+major-version+
    #:+minor-version+
-
    ;; Functions
    #:set-gc-context-of-gc
    #:get-version
@@ -75,16 +73,16 @@
 (defun set-gc-context-of-gc (gcontext gcontext-id)
   (declare (type gcontext gcontext)
            (type resource-id gcontext-id))
-    (setf (gcontext-id gcontext) gcontext-id))
+  (setf (gcontext-id gcontext) gcontext-id))
 
 ;;; Server requests
 (defun get-version (display &optional (major +major-version+) (minor +minor-version+))
   "Returns the major and minor version of the server's XTest implementation"
   (declare (type display display))
   (with-buffer-request-and-reply (display (opcode display) nil)
-      ((data +get-version+)
-       (card8 major)
-       (card16 minor))
+                                 ((data +get-version+)
+                                  (card8 major)
+                                  (card16 minor))
     (values (card8-get 1)
             (card16-get 8))))
 
@@ -93,9 +91,9 @@
            (type resource-id cursor-id)
            (type window window))
   (with-buffer-request-and-reply (display (opcode display) nil)
-      ((data +compare-cursor+)
-       (resource-id (window-id window))
-       (resource-id cursor-id))
+                                 ((data +compare-cursor+)
+                                  (resource-id (window-id window))
+                                  (resource-id cursor-id))
     (values (card8-get 1))))
 
 (defun fake-motion-event (display x y &key (delay 0) relative (root-window-id 0))
@@ -148,7 +146,3 @@ even when another client grabs the server."
     (card8 (if grab? 1 0))
     (pad8  0)
     (pad16 0)))
-
-;;; Local Variables:
-;;; indent-tabs-mode: nil
-;;; End:

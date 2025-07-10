@@ -1,4 +1,4 @@
-;;; -*- Mode:Lisp; Syntax: Common-lisp; Package:XLIB; Base:10; Lowercase: Yes -*-
+;;; hello.lisp
 
 (in-package :xlib)
 

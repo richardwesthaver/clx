@@ -1,21 +1,20 @@
-;;; -*- Mode: Lisp; Syntax: Common-Lisp; Package: XLIB; -*-
+;;; xc-misc.lisp
 ;;; ---------------------------------------------------------------------------
 ;;;     Title: XC Misc Extension
 ;;;   Created: 2014-11-17
 ;;;    Author: Johannes Martinez <johannes.martinez@gmail.com>
 ;;; ---------------------------------------------------------------------------
-;;;
+
 ;;; (c) copyright 2014 by Johannes Martinez
-;;;
+
 ;;; Permission is granted to any individual or institution to use,
 ;;; copy, modify, and distribute this software, provided that this
 ;;; complete copyright and permission notice is maintained, intact, in
 ;;; all copies and supporting documentation.
-;;;
+
 ;;; This program is distributed in the hope that it will be useful,
 ;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-;;;
 
 (in-package :xlib)
 
@@ -26,24 +25,20 @@
 
 (define-extension "XC-MISC")
 
-
 ;; version
 (defconstant +xc-major+               1)
 (defconstant +xc-minor+               1)
-
 
 ;; xc major opcode
 (defun xc-opcode (display)
   (extension-opcode display "XC-MISC"))
 
 ;; xc minor opcodes
-
 (defconstant +xc-get-version+         0)
 (defconstant +xc-get-xid-range+       1)
 (defconstant +xc-get-xid-list+        2)
 
 ;; x requests
-
 (defun xc-get-version (display)
   (declare (type display display))
   (with-buffer-request-and-reply (display (xc-opcode display) nil :sizes (16))
@@ -64,10 +59,11 @@
      (card32-get 12))))
 
 (defun xc-get-xid-list (display count &optional (result-type 'list))
-  "This request returns a sequence of individual resource IDs in ids. Count is the number 
-of resource IDs requested. The number returned may be smaller than the number requested."
-  (declare (type display display)
-	   (type card32 count))
+  "This request returns a sequence of individual resource IDs in ids. Count is
+the number of resource IDs requested. The number returned may be smaller than
+the number requested."
+  (declare (display display)
+	   (card32 count))
   (with-buffer-request-and-reply (display (xc-opcode display) nil :sizes (32))
 				 ((data +xc-get-xid-list+)
 				  (card32 count))
@@ -75,13 +71,3 @@ of resource IDs requested. The number returned may be smaller than the number re
       (values
        (sequence-get :format card32 :result-type result-type 
 		     :length num :index 32)))))
-
-
-
-
-
-
-
-
-
-

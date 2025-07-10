@@ -1,4 +1,4 @@
-;;; -*- Mode: Lisp; Syntax: Common-Lisp; Package: XLIB; -*-
+;;; xvidmode.lisp
 ;;; ---------------------------------------------------------------------------
 ;;;     Title: XFree86 video mode extension
 ;;;   Created: 2003 03 28 15:28
@@ -6,35 +6,32 @@
 ;;; ---------------------------------------------------------------------------
 ;;;  (c) copyright 2003 by Iban Hatchondo
 
-;;;
 ;;; Permission is granted to any individual or institution to use,
 ;;; copy, modify, and distribute this software, provided that this
 ;;; complete copyright and permission notice is maintained, intact, in
 ;;; all copies and supporting documentation.
-;;;
+
 ;;; This program is distributed in the hope that it will be useful,
 ;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-;;;
 
 ;;; THIS IS NOT AN X CONSORTIUM STANDARD OR AN X PROJECT TEAM SPECIFICATION
 
 ;;; DESCRIPTION
-;;;
+
 ;;; These functions provide an interface to the server extension
 ;;; XFree86-VidModeExtension which allows the video modes to be
 ;;; queried, adjusted dynamically and the mode switching to be
 ;;; controlled.
 
 ;;; [ personal notes ]
-;;;
+
 ;;; The documentation on this extension is very poor, probably,
 ;;; because it is not an X standard nor an X project team spec.
 ;;; Because of that, it need to be tested on some XFree 3.3.6,
 ;;; and XFree 4.3.x to ensure that all request are correctly
 ;;; constructed as well as to indentify any obsolete/wrong
 ;;; functions I made.
-
 (in-package :xlib)
 
 (export '(mode-info
@@ -79,7 +76,7 @@
 	:xlib)
 
 ;; current version numbers
-;;
+
 ;; major 0 == uses parameter-to-wire functions in XFree86 libXxf86vm.
 ;; major 1 == uses parameter-to-wire functions hard-coded in xvidtune client.
 ;; major 2 == uses new protocol version in XFree86 4.0.
@@ -181,12 +178,7 @@
   #-clx-little-endian
   (progn (values (ldb (byte 32 16) i) (ldb (byte 16 0) i))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;                                                                       ;;;;
-;;;;              public XFree86-VidMode Extension routines                ;;;;
-;;;;                                                                       ;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+;;; public XFree86-VidMode Extension routines
 (defun xfree86-vidmode-query-version (display)
   "Determine the version of the extension built into the server.
 return two values major-version and minor-version in that order."
@@ -662,12 +654,7 @@ x and y keyword parameters value (zero will be theire default value)."
     (sequence-get :length (card32-get 12) :format card32
 		  :index 32 :result-type 'list))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;                                                                       ;;;;
-;;;;                       private utility routines                        ;;;;
-;;;;                                                                       ;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+;;; private utility routines
 (defun mode-info->v-card16
     (mode-info major &key (encode-private t) (index 0) data)
   (declare (type integer index)

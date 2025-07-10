@@ -1,23 +1,21 @@
-;;; -*- Mode:Lisp; Package:XLIB; Syntax:COMMON-LISP; Base:10; Lowercase:T -*-
+;;; image.lisp --- CLX image functions
 
-;;; CLX Image functions
+;;
 
-;;;
-;;;			 TEXAS INSTRUMENTS INCORPORATED
-;;;				  P.O. BOX 2909
-;;;			       AUSTIN, TEXAS 78769
-;;;
-;;; Copyright (C) 1987 Texas Instruments Incorporated.
-;;;
-;;; Permission is granted to any individual or institution to use, copy, modify,
-;;; and distribute this software, provided that this complete copyright and
-;;; permission notice is maintained, intact, in all copies and supporting
-;;; documentation.
-;;;
-;;; Texas Instruments Incorporated provides this software "as is" without
-;;; express or implied warranty.
-;;;
+;;
+;;			 TEXAS INSTRUMENTS INCORPORATED
+;;				  P.O. BOX 2909
+;;			       AUSTIN, TEXAS 78769
+;;
+;; Copyright (C) 1987 Texas Instruments Incorporated.
 
+;; Permission is granted to any individual or institution to use, copy,
+;; modify, and distribute this software, provided that this complete copyright
+;; and permission notice is maintained, intact, in all copies and supporting
+;; documentation.
+
+;; Texas Instruments Incorporated provides this software "as is" without
+;; express or implied warranty.
 (in-package :xlib)
 
 (defmacro with-image-data-buffer ((buffer size) &body body)
@@ -207,7 +205,6 @@
     (when green-mask (setf (image-green-mask image) green-mask))
     image))
 
-;;;-----------------------------------------------------------------------------
 ;;; Swapping stuff
 (defun image-noswap
        (src dest srcoff destoff srclen srcinc destinc height lsb-first-p)
@@ -653,52 +650,49 @@
 		(setf (aref dest (index+ destidx 3))
 		      (br (aref src (index1+ srcidx))))))))))))
 
-;;; The following table gives the bit ordering within bytes (when accessed
-;;; sequentially) for a scanline containing 32 bits, with bits numbered 0 to
-;;; 31, where bit 0 should be leftmost on the display.  For a given byte
-;;; labelled A-B, A is for the most significant bit of the byte, and B is
-;;; for the least significant bit.
-;;; 
-;;; legend:
-;;; 	1   scanline-unit = 8
-;;; 	2   scanline-unit = 16
-;;; 	4   scanline-unit = 32
-;;; 	M   byte-order = MostSignificant
-;;; 	L   byte-order = LeastSignificant
-;;; 	m   bit-order = MostSignificant
-;;; 	l   bit-order = LeastSignificant
-;;; 
-;;; 
-;;; format	ordering
-;;; 
-;;; 1Mm	00-07 08-15 16-23 24-31
-;;; 2Mm	00-07 08-15 16-23 24-31
-;;; 4Mm	00-07 08-15 16-23 24-31
-;;; 1Ml	07-00 15-08 23-16 31-24
-;;; 2Ml	15-08 07-00 31-24 23-16
-;;; 4Ml	31-24 23-16 15-08 07-00
-;;; 1Lm	00-07 08-15 16-23 24-31
-;;; 2Lm	08-15 00-07 24-31 16-23
-;;; 4Lm	24-31 16-23 08-15 00-07
-;;; 1Ll	07-00 15-08 23-16 31-24
-;;; 2Ll	07-00 15-08 23-16 31-24
-;;; 4Ll	07-00 15-08 23-16 31-24
-;;; 
-;;; 
-;;; The following table gives the required conversion between any two
-;;; formats.  It is based strictly on the table above.  If you believe one,
-;;; you should believe the other.
-;;; 
-;;; legend:
-;;; 	n   no changes
-;;; 	s   reverse 8-bit units within 16-bit units
-;;; 	l   reverse 8-bit units within 32-bit units
-;;; 	w   reverse 16-bit units within 32-bit units
-;;; 	r   reverse bits within 8-bit units
-;;; 	sr  s+R
-;;; 	lr  l+R
-;;; 	wr  w+R
+;; The following table gives the bit ordering within bytes (when accessed
+;; sequentially) for a scanline containing 32 bits, with bits numbered 0 to
+;; 31, where bit 0 should be leftmost on the display.  For a given byte
+;; labelled A-B, A is for the most significant bit of the byte, and B is
+;; for the least significant bit.
 
+;; legend:
+;; 	1   scanline-unit = 8
+;; 	2   scanline-unit = 16
+;; 	4   scanline-unit = 32
+;; 	M   byte-order = MostSignificant
+;; 	L   byte-order = LeastSignificant
+;; 	m   bit-order = MostSignificant
+;; 	l   bit-order = LeastSignificant
+
+;; format	ordering
+
+;; 1Mm	00-07 08-15 16-23 24-31
+;; 2Mm	00-07 08-15 16-23 24-31
+;; 4Mm	00-07 08-15 16-23 24-31
+;; 1Ml	07-00 15-08 23-16 31-24
+;; 2Ml	15-08 07-00 31-24 23-16
+;; 4Ml	31-24 23-16 15-08 07-00
+;; 1Lm	00-07 08-15 16-23 24-31
+;; 2Lm	08-15 00-07 24-31 16-23
+;; 4Lm	24-31 16-23 08-15 00-07
+;; 1Ll	07-00 15-08 23-16 31-24
+;; 2Ll	07-00 15-08 23-16 31-24
+;; 4Ll	07-00 15-08 23-16 31-24
+
+;; The following table gives the required conversion between any two
+;; formats.  It is based strictly on the table above.  If you believe one,
+;; you should believe the other.
+
+;; legend:
+;; 	n   no changes
+;; 	s   reverse 8-bit units within 16-bit units
+;; 	l   reverse 8-bit units within 32-bit units
+;; 	w   reverse 16-bit units within 32-bit units
+;; 	r   reverse bits within 8-bit units
+;; 	sr  s+R
+;; 	lr  l+R
+;; 	wr  w+R
 (defconstant +image-swap-function+
  '#.(make-array
      '(12 12) :initial-contents
@@ -724,13 +718,12 @@
 	(list #| 2Ll |# r   r   r   n   s   l   r   sr  lr  n   n   n )
 	(list #| 4Ll |# r   r   r   n   s   l   r   sr  lr  n   n   n )))))
 
-;;; Of course, the table above is a lie.  We also need to factor in the
-;;; order of the source data to cope with swapping half of a unit at the
-;;; end of a scanline, since we are trying to avoid de-ref'ing off the
-;;; end of the source.
-;;;
-;;; Defines whether the first half of a unit has the first half of the data
+;; Of course, the table above is a lie.  We also need to factor in the
+;; order of the source data to cope with swapping half of a unit at the
+;; end of a scanline, since we are trying to avoid de-ref'ing off the
+;; end of the source.
 
+;; Defines whether the first half of a unit has the first half of the data
 (defconstant +image-swap-lsb-first-p+
  '#.(make-array
      12 :initial-contents
@@ -784,7 +777,6 @@
 	       (32 'image-swap-four-bytes)))
 	   from-byte-lsb-first-p))))
 
-;;;-----------------------------------------------------------------------------
 ;;; GET-IMAGE
 (defun read-pixarray-1 (buffer-bbuf index array x y width height  
 			padded-bytes-per-line bits-per-pixel)
@@ -1395,7 +1387,6 @@
 		      (visual-info-blue-mask visual-info))))
 	    (values image visual-info)))))))
 
-;;;-----------------------------------------------------------------------------
 ;;; PUT-IMAGE
 (defun write-pixarray-1 (buffer-bbuf index array x y width height
 			 padded-bytes-per-line bits-per-pixel)
@@ -1914,10 +1905,9 @@
 	(when (index-zerop (index-decf height nlines)) (return))))
     (buffer-flush display)))
 
-;;; Note:	The only difference between a format of :bitmap and :xy-pixmap
-;;;		of depth 1 is that when sending a :bitmap format the foreground 
-;;;		and background in the gcontext are used.
-
+;; Note:	The only difference between a format of :bitmap and :xy-pixmap
+;;		of depth 1 is that when sending a :bitmap format the foreground 
+;;		and background in the gcontext are used.
 (defun put-image (drawable gcontext image &key
 		  (src-x 0) (src-y 0)		;Position within image
 		  (x (required-arg x))		;Position within drawable
@@ -2085,7 +2075,6 @@
 		  (buffer-pad-request display (index- (index* request-words 4) request-bytes))
 		  )))))))))
 
-;;;-----------------------------------------------------------------------------
 ;;; COPY-IMAGE
 (defun xy-format-image-x->image-x (image x y width height)
   (declare (type image-x image)
@@ -2396,7 +2385,6 @@
 	(setf (image-y-hot copy) (index- (image-y-hot image) y)))
       copy)))
 
-;;;-----------------------------------------------------------------------------
 ;;; Image I/O functions
 (defun read-bitmap-file (pathname)
   ;; Creates an image from a C include file in standard X11 format

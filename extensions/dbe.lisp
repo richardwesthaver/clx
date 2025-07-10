@@ -1,22 +1,20 @@
-;;; -*- Mode: Lisp; Syntax: Common-Lisp; Package: XLIB; -*-
+;;; dbe.lisp
 ;;; ---------------------------------------------------------------------------
 ;;;     Title: Double Buffer Extension
 ;;;   Created: 2014-11-17
 ;;;    Author: Johannes Martinez <johannes.martinez@gmail.com>
 ;;; ---------------------------------------------------------------------------
-;;;
+
 ;;; (c) copyright 2014 by Johannes Martinez
-;;;
+
 ;;; Permission is granted to any individual or institution to use,
 ;;; copy, modify, and distribute this software, provided that this
 ;;; complete copyright and permission notice is maintained, intact, in
 ;;; all copies and supporting documentation.
-;;;
+
 ;;; This program is distributed in the hope that it will be useful,
 ;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-;;;
-
 (in-package :xlib)
 
 (export '(;;  x requests
@@ -40,12 +38,10 @@
   :errors (dbe-bad-buffer))
 
 ;; version
-
 (defconstant +dbe-major+                    1)
 (defconstant +dbe-minor+                    0)
 
 ;; request codes
-
 (defconstant +query-version+                0)
 (defconstant +allocate-back-buffer-name+    1)
 (defconstant +deallocate-back-buffer-name+  2)
@@ -56,14 +52,12 @@
 (defconstant +get-back-buffer-attributes+   7)
 
 ;; swap actions
-
 (defconstant +undefined+  #x00)
 (defconstant +background+ #x01)
 (defconstant +untouched+  #x02)
 (defconstant +copied+     #x03)
 
 ;; Errors ??
-
 (define-condition dbe-bad-buffer (request-error) ())
 (define-error dbe-bad-buffer decode-core-error)
 
@@ -72,7 +66,6 @@
 ;; use def-clx-class instead of deftype to be consistent with clx and be able to submit
 ;; back-buffers to other x-requests that accept drawables, for convenience should probably just
 ;; have get-visual-info return visual-ids or visual-info structs
-
 (def-clx-class (back-buffer (:include drawable) (:copier nil)
 			    (:print-function print-drawable)))
 
@@ -83,7 +76,6 @@
   (unused 0 :type (unsigned-byte 16)))
 
 ;; convenience function
-
 (defun create-back-buffer (window)
   "Returns a back-buffer structure associated with the given window"
   
@@ -99,7 +91,6 @@
     bb))
 
 ;; X requests
-
 (defun dbe-query-version (display)
   "Returns Major and Minor versions as values"
   (declare (display display))
@@ -193,7 +184,6 @@
        (or-get 8 null window)))))
 
 ;;  utility functions
-
 (defun lst->array (lst)
   (make-array (* 2 (length lst)) :initial-contents 
 	      (loop :for x :in lst

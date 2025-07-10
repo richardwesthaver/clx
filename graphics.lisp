@@ -1,23 +1,21 @@
-;;; -*- Mode: LISP; Syntax: Common-lisp; Package: XLIB; Base: 10; Lowercase: Yes -*-
+;;; graphics.lisp --- CLX drawing requests
 
-;;; CLX drawing requests
+;;
 
-;;;
-;;;			 TEXAS INSTRUMENTS INCORPORATED
-;;;				  P.O. BOX 2909
-;;;			       AUSTIN, TEXAS 78769
-;;;
-;;; Copyright (C) 1987 Texas Instruments Incorporated.
-;;;
-;;; Permission is granted to any individual or institution to use, copy, modify,
-;;; and distribute this software, provided that this complete copyright and
-;;; permission notice is maintained, intact, in all copies and supporting
-;;; documentation.
-;;;
-;;; Texas Instruments Incorporated provides this software "as is" without
-;;; express or implied warranty.
-;;;
-
+;;
+;;			 TEXAS INSTRUMENTS INCORPORATED
+;;				  P.O. BOX 2909
+;;			       AUSTIN, TEXAS 78769
+;;
+;; Copyright (C) 1987 Texas Instruments Incorporated.
+;;
+;; Permission is granted to any individual or institution to use, copy,
+;; modify, and distribute this software, provided that this complete copyright
+;; and permission notice is maintained, intact, in all copies and supporting
+;; documentation.
+;;
+;; Texas Instruments Incorporated provides this software "as is" without
+;; express or implied warranty.
 (in-package :xlib)
 
 (defvar *inhibit-appending* nil)
@@ -71,7 +69,6 @@
 	      (setf (buffer-last-request display) buffer-boffset)
 	      (setf (display-boffset display) (index+ buffer-boffset 16)))))))
     (display-invoke-after-function display))) 
-
 
 (defun draw-points (drawable gcontext points &optional relative-p)
   (declare (type drawable drawable)
@@ -375,7 +372,6 @@
 ;; some form of "image" object to hide representation details and format
 ;; conversions.  It also may be useful to provide stream-oriented interfaces
 ;; for reading and writing the data.
-
 (defun put-raw-image (drawable gcontext data &key
 		      (start 0)
 		      (depth (required-arg depth))

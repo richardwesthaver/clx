@@ -1,22 +1,20 @@
-;;; -*- Mode: LISP; Syntax: Common-lisp; Package: XLIB; Base: 10; Lowercase: Yes -*-
+;;; text.lisp
 
 ;;; CLX text keyboard and pointer requests
 
-;;;
 ;;;			 TEXAS INSTRUMENTS INCORPORATED
 ;;;				  P.O. BOX 2909
 ;;;			       AUSTIN, TEXAS 78769
-;;;
+
 ;;; Copyright (C) 1987 Texas Instruments Incorporated.
-;;;
+
 ;;; Permission is granted to any individual or institution to use, copy, modify,
 ;;; and distribute this software, provided that this complete copyright and
 ;;; permission notice is maintained, intact, in all copies and supporting
 ;;; documentation.
-;;;
+
 ;;; Texas Instruments Incorporated provides this software "as is" without
 ;;; express or implied warranty.
-;;;
 (in-package :xlib)
 
 ;; Strings are broken up into chunks of this size
@@ -28,7 +26,6 @@
 ;; (sub)sequence is reached.  If transform returns nil for an element, the
 ;; index of that element in the sequence is returned, otherwise nil is
 ;; returned.
-
 (deftype translation-function ()
   '(function (sequence array-index array-index (or null font) vector array-index)
 	     (values array-index (or null int16 font) (or null int32))))
@@ -40,7 +37,6 @@
 ;; is not specified, appending of subsequent output might not occur.
 ;; Specifying width is simply a hint, for performance.  Note that specifying
 ;; width may be difficult if transform can return nil.
-
 (defun translate-default (src src-start src-end font dst dst-start)
   ;; dst is guaranteed to have room for (- src-end src-start) integer elements,
   ;; starting at dst-start; whether dst holds 8-bit or 16-bit elements depends
@@ -103,7 +99,6 @@
 ;; dependent".  Or the default could be something that expected a vector of
 ;; integers and did no translation.  Or the default could come from the
 ;; gcontext (but what about text-extents and text-width?).
-
 (defun text-extents (font sequence &key (start 0) end translate)
   ;; If multiple fonts are involved, font-ascent and font-descent will be the
   ;; maximums.  If multiple directions are involved, the direction will be nil.
@@ -197,7 +192,6 @@
 			    (setq overall-direction nil)))
 	  (:right-to-left (unless (eq font-direction :right-to-left)
 			    (setq overall-direction nil))))))
-    
     (values width
 	    ascent
 	    descent
@@ -329,7 +323,6 @@
 		    font-descent
 		    (max-char-left-bearing font)
 		    (+ width (- font-width) (max-char-right-bearing font)))))
-      
       ;; Variable-width font
       (let* ((first-col (font-info-min-byte2 font-info))
 	     (num-cols (1+ (- (font-info-max-byte2 font-info) first-col)))
@@ -339,7 +332,6 @@
 	(declare (type card8 first-col first-row last-row)
 		 (type card16 num-cols num-rows))
 	(if (or (plusp first-row) (plusp last-row))
-	    
 	    ;; Matrix (16 bit) font
 	    (macrolet ((char-info-elt (sequence elt)
 			 `(let* ((char (the card16 (elt ,sequence ,elt)))
@@ -380,7 +372,6 @@
 		      (incf width (aref char-infos (index+ 2 n)))
 		      (setq ascent (max ascent (aref char-infos (index+ 3 n))))
 		      (setq descent (max descent (aref char-infos (index+ 4 n)))))))))
-	  
 	  ;; Non-matrix (8 bit) font
 	  ;; The code here is identical to the above, except for the following macro:
 	  (macrolet ((char-info-elt (sequence elt)
@@ -418,11 +409,7 @@
 		    (setq right (max right (+ width (aref char-infos (index1+ n)))))
 		    (incf width (aref char-infos (index+ 2 n)))
 		    (setq ascent (max ascent (aref char-infos (index+ 3 n))))
-		    (setq descent (max descent (aref char-infos (index+ 4 n)))))
-		  ))))
-	  )))))
-
-;;-----------------------------------------------------------------------------
+		    (setq descent (max descent (aref char-infos (index+ 4 n))))))))))))))
 
 ;; This controls the element size of the dst buffer given to translate.  If
 ;; :default is specified, the size will be based on the current font, if known,
@@ -435,7 +422,6 @@
 ;; additional possibility is to allow an index-size of :two-byte, in which case
 ;; translate would be given a double-length 8-bit array, and translate would be
 ;; expected to store first-byte/second-byte instead of 16-bit integers.]
-
 (deftype index-size () '(member :default 8 16))
 
 ;; In the functions below, if width is specified, it is assumed to be the total
@@ -445,7 +431,6 @@
 ;; If width is not specified, appending of subsequent output might not occur
 ;; (unless translate returns the width).  Specifying width is simply a hint,
 ;; for performance.
-
 (defun draw-glyph (drawable gcontext x y elt
 		   &key translate width (size :default))
   ;; Returns true if elt is output, nil if translate refuses to output it.
@@ -913,7 +898,6 @@
 	(values (if (index= chunk length) nil new-start)
 		(or translated-width width))))))
 
-;;-----------------------------------------------------------------------------
 (defun display-keycode-range (display)
   (declare (type display display))
   (declare (clx-values min max))
@@ -975,7 +959,6 @@
 
 ;; Either we will want lots of defconstants for well-known values, or perhaps
 ;; an integer-to-keyword translation function for well-known values.
-
 (defun change-keyboard-mapping
        (display keysyms &key (start 0) end (first-keycode start))
   ;; start/end give subrange of keysyms

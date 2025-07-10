@@ -1,12 +1,10 @@
-;;; This file contains code moved from "dependent" files that has been unified.
-
+;;; common.lisp --- code moved from "dependent" files that has been unified
 (in-package :xlib)
 
 ;;; BUFFER-READ-DEFAULT - read data from the X stream
 
 ;; READ-SEQUENCE was not present in ANSI Common Lisp when CLX was written. This
 ;; implementation is portable and implements block transfer.
-
 (defun buffer-read-default (display vector start end timeout)
   (declare (type display display)
            (type buffer-bytes vector)
@@ -58,10 +56,11 @@
     (unless (null stream)
       (close stream :abort abort))))
 
-;;; BUFFER-LISTEN-DEFAULT - returns T if there is input available for the
-;;; buffer. This should never block, so it can be called from the scheduler.
+;;; BUFFER-LISTEN-DEFAULT 
+;; returns T if there is input available for the buffer. This should never
+;; block, so it can be called from the scheduler.
 
-;;; The default implementation is to just use listen.
+;; The default implementation is to just use listen.
 (defun buffer-listen-default (display)
   (declare (type display display))
   (let ((stream (display-input-stream display)))

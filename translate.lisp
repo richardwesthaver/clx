@@ -1,17 +1,16 @@
 ;;; -*- Mode:Lisp; Package:XLIB; Syntax:COMMON-LISP; Base:10; Lowercase:YES -*-
 
-;;;
 ;;;			 TEXAS INSTRUMENTS INCORPORATED
 ;;;				  P.O. BOX 2909
 ;;;			       AUSTIN, TEXAS 78769
-;;;
+
 ;;; Copyright (C) 1987 Texas Instruments Incorporated.
-;;;
+
 ;;; Permission is granted to any individual or institution to use, copy, modify,
 ;;; and distribute this software, provided that this complete copyright and
 ;;; permission notice is maintained, intact, in all copies and supporting
 ;;; documentation.
-;;;
+
 ;;; Texas Instruments Incorporated provides this software "as is" without
 ;;; express or implied warranty.
 (in-package :xlib)
@@ -24,7 +23,7 @@
   ;; (i.e., a symbol in the package named KEYWORD).  When the function
   ;; KEYSYM-SET is called with a keysym, the SET of the keysym set to
   ;; which the keysym belongs is returned.
-  ;;
+
   ;; If the range of keysyms defined by first-keysym and last-keysym
   ;; overlaps the range of an existing keysym set, then an error is
   ;; signaled.
@@ -55,16 +54,16 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defmacro keysym (keysym &rest bytes)
     ;; Build a keysym.
-    ;;
+
     ;; If KEYSYM is an integer, it is used as the most significant
     ;; bits of the keysym, and BYTES are used to specify low order
     ;; bytes. The last parameter is always byte4 of the keysym.  If
     ;; KEYSYM is not an integer, the keysym associated with KEYSYM is
     ;; returned.
-    ;;
+
     ;; This is a macro and not a function macro to promote
     ;; compile-time lookup. All arguments are evaluated.
-    ;;
+
     ;; FIXME: The above means that this shouldn't really be a macro at
     ;; all, but a compiler macro.  Probably, anyway.
     (declare (type t keysym)
@@ -82,7 +81,6 @@
 
 ;; Keysym-mappings are a list of the form (object translate lowercase modifiers mask)
 ;; With the following accessor macros. Everything after OBJECT is optional.
-
 (defmacro keysym-mapping-object (keysym-mapping)
   ;; Parameter to translate
   `(first ,keysym-mapping))
@@ -118,33 +116,32 @@
   ;; Define the translation from keysym/modifiers to a (usually
   ;; character) object.  Any previous keysym definition with KEYSYM
   ;; and MODIFIERS is deleted before the new definition is added.
-  ;;
+
   ;; MODIFIERS is either a modifier-mask or list containing intermixed
   ;; keysyms and state-mask-keys specifying when to use this
   ;; keysym-translation.  The default is NIL.
-  ;;
+
   ;; MASK is either a modifier-mask or list containing intermixed
   ;; keysyms and state-mask-keys specifying which modifiers to look at
   ;; (i.e.  modifiers not specified are don't-cares).
   ;; If mask is :MODIFIERS then the mask is the same as the modifiers
   ;; (i.e.  modifiers not specified by modifiers are don't cares)
   ;; The default mask is *default-keysym-translate-mask*
-  ;;
+
   ;; If DISPLAY is specified, the translation will be local to DISPLAY,
   ;; otherwise it will be the default translation for all displays.
-  ;;
+
   ;; LOWERCASE is used for uppercase alphabetic keysyms.  The value
   ;; is the associated lowercase keysym.  This information is used
   ;; by the keysym-both-case-p predicate (for caps-lock computations)
   ;; and by the keysym-downcase function.
-  ;;
+
   ;; TRANSLATE will be called with parameters (display state OBJECT)
   ;; when translating KEYSYM and modifiers and mask are satisfied.
   ;; [e.g (zerop (logxor (logand state (or mask *default-keysym-translate-mask*))
   ;;                     (or modifiers 0)))
   ;;      when mask and modifiers aren't lists of keysyms]
   ;; The default is #'default-keysym-translate
-  ;;
   (declare (type (or base-char t) object)
 	   (type keysym keysym)
 	   (type (or null mask16 (clx-list (or keysym state-mask-key)))
@@ -270,7 +267,6 @@
   (defconstant left-hyper-keysym (keysym 255 237))
   (defconstant right-hyper-keysym (keysym 255 238)))
 
-;;-----------------------------------------------------------------------------
 ;; Keysym mapping functions
 (defun display-keyboard-mapping (display)
   (declare (type display display))
@@ -414,7 +410,7 @@
       shiftp)))
 
 ;;; default-keysym-index implements the following tables:
-;;;
+
 ;;; control shift caps-lock character               character
 ;;;   0       0       0       #\a                      #\8
 ;;;   0       0       1       #\A                      #\8
@@ -434,7 +430,6 @@
 ;;;   1       0       1       #\control-A              #\control-*
 ;;;   1       1       0       #\control-shift-a        #\control-*
 ;;;   1       1       1       #\control-shift-a        #\control-8
-
 (defun keycode->character (display keycode state &key keysym-index
 	                   (keysym-index-function #'default-keysym-index))
   ;; keysym-index defaults to the result of keysym-index-function which

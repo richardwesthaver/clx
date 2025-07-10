@@ -1,4 +1,4 @@
-;;; -*- Mode: Lisp; Package: Xlib; Log: clx.log -*-
+;;; dependent.lisp
 
 ;; This file contains some of the system dependent code for CLX
 
@@ -8,16 +8,14 @@
 ;;;                            AUSTIN, TEXAS 78769
 ;;;
 ;;; Copyright (C) 1987 Texas Instruments Incorporated.
-;;;
+
 ;;; Permission is granted to any individual or institution to use, copy, modify,
 ;;; and distribute this software, provided that this complete copyright and
 ;;; permission notice is maintained, intact, in all copies and supporting
 ;;; documentation.
-;;;
+
 ;;; Texas Instruments Incorporated provides this software "as is" without
 ;;; express or implied warranty.
-;;;
-
 (in-package :xlib)
 
 (proclaim '(declaration array-register))
@@ -38,7 +36,6 @@
   (defconstant +long-3+ 3))
 
 ;;; Set some compiler-options for often used code
-
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defconstant +buffer-speed+ #+clx-debugging 1 #-clx-debugging 3
                "Speed compiler option for buffer code.")
@@ -310,7 +307,6 @@
   #.(declare-buffun)
   (the short-float (* (the int16 value) #.(coerce (/ pi 180.0 64.0) 'short-float))))
 
-
 (progn
 ;;; This overrides the (probably incorrect) definition in clx.lisp.  Since PI
 ;;; is irrational, there can't be a precise rational representation.  In
@@ -340,42 +336,42 @@
 
 (macrolet ((char-translators ()
              (let ((alist
-                    `(#-lispm
-                      ;; The normal ascii codes for the control characters.
-                      ,@`((#\Return . 13)
-                          (#\Linefeed . 10)
-                          (#\Rubout . 127)
-                          (#\Page . 12)
-                          (#\Tab . 9)
-                          (#\Backspace . 8)
-                          (#\Newline . 10)
-                          (#\Space . 32))
-                      ;; The rest of the common lisp charater set with the normal
-                      ;; ascii codes for them.
-                      (#\! . 33) (#\" . 34) (#\# . 35) (#\$ . 36)
-                      (#\% . 37) (#\& . 38) (#\' . 39) (#\( . 40)
-                      (#\) . 41) (#\* . 42) (#\+ . 43) (#\, . 44)
-                      (#\- . 45) (#\. . 46) (#\/ . 47) (#\0 . 48)
-                      (#\1 . 49) (#\2 . 50) (#\3 . 51) (#\4 . 52)
-                      (#\5 . 53) (#\6 . 54) (#\7 . 55) (#\8 . 56)
-                      (#\9 . 57) (#\: . 58) (#\; . 59) (#\< . 60)
-                      (#\= . 61) (#\> . 62) (#\? . 63) (#\@ . 64)
-                      (#\A . 65) (#\B . 66) (#\C . 67) (#\D . 68)
-                      (#\E . 69) (#\F . 70) (#\G . 71) (#\H . 72)
-                      (#\I . 73) (#\J . 74) (#\K . 75) (#\L . 76)
-                      (#\M . 77) (#\N . 78) (#\O . 79) (#\P . 80)
-                      (#\Q . 81) (#\R . 82) (#\S . 83) (#\T . 84)
-                      (#\U . 85) (#\V . 86) (#\W . 87) (#\X . 88)
-                      (#\Y . 89) (#\Z . 90) (#\[ . 91) (#\\ . 92)
-                      (#\] . 93) (#\^ . 94) (#\_ . 95) (#\` . 96)
-                      (#\a . 97) (#\b . 98) (#\c . 99) (#\d . 100)
-                      (#\e . 101) (#\f . 102) (#\g . 103) (#\h . 104)
-                      (#\i . 105) (#\j . 106) (#\k . 107) (#\l . 108)
-                      (#\m . 109) (#\n . 110) (#\o . 111) (#\p . 112)
-                      (#\q . 113) (#\r . 114) (#\s . 115) (#\t . 116)
-                      (#\u . 117) (#\v . 118) (#\w . 119) (#\x . 120)
-                      (#\y . 121) (#\z . 122) (#\{ . 123) (#\| . 124)
-                      (#\} . 125) (#\~ . 126))))
+                     `(#-lispm
+                       ;; The normal ascii codes for the control characters.
+                       ,@`((#\Return . 13)
+                           (#\Linefeed . 10)
+                           (#\Rubout . 127)
+                           (#\Page . 12)
+                           (#\Tab . 9)
+                           (#\Backspace . 8)
+                           (#\Newline . 10)
+                           (#\Space . 32))
+                       ;; The rest of the common lisp charater set with the normal
+                       ;; ascii codes for them.
+                       (#\! . 33) (#\" . 34) (#\# . 35) (#\$ . 36)
+                       (#\% . 37) (#\& . 38) (#\' . 39) (#\( . 40)
+                       (#\) . 41) (#\* . 42) (#\+ . 43) (#\, . 44)
+                       (#\- . 45) (#\. . 46) (#\/ . 47) (#\0 . 48)
+                       (#\1 . 49) (#\2 . 50) (#\3 . 51) (#\4 . 52)
+                       (#\5 . 53) (#\6 . 54) (#\7 . 55) (#\8 . 56)
+                       (#\9 . 57) (#\: . 58) (#\; . 59) (#\< . 60)
+                       (#\= . 61) (#\> . 62) (#\? . 63) (#\@ . 64)
+                       (#\A . 65) (#\B . 66) (#\C . 67) (#\D . 68)
+                       (#\E . 69) (#\F . 70) (#\G . 71) (#\H . 72)
+                       (#\I . 73) (#\J . 74) (#\K . 75) (#\L . 76)
+                       (#\M . 77) (#\N . 78) (#\O . 79) (#\P . 80)
+                       (#\Q . 81) (#\R . 82) (#\S . 83) (#\T . 84)
+                       (#\U . 85) (#\V . 86) (#\W . 87) (#\X . 88)
+                       (#\Y . 89) (#\Z . 90) (#\[ . 91) (#\\ . 92)
+                       (#\] . 93) (#\^ . 94) (#\_ . 95) (#\` . 96)
+                       (#\a . 97) (#\b . 98) (#\c . 99) (#\d . 100)
+                       (#\e . 101) (#\f . 102) (#\g . 103) (#\h . 104)
+                       (#\i . 105) (#\j . 106) (#\k . 107) (#\l . 108)
+                       (#\m . 109) (#\n . 110) (#\o . 111) (#\p . 112)
+                       (#\q . 113) (#\r . 114) (#\s . 115) (#\t . 116)
+                       (#\u . 117) (#\v . 118) (#\w . 119) (#\x . 120)
+                       (#\y . 121) (#\z . 122) (#\{ . 123) (#\| . 124)
+                       (#\} . 125) (#\~ . 126))))
                (cond ((dolist (pair alist nil)
                         (when (not (= (char-code (car pair)) (cdr pair)))
                           (return t)))
@@ -457,7 +453,7 @@
   (sb-thread:make-mutex :name name))
 
 (defmacro holding-lock ((lock display &optional (whostate "CLX wait")
-                              &key timeout)
+                                      &key timeout)
                         &body body)
   ;; This macro is used by WITH-DISPLAY, which claims to be callable
   ;; recursively.  So, had better use a recursive lock.
@@ -492,9 +488,9 @@
   (declare (ignore whostate))
   (declare (type function predicate))
   (loop
-   (when (apply predicate predicate-args)
-     (return))
-     (yield)))
+    (when (apply predicate predicate-args)
+      (return))
+    (yield)))
 
 ;;; FIXME: the below implementation for threaded PROCESS-BLOCK using
 ;;; queues and condition variables might seem better, but in fact it
@@ -510,22 +506,22 @@
   (let* ((pid (sb-thread:current-thread-id))
          (last (gethash  pid *process-conditions*))
          (lock
-          (or (car last)
-              (sb-thread:make-mutex :name (format nil "lock ~A" pid))))
+           (or (car last)
+               (sb-thread:make-mutex :name (format nil "lock ~A" pid))))
          (queue
-          (or (cdr last)
-              (sb-thread:make-waitqueue :name (format nil "queue ~A" pid)))))
+           (or (cdr last)
+               (sb-thread:make-waitqueue :name (format nil "queue ~A" pid)))))
     (unless last
       (setf (gethash pid *process-conditions*) (cons lock queue)))
     (sb-thread:with-mutex (lock)
       (loop
-         (when (apply predicate predicate-args) (return))
-         (handler-case
-             (sb-ext:with-timeout .5
-               (sb-thread:condition-wait queue lock))
-           (sb-ext:timeout ()
-             (format *trace-output* "thread ~A, process-block timed out~%"
-                     (sb-thread:current-thread-id) )))))))
+        (when (apply predicate predicate-args) (return))
+        (handler-case
+            (sb-ext:with-timeout .5
+              (sb-thread:condition-wait queue lock))
+          (sb-ext:timeout ()
+            (format *trace-output* "thread ~A, process-block timed out~%"
+                    (sb-thread:current-thread-id) )))))))
 
 ;;; PROCESS-WAKEUP: Check some other process' wait function.
 (declaim (inline process-wakeup))
@@ -736,7 +732,7 @@
 ;;    along
 ;;-----------------------------------------------------------------------------
 (defun default-error-handler (display error-key &rest key-vals
-                              &key asynchronous &allow-other-keys)
+                                                &key asynchronous &allow-other-keys)
   (declare (type generalized-boolean asynchronous)
            (dynamic-extent key-vals))
   ;; The default display-error-handler.
@@ -870,12 +866,12 @@ Returns a list of (host display-number screen protocol)."
          (screen (when dot-i
                    (parse-integer name :start (1+ dot-i))))
          (protocol
-          (cond ((or (string= host "") (string-equal host "unix")) :local)
-                (decnet-colon-p :decnet)
-                ((> slash-i -1) (intern
-                                 (string-upcase (subseq name 0 slash-i))
-                                 :keyword))
-                (t :internet))))
+           (cond ((or (string= host "") (string-equal host "unix")) :local)
+                 (decnet-colon-p :decnet)
+                 ((> slash-i -1) (intern
+                                  (string-upcase (subseq name 0 slash-i))
+                                  :keyword))
+                 (t :internet))))
     (list host (or display 0) (or screen 0) protocol)))
 
 ;;-----------------------------------------------------------------------------
@@ -1019,9 +1015,9 @@ Returns a list of (host display-number screen protocol)."
         (count 0))
     (dolist (byte (rest bytes))
       (setq it `(#-Genera dpb #+Genera sys:%logdpb
-                          (the (unsigned-byte ,size) ,byte)
-                          (byte ,size ,(incf count size))
-                          (the (unsigned-byte ,count) ,it))))
+                 (the (unsigned-byte ,size) ,byte)
+                 (byte ,size ,(incf count size))
+                 (the (unsigned-byte ,count) ,it))))
     `(the card8 ,it)))
 
 ;;; If you can write fast routines that can read and write pixarrays out of a
@@ -1075,12 +1071,11 @@ Returns a list of (host display-number screen protocol)."
            (error "Invalid pixarray: ~S." pixarray)))))
 
 ;;; COPY-BIT-RECT  --  Internal
-;;;
+
 ;;;    This is the classic BITBLT operation, copying a rectangular subarray
 ;;; from one array to another (but source and destination must not overlap.)
 ;;; Widths are specified in bits.  Neither array can have a non-zero
 ;;; displacement.  We allow extra random bit-offset to be thrown into the X.
-;;;
 (defun copy-bit-rect (source source-width sx sy dest dest-width dx dy
                       height width)
   (declare (type array-index source-width sx sy dest-width dx dy height width))

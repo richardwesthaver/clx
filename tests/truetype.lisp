@@ -1,8 +1,7 @@
-;;; REPL playing
+;;; truetype.lisp
 (in-package :clx/truetype/tests)
 
 (defparameter *display* nil)
-;;(defparameter *display* (xlib:open-default-display "192.168.1.101:0.0"))
 
 (defparameter *screen* nil)
 (defparameter *root* nil)

@@ -1,21 +1,21 @@
-;;; -*- Mode: Lisp; Syntax: Common-Lisp; Package: XLIB; -*-
-;;; ---------------------------------------------------------------------------
-;;;     Title: DRI Extension
-;;;   Created: 2014-11-17
-;;;    Author: Johannes Martinez <johannes.martinez@gmail.com>
-;;; ---------------------------------------------------------------------------
-;;;
-;;; (c) copyright 2014 by Johannes Martinez
-;;;
-;;; Permission is granted to any individual or institution to use,
-;;; copy, modify, and distribute this software, provided that this
-;;; complete copyright and permission notice is maintained, intact, in
-;;; all copies and supporting documentation.
-;;;
-;;; This program is distributed in the hope that it will be useful,
-;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-;;;
+;;; extensions/dri2.lisp --- DRI2 Extensions
+
+;;     Title: DRI Extension
+;;   Created: 2014-11-17
+;;    Author: Johannes Martinez <johannes.martinez@gmail.com>
+
+;; (c) copyright 2014 by Johannes Martinez
+
+;; Permission is granted to any individual or institution to use,
+;; copy, modify, and distribute this software, provided that this
+;; complete copyright and permission notice is maintained, intact, in
+;; all copies and supporting documentation.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+;;; Code:
 (in-package :xlib)
 
 (export '(dri2-query-version
@@ -64,9 +64,7 @@
 (defconstant +dri2-swap-interval+		12)
 (defconstant +dri2-get-param+			13)
 
-
 ;; structs
-
 (def-clx-class (dri2-buffer (:copier nil))
   (attachment 0 :type card32)
   (name 0 :type card32)

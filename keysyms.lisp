@@ -1,23 +1,20 @@
-;;; -*- Mode:Lisp; Package:XLIB; Syntax:COMMON-LISP; Base:10; Lowercase:YES -*-
+;;; keysyms.lisp --- char to keysym mapping
 
-;;; Define lisp character to keysym mappings
+;;
 
-;;;
-;;;			 TEXAS INSTRUMENTS INCORPORATED
-;;;				  P.O. BOX 2909
-;;;			       AUSTIN, TEXAS 78769
-;;;
-;;; Copyright (C) 1987 Texas Instruments Incorporated.
-;;;
-;;; Permission is granted to any individual or institution to use, copy, modify,
-;;; and distribute this software, provided that this complete copyright and
-;;; permission notice is maintained, intact, in all copies and supporting
-;;; documentation.
-;;;
-;;; Texas Instruments Incorporated provides this software "as is" without
-;;; express or implied warranty.
-;;;
+;;			 TEXAS INSTRUMENTS INCORPORATED
+;;				  P.O. BOX 2909
+;;			       AUSTIN, TEXAS 78769
 
+;; Copyright (C) 1987 Texas Instruments Incorporated.
+
+;; Permission is granted to any individual or institution to use, copy,
+;; modify, and distribute this software, provided that this complete copyright
+;; and permission notice is maintained, intact, in all copies and supporting
+;; documentation.
+
+;; Texas Instruments Incorporated provides this software "as is" without
+;; express or implied warranty.
 (in-package :xlib)
 
 (define-keysym-set :latin-1	(keysym 0 0) (keysym 0 255))
@@ -163,15 +160,14 @@
   (define-keysym #\linefeed (keysym 255 010))	; :tty
   (define-keysym #\page (keysym 009 227))	; :special
   (define-keysym #\return (keysym 255 013))	; :tty
-  (define-keysym #\backspace (keysym 255 008))	; :tty
-  )
+  (define-keysym #\backspace (keysym 255 008)))	; :tty
 
-;;; these keysym definitions are only correct if the underlying lisp's
-;;; definition of characters between 160 and 255 match latin1 exactly.
-;;; If the characters are in some way locale-dependent (as, I believe,
-;;; in Allegro8) or are treated as opaque without any notions of
-;;; graphicness or case (as in cmucl and openmcl) then defining these
-;;; keysyms is either not useful or wrong.  -- CSR, 2006-03-14
+;; these keysym definitions are only correct if the underlying lisp's
+;; definition of characters between 160 and 255 match latin1 exactly.  If the
+;; characters are in some way locale-dependent (as, I believe, in Allegro8) or
+;; are treated as opaque without any notions of graphicness or case (as in
+;; cmucl and openmcl) then defining these keysyms is either not useful or
+;; wrong.  -- CSR, 2006-03-14
 (progn
   (do ((i 160 (+ i 1)))
       ((>= i 256))

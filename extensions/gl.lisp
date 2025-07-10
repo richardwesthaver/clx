@@ -1,3 +1,4 @@
+;;; extensions/gl.lisp
 (defpackage #:xlib/gl
   (:use :common-lisp :xlib)
   (:import-from :xlib/glx
@@ -2980,11 +2981,9 @@
                               ((#.+color-index+)
                                3)))))
 
-
 (define-rendering-command matrix-mode 179
   ;; *** ENUM
   (mode         card32))
-
 
 (define-rendering-command minmax 4111
   ;; *** ENUM
@@ -2993,14 +2992,11 @@
   (internalformat card32)
   (sink         bool))
 
-
 (define-rendering-command mult-matrix-d 181
   (m            (list float64 16)))
 
-
 (define-rendering-command mult-matrix-f 180
   (m            (list float32 16)))
-
 
 ;;; *** Note that TARGET is placed last for FLOAT64 versions.
 (define-rendering-command multi-tex-coord-1d-arb 198
@@ -3022,7 +3018,6 @@
   ;; *** ENUM
   (target       card32)
   (v-0          int16))
-
 
 (define-rendering-command multi-tex-coord-2d-arb 202
   ((v-0 v-1)    float64)
@@ -3102,7 +3097,6 @@
 (define-rendering-command normal-3s 32
   ((v-0 v-1 v-2) int16))
 
-
 (define-rendering-command ortho 182
   (left         float64)
   (right        float64)
@@ -3111,31 +3105,25 @@
   (z-near       float64)
   (z-far        float64))
 
-
 (define-rendering-command pass-through 123
   (token        float32))
-
 
 (define-rendering-command pixel-transfer-f 166
   ;; *** ENUM
   (pname        card32)
   (param        float32))
 
-
 (define-rendering-command pixel-transfer-i 167
   ;; *** ENUM
   (pname        card32)
   (param        int32))
 
-
 (define-rendering-command pixel-zoom 165
   (xfactor      float32)
   (yfactor      float32))
 
-
 (define-rendering-command point-size 100
   (size         float32))
-
 
 (define-rendering-command polygon-mode 101
   ;; *** ENUM
@@ -3143,38 +3131,29 @@
   ;; *** ENUM
   (mode         card32))
 
-
 (define-rendering-command polygon-offset 192
   (factor       float32)
   (units        float32))
 
-
 (define-rendering-command pop-attrib 141)
-
 
 (define-rendering-command pop-matrix 183)
 
-
 (define-rendering-command pop-name 124)
-
 
 (define-rendering-command prioritize-textures 4118
   (n            int32)
   (textures     (list card32 n))
   (priorities   (list float32 n)))
 
-
 (define-rendering-command push-attrib 142
   ;; *** BITFIELD
   (mask         card32))
 
-
 (define-rendering-command push-matrix 184)
-
 
 (define-rendering-command push-name 125
   (name         card32))
-
 
 (define-rendering-command raster-pos-2d 33
   ((v-0 v-1)    float64))
@@ -3188,7 +3167,6 @@
 (define-rendering-command raster-pos-2s 36
   ((v-0 v-1)    int16))
 
-
 (define-rendering-command raster-pos-3d 37
   ((v-0 v-1 v-2) float64))
 
@@ -3200,7 +3178,6 @@
 
 (define-rendering-command raster-pos-3s 40
   ((v-0 v-1 v-2) int16))
-
 
 (define-rendering-command raster-pos-4d 41
   ((v-0 v-1 v-2 v-3) float64))
@@ -3214,11 +3191,9 @@
 (define-rendering-command raster-pos-4s 44
   ((v-0 v-1 v-2 v-3) int16))
 
-
 (define-rendering-command read-buffer 171
   ;; *** ENUM
   (mode         card32))
-
 
 (define-rendering-command rect-d 45
   ((v1-0 v1-1 v2-0 v2-1) float64))
@@ -3232,41 +3207,32 @@
 (define-rendering-command rect-s 48
   ((v1-0 v1-1 v2-0 v2-1) int16))
 
-
 (define-rendering-command reset-histogram 4112
   ;; *** ENUM
   (target       card32))
-
 
 (define-rendering-command reset-minmax 4113
   ;; *** ENUM
   (target       card32))
 
-
 (define-rendering-command rotate-d 185
   ((angle x y z) float64))
-
 
 (define-rendering-command rotate-f 186
   ((angle x y z) float32))
 
-
 (define-rendering-command scale-d 187
   ((x y z)      float64))
-
 
 (define-rendering-command scale-f 188
   ((x y z)      float32))
 
-
 (define-rendering-command scissor 103
   ((x y width height) int32))
-
 
 (define-rendering-command shade-model 104
   ;; *** ENUM
   (mode         card32))
-
 
 (define-rendering-command stencil-func 162
   ;; *** ENUM
@@ -3274,10 +3240,8 @@
   (ref          int32)
   (mask         card32))
 
-
 (define-rendering-command stencil-mask 133
   (mask         card32))
-
 
 (define-rendering-command stencil-op 163
   ;; *** ENUM
@@ -3287,14 +3251,12 @@
   ;; *** ENUM
   (zpass        card32))
 
-
 (define-rendering-command tex-env-f 111
   ;; *** ENUM
   (target       card32)
   ;; *** ENUM
   (pname        card32)
   (param        float32))
-
 
 (define-rendering-command tex-env-fv 112
   ;; *** ENUM
@@ -3305,14 +3267,12 @@
                                 (#.+texture-env-mode+ 1)
                                 (#.+texture-env-color+ 4)))))
 
-
 (define-rendering-command tex-env-i 113
   ;; *** ENUM
   (target       card32)
   ;; *** ENUM
   (pname        card32)
   (param        int32))
-
 
 (define-rendering-command tex-env-iv 114
   ;; *** ENUM
@@ -3323,7 +3283,6 @@
                               (#.+texture-env-mode+ 1)
                               (#.+texture-env-color+ 4)))))
 
-
 ;;; *** 
 ;;; last there.
 (define-rendering-command tex-gen-d 115
@@ -3332,7 +3291,6 @@
   (coord        card32)
   ;; *** ENUM
   (pname        card32))
-
 
 (define-rendering-command tex-gen-dv 116
   ;; *** ENUM
@@ -3346,14 +3304,12 @@
                                 ((#.+texture-gen-mode+ #.+eye-plane+) 1)
                                 (#.+object-plane+ 4)))))
 
-
 (define-rendering-command tex-gen-f 117
   ;; *** ENUM
   (coord        card32)
   ;; *** ENUM
   (pname        card32)
   (param        float32))
-
 
 (define-rendering-command tex-gen-fv 118
   ;; *** ENUM
@@ -3364,14 +3320,12 @@
                                 ((#.+texture-gen-mode+ #.+eye-plane+) 1)
                                 (#.+object-plane+ 4)))))
 
-
 (define-rendering-command tex-gen-i 119
   ;; *** ENUM
   (coord        card32)
   ;; *** ENUM
   (pname        card32)
   (param        int32))
-
 
 (define-rendering-command tex-gen-iv 120
   ;; *** ENUM
@@ -3382,14 +3336,12 @@
                               ((#.+texture-gen-mode+ #.+eye-plane+) 1)
                               (#.+object-plane+ 4)))))
 
-
 (define-rendering-command tex-parameter-f 105
   ;; *** ENUM
   (target        card32)
   ;; *** ENUM
   (pname        card32)
   (param        float32))
-
 
 (define-rendering-command tex-parameter-fv 106
   ;; *** ENUM
@@ -3405,14 +3357,12 @@
                                   #.+texture-wrap-t+)
                                  1)))))
 
-
 (define-rendering-command tex-parameter-i 107
   ;; *** ENUM
   (target        card32)
   ;; *** ENUM
   (pname        card32)
   (param        int32))
-
 
 (define-rendering-command tex-parameter-iv 108
   ;; *** ENUM
@@ -3428,13 +3378,11 @@
                                 #.+texture-wrap-t+)
                                1)))))
 
-
 (define-rendering-command translate-d 189
   ((x y z)      float64))
 
 (define-rendering-command translate-f 190
   ((x y z)      float32))
-
 
 (define-rendering-command vertex-2d 65
   ((x y)        float64))
@@ -3448,7 +3396,6 @@
 (define-rendering-command vertex-2s 68
   ((x y)        int16))
 
-
 (define-rendering-command vertex-3d 69
   ((x y z)      float64))
 
@@ -3460,7 +3407,6 @@
 
 (define-rendering-command vertex-3s 72
   ((x y z)      int16))
-
 
 (define-rendering-command vertex-4d 73
   ((x y z w)    float64))
@@ -3500,7 +3446,6 @@
       ;; *** ENUM
       (card32 mode))))
 
-
 (defun gen-lists (range)
   (assert (context-p *current-context*)
           (*current-context*)
@@ -3514,7 +3459,6 @@
          (integer range))
       (card32-get 8))))
 
-
 (defun end-list ()
   (assert (context-p *current-context*)
           (*current-context*)
@@ -3525,7 +3469,6 @@
       (data +end-list+)
       ;; *** GLX_CONTEXT_TAG
       (card32 (context-tag ctx)))))
-
 
 (defun enable (cap)
   (assert (context-p *current-context*)
@@ -3540,7 +3483,6 @@
          ;; *** ENUM?
          (card32 cap)))))
 
-
 ;;; FIXME: FLUSH and FINISH should send *all* buffered data, including
 ;;; buffered rendering commands.
 (defun flush ()
@@ -3553,7 +3495,6 @@
       (data +flush+)
       ;; *** GLX_CONTEXT_TAG
       (card32 (context-tag ctx)))))
-
 
 (defun finish ()
   (assert (context-p *current-context*)

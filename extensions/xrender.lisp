@@ -1,23 +1,22 @@
-;;; -*- Mode: Lisp; Syntax: Common-Lisp; Package: XLIB; -*-
+;;; xrender.lisp
 ;;; ---------------------------------------------------------------------------
 ;;;     Title: The X Render Extension
 ;;;   Created: 2002-08-03
 ;;;    Author: Gilbert Baumann <unk6@rz.uni-karlsruhe.de>
 ;;;       $Id: xrender.lisp,v 1.5 2004/12/06 11:48:57 csr21 Exp $
 ;;; ---------------------------------------------------------------------------
-;;;
+
 ;;; (c) copyright 2002, 2003 by Gilbert Baumann
 ;;; (c) copyright 2002 by Christian Sunesson
-;;;
+
 ;;; Permission is granted to any individual or institution to use,
 ;;; copy, modify, and distribute this software, provided that this
 ;;; complete copyright and permission notice is maintained, intact, in
 ;;; all copies and supporting documentation.
-;;;
+
 ;;; This program is distributed in the hope that it will be useful,
 ;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-;;;
 
 ;;; NOTE: we need to watch maximum request sizes and somehow work
 ;;; around them. Sometimes e.g. in AddGlyphs this is not possible,
@@ -73,7 +72,6 @@
 ;; - WITH-PICTURE ?
 ;;
 ;;   (WITH-PICTURE (picture drawable ...) ...)
-
 (in-package :xlib)
 
 ;; Beginning to collect the external interface for documentation.
@@ -140,10 +138,9 @@
 (pushnew :clx-ext-render *features*)
 
 (define-extension "RENDER")
-
 ;;; X-RenderQueryVersion will always return the highest version it supports
 ;;; which is no higher than requested client version. For example:
-;;;
+
 ;;; server version: 0.11; client version: 0.10; answer: 0.10
 ;;; server version: 0.11; client version: 0.12; answer: 0.11
 ;;; server version: 0.11; client version: 0.1; answer: 0.1
@@ -289,13 +286,10 @@
 (defconstant +RepeatReflect+              3)
 
 
-;;;;
-
 ;; Sanity measures:
 
 ;; We do away with the distinction between pict-format and
 ;; picture-format-info. That is we cache picture-format-infos.
-
 (defstruct picture-format
   display
   (id   0 :type (unsigned-byte 29))
@@ -450,8 +444,8 @@ by every function, which attempts to generate RENDER requests."
                     (return-from find-window-picture-format f)))
                 (render-info-picture-formats
                  (display-render-info display))))
-      (t
-       ))))
+      (t))))
+       
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (define-accessor picture (32)
@@ -462,7 +456,6 @@ by every function, which attempts to generate RENDER requests."
     ((index thing) `(resource-id-put ,index (glyph-set-id ,thing)))))
 
 ;;; picture format
-
 (defmethod print-object ((object picture-format) stream)
   (let ((abbrev
          (with-output-to-string (bag)
@@ -533,7 +526,6 @@ by every function, which attempts to generate RENDER requests."
 ;; to introduce a synchronous mode, realizing that the RENDER protocol
 ;; provides no provision to actually query a picture object's values.
 ;; *sigh*
-
 (def-clx-class (picture (:copier nil))
   (id 0 :type resource-id)
   (display nil :type (or null display))
@@ -547,7 +539,6 @@ by every function, which attempts to generate RENDER requests."
   (picture-%drawable picture))
 
 ;; xx make id, display, format readonly
-
 (defun %render-change-picture-clip-rectangles (picture rectangles)
   "Dont call me, use (SETF PICTURE-CLIP-MASK) instead."
   (declare (optimize (speed 0)))
@@ -745,7 +736,6 @@ by every function, which attempts to generate RENDER requests."
       (int16 x1) (int16 y1) (card16 w) (card16 h))))
 
 ;; fill rectangles, colors.
-
 (declaim (inline render-triangles-impl))
 (defun render-triangles-impl (code picture op source src-x src-y format coord-sequence)
   ;; For performance reasons we do a special typecase on (simple-array
@@ -874,8 +864,6 @@ by every function, which attempts to generate RENDER requests."
       (card16 (length filter))
       (pad16 0)
       ((sequence :format card8) (map 'vector #'char-code filter)))))
-
-
 
 #||
 (defun render-triangle (destination source x1 y1 x2 y2 x3 y3 &key (src-x 0) (src-y 0) (format nil) (op :over))
@@ -1171,7 +1159,6 @@ by every function, which attempts to generate RENDER requests."
       (glyph-set glyph-set)
       ((sequence :format card32 :start start :end end) glyphs))))
 
-
 #||
 ;;; --------------------------------------------------------------------------------
 
@@ -1325,7 +1312,6 @@ by every function, which attempts to generate RENDER requests."
 
 
 ;;;; Cursors
-
 (defun render-create-cursor (picture &optional (x 0) (y 0))
   (let ((display (picture-display picture)))
     (ensure-render-initialized display)

@@ -1,35 +1,33 @@
-;;; -*- Mode: Lisp; Syntax: Common-Lisp; Package: XLIB; -*-
-;;; ---------------------------------------------------------------------------
-;;;     Title: X11 MIT Screensaver extension
-;;;   Created: 2005-08-28 01:41
-;;;    Author: Istvan Marko <mi-clx@kismala.com>
-;;; ---------------------------------------------------------------------------
-;;;  (c) copyright 2005 by Istvan Marko
+;;; extensions/screensaver.lisp
 
-;;;
-;;; Permission is granted to any individual or institution to use,
-;;; copy, modify, and distribute this software, provided that this
-;;; complete copyright and permission notice is maintained, intact, in
-;;; all copies and supporting documentation.
-;;;
-;;; This program is distributed in the hope that it will be useful,
-;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-;;;
+;;     Title: X11 MIT Screensaver extension
+;;   Created: 2005-08-28 01:41
+;;    Author: Istvan Marko <mi-clx@kismala.com>
+
+;;  (c) copyright 2005 by Istvan Marko
+
+;;
+;; Permission is granted to any individual or institution to use,
+;; copy, modify, and distribute this software, provided that this
+;; complete copyright and permission notice is maintained, intact, in
+;; all copies and supporting documentation.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 ;;; Description:
-;;;
-;;; This is a partial interface to the MIT-SCREEN-SAVER
-;;; extension. Only the ScreenSaverQueryVersion and
-;;; ScreenSaverQueryInfo requests are implemented because I couldn't
-;;; think of a use for the rest. In fact, the only use I see for this
-;;; extension is screen-saver-get-idle which provides and easy way to
-;;; find out how long has it been since the last keyboard or mouse
-;;; activity.
 
-;;; A description of this extension can be found at
-;;; doc/hardcopy/saver/saver.PS.gz in the X11 distribution.
+;; This is a partial interface to the MIT-SCREEN-SAVER extension. Only the
+;; ScreenSaverQueryVersion and ScreenSaverQueryInfo requests are implemented
+;; because I couldn't think of a use for the rest. In fact, the only use I see
+;; for this extension is screen-saver-get-idle which provides and easy way to
+;; find out how long has it been since the last keyboard or mouse activity.
 
+;; A description of this extension can be found at
+;; doc/hardcopy/saver/saver.PS.gz in the X11 distribution.
+
+;;; Code:
 (in-package :xlib)
 
 (export '(screen-saver-query-version

@@ -1,4 +1,4 @@
-;;; -*- Mode: LISP; Syntax: Common-lisp; Package: XLIB; Base: 10; Lowercase: Yes -*-
+;;; depdefs.lisp --- Dependency Definitions
 
 ;; This file contains some of the system dependent code for CLX
 
@@ -127,16 +127,6 @@
   (ecase sb-c:*backend-byte-order*
     (:big-endian)
     (:little-endian (pushnew :clx-little-endian *features*))))
-
-;; FIX 2025-06-24: lisp machines no longer exist
-;;; Steele's Common-Lisp states:  "It is an error if the array specified
-;;; as the :displaced-to argument  does not have the same :element-type
-;;; as the array being created" If this is the case on your lisp, then
-;;; leave the overlapping-arrays feature turned off.  Lisp machines
-;;; (Symbolics TI and LMI) don't have this restriction, and allow arrays
-;;; with different element types to overlap.  CLX will take advantage of
-;;; this to do fast array packing/unpacking when the overlapping-arrays
-;;; feature is enabled.
 
 (deftype buffer-bytes () `(simple-array (unsigned-byte 8) (*)))
 

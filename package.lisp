@@ -1,19 +1,15 @@
-;;; -*- Mode: LISP; Syntax: Common-lisp; Base: 10; Lowercase: Yes;  -*-
+;;; package.lisp --- CLX Packages
 
-;;; Copyright 1990 Massachusetts Institute of Technology, Cambridge,
-;;; Massachusetts.  All Rights Reserved.
-;;; 
-;;; Permission to use, copy, modify, and distribute this software and its
-;;; documentation for any purpose and without fee is hereby granted, provided
-;;; that the above copyright notice appear in all copies and that both that
-;;; copyright notice and this permission notice appear in supporting
-;;; documentation, and that the name MIT not be used in advertising or
-;;; publicity pertaining to distribution of the software without specific,
-;;; written prior permission.
+;; Copyright 1990 Massachusetts Institute of Technology, Cambridge,
+;; Massachusetts.  All Rights Reserved.
 
-;;; The ANSI Common Lisp way
-(in-package :cl-user)
-
+;; Permission to use, copy, modify, and distribute this software and its
+;; documentation for any purpose and without fee is hereby granted, provided
+;; that the above copyright notice appear in all copies and that both that
+;; copyright notice and this permission notice appear in supporting
+;; documentation, and that the name MIT not be used in advertising or
+;; publicity pertaining to distribution of the software without specific,
+;; written prior permission.
 (defpackage #:xlib
   (:use :cl)
   (:shadow :defconstant)

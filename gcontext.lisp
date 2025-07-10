@@ -1,52 +1,47 @@
-;;; -*- Mode: LISP; Syntax: Common-lisp; Package: XLIB; Base: 10; Lowercase: Yes -*-
+;;; gcontext.lisp --- GContext
 
-;;; GContext
+;;
+;;                      TEXAS INSTRUMENTS INCORPORATED
+;;                               P.O. BOX 2909
+;;                            AUSTIN, TEXAS 78769
+;;
+;; Copyright (C) 1987 Texas Instruments Incorporated.
+;;
+;; Permission is granted to any individual or institution to use, copy,
+;; modify, and distribute this software, provided that this complete copyright
+;; and permission notice is maintained, intact, in all copies and supporting
+;; documentation.
+;;
+;; Texas Instruments Incorporated provides this software "as is" without
+;; express or implied warranty.
+;;
 
-;;;
-;;;                      TEXAS INSTRUMENTS INCORPORATED
-;;;                               P.O. BOX 2909
-;;;                            AUSTIN, TEXAS 78769
-;;;
-;;; Copyright (C) 1987 Texas Instruments Incorporated.
-;;;
-;;; Permission is granted to any individual or institution to use, copy, modify,
-;;; and distribute this software, provided that this complete copyright and
-;;; permission notice is maintained, intact, in all copies and supporting
-;;; documentation.
-;;;
-;;; Texas Instruments Incorporated provides this software "as is" without
-;;; express or implied warranty.
-;;;
-
-;;;	GContext values are usually cached locally in the GContext object.
-;;;	This is required because the X.11 server doesn't have any requests
-;;;	for getting GContext values back.
-;;;
-;;;	GContext changes are cached until force-GContext-changes is called.
-;;;	All the requests that use GContext (including the GContext accessors,
-;;;	but not the SETF's) call force-GContext-changes.
-;;;	In addition, the macro WITH-GCONTEXT may be used to provide a
-;;;	local view if a GContext.
-;;;
-;;;	Each GContext keeps a copy of the values the server has seen, and
-;;;	a copy altered by SETF, called the LOCAL-STATE (bad name...).
-;;;	The SETF accessors increment a timestamp in the GContext.
-;;;	When the timestamp in a GContext isn't equal to the timestamp in
-;;;	the local-state, changes have been made, and force-GContext-changes
-;;;	loops through the GContext and local-state, sending differences to
-;;;	the server, and updating GContext.
-;;;
-;;;	WITH-GCONTEXT works by BINDING the local-state slot in a GContext to
-;;;	a private copy.  This is easy (and fast) for lisp machines, but other
-;;;	lisps will have problems.  Fortunately, most other lisps don't care,
-;;;	because they don't run in a multi-processing shared-address space
-;;;	environment.
-
+;;	GContext values are usually cached locally in the GContext object.
+;;	This is required because the X.11 server doesn't have any requests for
+;;	getting GContext values back.
+;;
+;;	GContext changes are cached until force-GContext-changes is called.
+;;	All the requests that use GContext (including the GContext accessors,
+;;	but not the SETF's) call force-GContext-changes.  In addition, the
+;;	macro WITH-GCONTEXT may be used to provide a local view if a GContext.
+;;
+;;	Each GContext keeps a copy of the values the server has seen, and a
+;;	copy altered by SETF, called the LOCAL-STATE (bad name...).  The SETF
+;;	accessors increment a timestamp in the GContext.  When the timestamp
+;;	in a GContext isn't equal to the timestamp in the local-state, changes
+;;	have been made, and force-GContext-changes loops through the GContext
+;;	and local-state, sending differences to the server, and updating
+;;	GContext.
+;;
+;;	WITH-GCONTEXT works by BINDING the local-state slot in a GContext to a
+;;	private copy.  This is easy (and fast) for lisp machines, but other
+;;	lisps will have problems.  Fortunately, most other lisps don't care,
+;;	because they don't run in a multi-processing shared-address space
+;;	environment.
 (in-package :xlib)
 
 ;; GContext state accessors
 ;;	The state vector contains all card32s to speed server updating
-
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defconstant +gcontext-fast-change-length+ #.(length +gcontext-components+))
 
@@ -84,9 +79,7 @@
                         ',(coerce (nreverse masks) 'simple-vector)
                         ))))))
     (def-gc-internals ignore
-        (:clip :clip-mask) (:dash :dashes) (:font-obj :font) (:timestamp)))
-
-  ) ;; end EVAL-WHEN
+        (:clip :clip-mask) (:dash :dashes) (:font-obj :font) (:timestamp))))
 
 (deftype gcmask () '(unsigned-byte #.+gcontext-fast-change-length+))
 
@@ -955,7 +948,6 @@
 ;; the extension component name) reflects this position.  The position within
 ;; *gcontext-extensions* and the value of the special value are determined at
 ;; LOAD time to facilitate merging of seperately compiled extension files.
-
 (defun add-gcontext-extension (name default-value set-function copy-function)
   (declare (type symbol name)
            (type t default-value)

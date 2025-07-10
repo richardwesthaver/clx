@@ -1,22 +1,20 @@
-;;; -*- Mode: Lisp; Syntax: Common-Lisp; Package: XLIB; -*-
+;;; composite.lisp
 ;;; ---------------------------------------------------------------------------
 ;;;     Title: Composite Extension
 ;;;   Created: 2014-11-17
 ;;;    Author: Johannes Martinez <johannes.martinez@gmail.com>
 ;;; ---------------------------------------------------------------------------
-;;;
+
 ;;; (c) copyright 2014 by Johannes Martinez
-;;;
+
 ;;; Permission is granted to any individual or institution to use,
 ;;; copy, modify, and distribute this software, provided that this
 ;;; complete copyright and permission notice is maintained, intact, in
 ;;; all copies and supporting documentation.
-;;;
+
 ;;; This program is distributed in the hope that it will be useful,
 ;;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-;;;
-
 (in-package :xlib)
 
 (export '(composite-query-version
@@ -41,7 +39,6 @@
   "Prevents some activities that would otherwise be automatic.")
 
 ;; xrequests
-
 (defconstant  +composite-QueryVersion+ 0
   "Query for the version of composite.")
 (defconstant  +composite-RedirectWindow+ 1
@@ -61,16 +58,13 @@
 (defconstant  +composite-ReleaseOverlayWindow+ 8
   "Release the overlay surface.")
 
-
 (defmacro composite-opcode (display)
   `(extension-opcode ,display "Composite"))
 
 ;; types
-
 (deftype update-type () '(card8))
 
 ;; x requests
-
 (defun composite-query-version (display)
   "Query for the version. All clients are expected to query!"
   (declare (type display display))

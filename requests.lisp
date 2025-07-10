@@ -1,19 +1,21 @@
-;;; -*- Mode: LISP; Syntax: Common-lisp; Package: XLIB; Base: 10; Lowercase: Yes -*-
+;;; requests.lisp
 
-;;;
-;;;			 TEXAS INSTRUMENTS INCORPORATED
-;;;				  P.O. BOX 2909
-;;;			       AUSTIN, TEXAS 78769
-;;;
-;;; Copyright (C) 1987 Texas Instruments Incorporated.
-;;;
-;;; Permission is granted to any individual or institution to use, copy, modify,
-;;; and distribute this software, provided that this complete copyright and
-;;; permission notice is maintained, intact, in all copies and supporting
-;;; documentation.
-;;;
-;;; Texas Instruments Incorporated provides this software "as is" without
-;;; express or implied warranty.
+
+;;			 TEXAS INSTRUMENTS INCORPORATED
+;;				  P.O. BOX 2909
+;;			       AUSTIN, TEXAS 78769
+
+;; Copyright (C) 1987 Texas Instruments Incorporated.
+
+;; Permission is granted to any individual or institution to use, copy,
+;; modify, and distribute this software, provided that this complete copyright
+;; and permission notice is maintained, intact, in all copies and supporting
+;; documentation.
+
+;; Texas Instruments Incorporated provides this software "as is" without
+;; express or implied warranty.
+
+;;; Code:
 (in-package :xlib)
 
 (defun create-window (&key
@@ -1054,8 +1056,8 @@
 	  (advance-buffer-offset 8))))))
 
 (defun lookup-color (colormap name)
-  (declare (type colormap colormap)
-	   (type stringable name))
+  (declare (colormap colormap)
+	   (stringable name))
   (declare (clx-values screen-color true-color))
   (let* ((display (colormap-display colormap))
 	 (string (string name))

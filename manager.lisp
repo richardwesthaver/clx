@@ -1,22 +1,22 @@
-;;; -*- Mode:Lisp; Package:XLIB; Syntax:COMMON-LISP; Base:10; Lowercase:T -*-
+;;; manager.lisp
 
-;;; Window Manager Property functions
+;; Window Manager Property functions
 
-;;;
-;;;			 TEXAS INSTRUMENTS INCORPORATED
-;;;				  P.O. BOX 2909
-;;;			       AUSTIN, TEXAS 78769
-;;;
-;;; Copyright (C) 1987 Texas Instruments Incorporated.
-;;;
-;;; Permission is granted to any individual or institution to use, copy, modify,
-;;; and distribute this software, provided that this complete copyright and
-;;; permission notice is maintained, intact, in all copies and supporting
-;;; documentation.
-;;;
-;;; Texas Instruments Incorporated provides this software "as is" without
-;;; express or implied warranty.
-;;;
+;;			 TEXAS INSTRUMENTS INCORPORATED
+;;				  P.O. BOX 2909
+;;			       AUSTIN, TEXAS 78769
+
+;; Copyright (C) 1987 Texas Instruments Incorporated.
+
+;; Permission is granted to any individual or institution to use, copy, modify,
+;; and distribute this software, provided that this complete copyright and
+;; permission notice is maintained, intact, in all copies and supporting
+;; documentation.
+
+;; Texas Instruments Incorporated provides this software "as is" without
+;; express or implied warranty.
+
+;;; Code:
 (in-package :xlib)
 
 (defun wm-name (window)
@@ -118,9 +118,7 @@
                    :string 8)
   command)
 
-;;-----------------------------------------------------------------------------
 ;; WM_HINTS
-
 (def-clx-class (wm-hints)
   (input nil :type (or null (member :off :on)))
   (initial-state nil :type (or null (member :dont-care :normal :zoom :iconic :inactive)))
@@ -230,9 +228,7 @@
       (setf (aref vector 0) (logior flags (logandc2 (wm-hints-flags wm-hints) mask)))
       vector)))
 
-;;-----------------------------------------------------------------------------
 ;; WM_SIZE_HINTS
-
 (def-clx-class (wm-size-hints)
   (user-specified-position-p nil :type generalized-boolean) ;; True when user specified x y
   (user-specified-size-p nil :type generalized-boolean)     ;; True when user specified width height
@@ -401,11 +397,9 @@
     (setf (aref vector 0) flags)
     vector))
 
-;;-----------------------------------------------------------------------------
 ;; Icon_Size
 
 ;; Use the same intermediate structure as WM_SIZE_HINTS
-
 (defun icon-sizes (window)
   (declare (type window window))
   (declare (clx-values wm-size-hints))
@@ -433,9 +427,7 @@
     (change-property window :WM_ICON_SIZE vector :WM_ICON_SIZE 32)
     wm-size-hints))
 
-;;-----------------------------------------------------------------------------
 ;; WM-Protocols
-
 (defun wm-protocols (window)
   (map 'list #'(lambda (id) (atom-name (window-display window) id))
        (get-property window :WM_PROTOCOLS :type :ATOM)))
@@ -448,9 +440,7 @@
                    :ATOM 32)
   protocols)
 
-;;-----------------------------------------------------------------------------
 ;; WM-Colormap-windows
-
 (defun wm-colormap-windows (window)
   (values (get-property window :WM_COLORMAP_WINDOWS :type :WINDOW
                                                     :transform #'(lambda (id)
@@ -462,9 +452,7 @@
                           :transform #'window-id)
   colormap-windows)
 
-;;-----------------------------------------------------------------------------
 ;; Transient-For
-
 (defun transient-for (window)
   (let ((prop (get-property window :WM_TRANSIENT_FOR :type :WINDOW :result-type 'list)))
     (and prop (lookup-window (window-display window) (car prop)))))
@@ -475,9 +463,7 @@
   (change-property window :WM_TRANSIENT_FOR (list (window-id transient)) :WINDOW 32)
   transient)
 
-;;-----------------------------------------------------------------------------
 ;; Set-WM-Properties
-
 (defun set-wm-properties (window &rest options &key
                                                name icon-name resource-name resource-class command
                                                client-machine hints normal-hints zoom-hints
@@ -585,9 +571,7 @@
   (declare (dynamic-extent options))
   (apply #'set-wm-properties window options))
 
-;;-----------------------------------------------------------------------------
 ;; WM Control
-
 (defun iconify-window (window screen)
   (declare (type window window)
            (type screen screen))
@@ -605,10 +589,7 @@
     (send-event root :unmap-notify '(:substructure-redirect :substructure-notify)
                      :window window :event-window root :configure-p nil)))
 
-
-;;-----------------------------------------------------------------------------
 ;; Colormaps
-
 (def-clx-class (standard-colormap (:copier nil) (:predicate nil))
   (colormap nil :type (or null colormap))
   (base-pixel 0 :type pixel)
@@ -722,9 +703,7 @@
                       base-pixel)))
     (change-property window property prop :RGB_COLOR_MAP 32)))
 
-;;-----------------------------------------------------------------------------
 ;; Cut-Buffers
-
 (defun cut-buffer (display &key (buffer 0) (type :STRING) (result-type 'string)
                                 (transform #'card8->char) (start 0) end)
   ;; Return the contents of cut-buffer BUFFER

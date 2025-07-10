@@ -1,21 +1,18 @@
-;;; -*- Mode: LISP; Syntax: Common-lisp; Package: XLIB; Base: 10; Lowercase: Yes -*-
+;;; fonts.lisp
 
-;;;
 ;;;			 TEXAS INSTRUMENTS INCORPORATED
 ;;;				  P.O. BOX 2909
 ;;;			       AUSTIN, TEXAS 78769
-;;;
+
 ;;; Copyright (C) 1987 Texas Instruments Incorporated.
-;;;
+
 ;;; Permission is granted to any individual or institution to use, copy, modify,
 ;;; and distribute this software, provided that this complete copyright and
 ;;; permission notice is maintained, intact, in all copies and supporting
 ;;; documentation.
-;;;
+
 ;;; Texas Instruments Incorporated provides this software "as is" without
 ;;; express or implied warranty.
-;;;
-
 (in-package :xlib)
 
 ;; The char-info stuff is here instead of CLX because of uses of int16->card16.
@@ -44,7 +41,6 @@
 ;	   (clx-values integer)))
 
 ;; Note: char16-<metric> accessors could be defined to accept two-byte indexes.
-
 (deftype char-info-vec () '(simple-array int16 (*)))
 
 (macrolet ((def-char-info-accessors (useless-name &body fields)

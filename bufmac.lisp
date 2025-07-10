@@ -1,28 +1,24 @@
-;;; -*- Mode: LISP; Syntax: Common-lisp; Package: XLIB; Base: 10; Lowercase: Yes -*-
+;;; bufmac.lisp --- Buffer Macros
 
 ;;; This file contains macro definitions for the BUFFER object for Common-Lisp
 ;;; X windows version 11
 
-;;;
 ;;;			 TEXAS INSTRUMENTS INCORPORATED
 ;;;				  P.O. BOX 2909
 ;;;			       AUSTIN, TEXAS 78769
-;;;
+
 ;;; Copyright (C) 1987 Texas Instruments Incorporated.
-;;;
+
 ;;; Permission is granted to any individual or institution to use, copy, modify,
 ;;; and distribute this software, provided that this complete copyright and
 ;;; permission notice is maintained, intact, in all copies and supporting
 ;;; documentation.
-;;;
+
 ;;; Texas Instruments Incorporated provides this software "as is" without
 ;;; express or implied warranty.
-;;;
-
 (in-package :xlib)
 
 ;;; The read- macros are in buffer.lisp, because event-case depends on (most of) them.
-
 (defmacro write-card8 (byte-index item)
   `(aset-card8 (the card8 ,item) buffer-bbuf (index+ buffer-boffset ,byte-index)))
 
@@ -86,7 +82,6 @@
        ,@body)))
 
 ;;; This macro is just used internally in buffer
-
 (defmacro writing-buffer-chunks (type args decls &body body)
   (when (> (length body) 2)
     (error "writing-buffer-chunks called with too many forms"))

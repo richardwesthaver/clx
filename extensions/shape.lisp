@@ -1,4 +1,4 @@
-;;; -*- Mode: Lisp; Syntax: Common-Lisp; Package: XLIB; -*-
+;;; shape.lisp
 ;;; ---------------------------------------------------------------------------
 ;;;     Title: X11 Shape extension
 ;;;   Created: 1999-05-14 11:31
