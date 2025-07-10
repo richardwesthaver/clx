@@ -32,7 +32,7 @@ Independent FOSS developers"
   :maintainer "sharplispers"
   :license "MIT"
   :depends-on (:sb-bsd-sockets :std)
-  :version "0.7.6"
+  :version "0.7.7"
   :serial t
   :default-component-class clx-source-file
   :in-order-to ((test-op (test-op "clx/tests")))
