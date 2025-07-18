@@ -15,6 +15,8 @@
 
 ;; Texas Instruments Incorporated provides this software "as is" without
 ;; express or implied warranty.
+
+;;; Code:
 (in-package :xlib)
 
 (define-keysym-set :latin-1	(keysym 0 0) (keysym 0 255))

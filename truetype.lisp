@@ -3,6 +3,7 @@
   (:nicknames #:xft)
   (:use #:cl #:std #:dat/ttf #:obj/cache)
   (:import-from :obj/db :get-val)
+  (:import-from :ttf :size)
   (:export
    :drawable-screen
    :font-ascent
@@ -22,7 +23,8 @@
    :font-lines-height
    :*allow-fixed-pitch-p*)
   (:documentation "Package contains API for TrueType text rendering using CLX, XRender.
-Glyphs information is obtained by DAT/TTF. Font rasterization is made by CL-VECTORS."))
+Glyphs information is obtained by DAT/TTF. Font rasterization is made by
+CL-VECTORS."))
 
 (in-package #:clx/truetype)
 
@@ -85,7 +87,7 @@ Glyphs information is obtained by DAT/TTF. Font rasterization is made by CL-VECT
                        (xlib:screen-width-in-millimeters screen)))
           (getf (xlib:screen-plist screen) :dpi-y
                 (floor (* (xlib:screen-height screen) 25.4)
-                             (xlib:screen-height-in-millimeters screen)))))
+                       (xlib:screen-height-in-millimeters screen)))))
 
 (defun (setf screen-dpi) (value screen)
   "Sets current dpi for @var{screen}."
@@ -95,7 +97,7 @@ Glyphs information is obtained by DAT/TTF. Font rasterization is made by CL-VECT
 ;;; Font metrics
 (defun font-units->pixels-x (dpi-x font)
   "px = funits*coeff. Function returns coeff."
-  (with-font-loader (loader font)
+  (with-font (loader font)
     (with-slots (size) font
       (let* ((units/em (ttf:units/em loader))
              (pixel-size-x (* size (/ dpi-x 72))))
@@ -103,18 +105,18 @@ Glyphs information is obtained by DAT/TTF. Font rasterization is made by CL-VECT
 
 (defun font-units->pixels-y (dpi-y font)
   "px = funits*coeff. Function returns coeff."
-  (with-font-loader (loader font)
+  (with-font (loader font)
     (with-slots (size) font
       (let* ((units/em (ttf:units/em loader))
              (pixel-size-y (* size (/ dpi-y 72))))
         (* pixel-size-y (/ units/em))))))
 
 (defun font-ascent-for-dpi (dpi-y font)
-  (with-font-loader (loader font)
+  (with-font (loader font)
     (ceiling (* (font-units->pixels-y dpi-y font) (ttf:ascender loader)))))
 
 (defun font-descent-for-dpi (dpi-y font)
-  (with-font-loader (loader font)
+  (with-font (loader font)
     (floor (* (font-units->pixels-y dpi-y font) (ttf:descender loader)))))
 
 (defun font-ascent (drawable font)
@@ -126,18 +128,19 @@ Glyphs information is obtained by DAT/TTF. Font rasterization is made by CL-VECT
   (font-descent-for-dpi (nth-value 1 (screen-dpi (drawable-screen drawable))) font))
 
 (defun font-line-gap (drawable font)
-  "Returns line gap of @var{font}. @var{drawable} must be window, pixmap or screen."
-  (with-font-loader (loader font)
+  "Returns line gap of FONT. DRAWABLE must be window, pixmap or screen."
+  (with-font (loader font)
     (ceiling (* (font-units->pixels-y drawable font) (ttf:line-gap loader)))))
 
 ;;; baseline-to-baseline = ascent - descent + line gap
 (defun baseline-to-baseline (drawable font)
-  "Returns distance between baselines of @var{font}. @var{drawable} must be window, pixmap or screen. ascent - descent + line gap"
+  "Returns distance between baselines of FONT. DRAWABLE must be
+window, pixmap or screen. ascent - descent + line gap"
   (+ (font-ascent drawable font) (- (font-descent drawable font))
-     (font-line-gap drawable font)))
+     (font-line-gap (screen-dpi (drawable-screen drawable)) font)))
 
 (defun text-bounding-box-provider (dpi-x dpi-y font string)
-  (with-font-loader (loader font)
+  (with-font (loader font)
     (let* ((bbox (ttf:string-bounding-box string loader))
            (units->pixels-x (font-units->pixels-x dpi-x font))
            (units->pixels-y (font-units->pixels-y dpi-y font))
@@ -188,7 +191,7 @@ Glyphs information is obtained by DAT/TTF. Font rasterization is made by CL-VECT
 in fixed-pitch fonts.")
 
 (defun text-line-bounding-box-provider (dpi-x dpi-y font string)
-  (with-font-loader (loader font)
+  (with-font (loader font)
     (let* ((units->pixels-x (font-units->pixels-x dpi-x font))
            (xmin 0)
            (ymin (font-descent-for-dpi dpi-y font))
@@ -275,17 +278,17 @@ in fixed-pitch fonts.")
             ;; at least 2 knots
             (let ((first-knot k1))
               (loop
-                 (multiple-value-bind (i2 k2 e2) (paths:path-iterator-next iterator)
-                   (declare (ignore i2))
-                   (aa-bin:line-f state
-                           (paths:point-x k1) (paths:point-y k1)
-                           (paths:point-x k2) (paths:point-y k2))
-                   (setf k1 k2)
-                   (when e2
-                     (return))))
+                (multiple-value-bind (i2 k2 e2) (paths:path-iterator-next iterator)
+                  (declare (ignore i2))
+                  (aa-bin:line-f state
+                                 (paths:point-x k1) (paths:point-y k1)
+                                 (paths:point-x k2) (paths:point-y k2))
+                  (setf k1 k2)
+                  (when e2
+                    (return))))
               (aa-bin:line-f state
-                      (paths:point-x k1) (paths:point-y k1)
-                      (paths:point-x first-knot) (paths:point-y first-knot)))))))
+                             (paths:point-x k1) (paths:point-y k1)
+                             (paths:point-x first-knot) (paths:point-y first-knot)))))))
   state)
 
 (defun update-state (font state paths)
@@ -301,7 +304,7 @@ in fixed-pitch fonts.")
       (aa-bin:cells-sweep state function function-span)))
 
 (defun text-pixarray-provider (dpi-x dpi-y font string)
-  (with-font-loader (font-loader font)
+  (with-font (font-loader font)
     (let* ((bbox (font-cache-fetch (font-string-bboxes font) (cons dpi-x dpi-y) string))
            (min-x (xmin bbox))
            (min-y (ymin bbox))
@@ -372,7 +375,7 @@ position before rendering), horizontal and vertical advances.
     string)))
 
 (defun text-line-pixarray-provider (dpi-x dpi-y font string)
-  (with-font-loader (font-loader font)
+  (with-font (font-loader font)
     (let* ((bbox (font-cache-fetch (font-string-line-bboxes font) (cons dpi-x dpi-y) string))
            (min-x (xmin bbox))
            (min-y (ymin bbox))
@@ -505,11 +508,13 @@ position before rendering), horizontal and vertical advances.
               :depth 8 :alpha 8 :red 0 :blue 0 :green 0)))))
 
 ;;; Drawing text
-
 (defun draw-text (drawable gcontext font string x y &key start end 
-                                                      draw-background-p)
-  "Draws text string using @var{font} on @var{drawable} with graphic context @var{gcontext}. @var{x}, @var{y} are the left point of base line. @var{start} and @var{end} are used for substring rendering.
-If @var{gcontext} has background color, text bounding box will be filled with it. Text line bounding box is bigger than text bounding box. @var{drawable} must be window or pixmap."
+                                                         draw-background-p)
+  "Draws text string using FONT on DRAWABLE with graphic context GCONTEXT. X, Y
+are the left point of base line. START and END are used for substring
+rendering. If GCONTEXT has background color, text bounding box will be filled
+with it. Text line bounding box is bigger than text bounding box. DRAWABLE
+must be window or pixmap."
   (when (and start end)
     (when (>= start end)
       (return-from draw-text))
@@ -548,8 +553,13 @@ If @var{gcontext} has background color, text bounding box will be filled with it
       nil)))
 
 (defun draw-text-line (drawable gcontext font string x y &key start end draw-background-p)
-  "Draws text string using @var{font} on @var{drawable} with graphic context @var{gcontext}. @var{x}, @var{y} are the left point of base line. @var{start} and @var{end} are used for substring rendering.
-If @var{gcontext} has background color, text line bounding box will be filled with it. Text line bounding box is bigger than text bounding box. @var{drawable} must be window or pixmap."
+  "Draws text string using FONT on DRAWABLE with graphic context
+GCONTEXT. X, Y are the left point of base line. START and END are used for
+substring rendering.
+
+If GCONTEXT has background color, text line bounding box will be filled with
+it. Text line bounding box is bigger than text bounding box. DRAWABLE must be
+window or pixmap."
   (when (and start end)
     (when (>= start end)
       (return-from draw-text-line))
@@ -608,7 +618,9 @@ If @var{gcontext} has background color, text line bounding box will be filled wi
     (format t "~%")))
 
 (defun font-lines-height (drawable font lines-count)
-  "Returns text lines height in pixels. For one line height is ascender+descender. For more than one line height is ascender+descender+linegap."
+  "Returns text lines height in pixels. For one line height is
+ascender+descender. For more than one line height is
+ascender+descender+linegap."
   (if (> lines-count 0)
       (+ (+ (xft:font-ascent drawable font)
             (- (xft:font-descent drawable font)))
